@@ -18,7 +18,8 @@ import {
   Mic,
   ShieldCheck,
   Square,
-  AlertOctagon
+  AlertOctagon,
+  Sparkles
 } from 'lucide-react';
 import { RBACRole } from '../../types';
 
