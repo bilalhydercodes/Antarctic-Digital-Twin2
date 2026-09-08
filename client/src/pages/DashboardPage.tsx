@@ -120,7 +120,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
             {/* 3D Canvas Render Area */}
             <div className="h-[460px] relative bg-stone-900">
-              <Station3DCanvas />
+              <Station3DCanvas onNavigate={onNavigate} />
             </div>
           </div>
         ) : (

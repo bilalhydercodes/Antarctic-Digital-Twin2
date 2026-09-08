@@ -117,7 +117,7 @@ export const MainContent: React.FC = () => {
               {activeTab === 'dashboard' && <DashboardPage onNavigate={setActiveTab} />}
               {activeTab === 'commander' && <CommanderPage />}
               {activeTab === 'incidents' && <IncidentCommandPage />}
-              {activeTab === 'twin' && <Station3DCanvas />}
+              {activeTab === 'twin' && <Station3DCanvas onNavigate={setActiveTab} />}
               {activeTab === 'sensors' && <SensorHealthPage />}
               {activeTab === 'edge' && <EdgeGatewayPage />}
               {activeTab === 'dependencies' && <DependencyGraphPage />}

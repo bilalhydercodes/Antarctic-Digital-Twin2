@@ -3,7 +3,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { useSimulation } from '../../context/SimulationContext';
-import { RBACRole } from '../../types';
+import { RBACRole, NavTab, ScenarioId } from '../../types';
 import { 
   Search, 
   Wind, 
@@ -13,7 +13,16 @@ import {
   CheckCircle2, 
   X, 
   ShieldCheck, 
-  Radio
+  Radio,
+  ChevronRight,
+  ChevronDown,
+  Play,
+  Pause,
+  Zap,
+  TrendingUp,
+  Sliders,
+  Battery,
+  Package
 } from 'lucide-react';
 
 // ─── DYNAMIC PROCEDURAL TEXTURE GENERATORS ───────────────────────────────────
@@ -516,14 +525,26 @@ const BHARATI_HOTSPOTS: StationHotspot[] = [
 ];
 
 // ─── MAIN BHARATI 3D DIGITAL TWIN CANVAS COMPONENT ───────────────────────────
-export const Bharati3DCanvas: React.FC = () => {
+interface Bharati3DCanvasProps {
+  onNavigate?: (tab: NavTab) => void;
+}
+
+export const Bharati3DCanvas: React.FC<Bharati3DCanvasProps> = ({ onNavigate }) => {
   const { 
     userRole, 
     setUserRole, 
     activeStationId, 
-    setActiveStationId 
+    setActiveStationId,
+    environment,
+    energy,
+    simulationState,
+    triggerScenario,
+    setSpeed,
+    toggleSimulation
   } = useSimulation();
 
+  const [activeNavTab, setActiveNavTab] = useState<'stations' | 'data' | 'simulation' | 'resources'>('stations');
+  const [stationDropdownOpen, setStationDropdownOpen] = useState(false);
   const [selectedHotspot, setSelectedHotspot] = useState<StationHotspot | null>(null);
   const [compassAngle, setCompassAngle] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
@@ -625,47 +646,133 @@ export const Bharati3DCanvas: React.FC = () => {
           )}
         </div>
 
-        {/* Center: Main Navigation Tabs & Station Switcher */}
-        <div className="hidden lg:flex items-center space-x-6">
-          {/* Station Switcher Pill */}
-          <div className="flex items-center p-1 rounded-xl bg-slate-900/90 border border-slate-700/80 shadow-inner">
+        {/* Center: Main Navigation Tabs (Stations, Data, Simulation, Resources) */}
+        <nav className="relative hidden lg:flex items-center space-x-7 text-xs font-semibold tracking-wider">
+          {/* 1. STATIONS */}
+          <div className="relative">
             <button
-              onClick={() => setActiveStationId('maitri')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 ${
-                activeStationId === 'maitri'
-                  ? 'bg-blue-600 text-white shadow-[0_0_12px_rgba(37,99,235,0.6)]'
-                  : 'text-slate-400 hover:text-slate-200'
+              onClick={() => {
+                setActiveNavTab('stations');
+                setStationDropdownOpen(prev => !prev);
+              }}
+              className={`flex items-center space-x-1.5 pb-0.5 transition cursor-pointer ${
+                activeNavTab === 'stations'
+                  ? 'text-white font-bold border-b-2 border-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]'
+                  : 'text-slate-400 hover:text-white border-b-2 border-transparent'
               }`}
             >
-              <span>Maitri 3D</span>
+              <span>Stations</span>
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${stationDropdownOpen ? 'rotate-180 text-cyan-400' : 'text-slate-500'}`} />
             </button>
-            <button
-              onClick={() => setActiveStationId('bharati')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 ${
-                activeStationId === 'bharati'
-                  ? 'bg-cyan-500 text-slate-950 shadow-[0_0_12px_rgba(6,182,212,0.6)] font-black'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <span>Bharati 3D</span>
-            </button>
+
+            {/* Station Dropdown */}
+            {stationDropdownOpen && (
+              <div className="absolute top-9 left-1/2 -translate-x-1/2 w-80 bg-slate-900/95 border border-cyan-500/40 rounded-2xl shadow-2xl p-2.5 z-50 divide-y divide-slate-800 backdrop-blur-2xl animate-in fade-in zoom-in-95">
+                <div className="px-3 py-1.5 text-[10px] font-mono text-slate-400 uppercase tracking-wider font-bold">
+                  Select Antarctic Station (3D Twin)
+                </div>
+                <div className="p-1 space-y-1">
+                  <button
+                    onClick={() => {
+                      setActiveStationId('maitri');
+                      setStationDropdownOpen(false);
+                      setActiveNavTab('stations');
+                    }}
+                    className={`w-full flex items-center justify-between p-2.5 rounded-xl text-left transition cursor-pointer ${
+                      activeStationId === 'maitri'
+                        ? 'bg-blue-600/30 border border-blue-500/60 text-white'
+                        : 'hover:bg-slate-800 text-slate-300'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center space-x-2 font-bold text-xs">
+                        <span className="text-sm">🇮🇳</span>
+                        <span className="text-white">MAITRI STATION</span>
+                        {activeStationId === 'maitri' && (
+                          <span className="px-1.5 py-0.5 rounded bg-blue-600 text-[9px] font-black text-white">ACTIVE</span>
+                        )}
+                      </div>
+                      <div className="text-[10px] text-slate-400 font-mono mt-0.5">
+                        70°45&apos;S, 11°44&apos;E • Schirmacher Oasis • 1989
+                      </div>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setActiveStationId('bharati');
+                      setStationDropdownOpen(false);
+                      setActiveNavTab('stations');
+                    }}
+                    className={`w-full flex items-center justify-between p-2.5 rounded-xl text-left transition cursor-pointer ${
+                      activeStationId === 'bharati'
+                        ? 'bg-cyan-600/30 border border-cyan-500/60 text-white'
+                        : 'hover:bg-slate-800 text-slate-300'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center space-x-2 font-bold text-xs">
+                        <span className="text-sm">🇮🇳</span>
+                        <span className="text-white">BHARATI STATION</span>
+                        {activeStationId === 'bharati' && (
+                          <span className="px-1.5 py-0.5 rounded bg-cyan-500 text-[9px] font-black text-slate-950">ACTIVE</span>
+                        )}
+                      </div>
+                      <div className="text-[10px] text-slate-400 font-mono mt-0.5">
+                        69°24&apos;S, 76°11&apos;E • Larsemann Hills • 2012
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
-          <nav className="flex items-center space-x-6 text-xs font-semibold tracking-wider">
-            <button className="text-white border-b-2 border-cyan-400 pb-0.5 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]">
-              Stations
-            </button>
-            <button className="text-slate-400 hover:text-white transition">
-              Data
-            </button>
-            <button className="text-slate-400 hover:text-white transition">
-              Simulation
-            </button>
-            <button className="text-slate-400 hover:text-white transition">
-              Resources
-            </button>
-          </nav>
-        </div>
+          {/* 2. DATA */}
+          <button
+            onClick={() => {
+              setActiveNavTab(prev => prev === 'data' ? 'stations' : 'data');
+              setStationDropdownOpen(false);
+            }}
+            className={`pb-0.5 transition cursor-pointer ${
+              activeNavTab === 'data'
+                ? 'text-white font-bold border-b-2 border-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]'
+                : 'text-slate-400 hover:text-white border-b-2 border-transparent'
+            }`}
+          >
+            Data
+          </button>
+
+          {/* 3. SIMULATION */}
+          <button
+            onClick={() => {
+              setActiveNavTab(prev => prev === 'simulation' ? 'stations' : 'simulation');
+              setStationDropdownOpen(false);
+            }}
+            className={`pb-0.5 transition cursor-pointer ${
+              activeNavTab === 'simulation'
+                ? 'text-white font-bold border-b-2 border-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]'
+                : 'text-slate-400 hover:text-white border-b-2 border-transparent'
+            }`}
+          >
+            Simulation
+          </button>
+
+          {/* 4. RESOURCES */}
+          <button
+            onClick={() => {
+              setActiveNavTab(prev => prev === 'resources' ? 'stations' : 'resources');
+              setStationDropdownOpen(false);
+            }}
+            className={`pb-0.5 transition cursor-pointer ${
+              activeNavTab === 'resources'
+                ? 'text-white font-bold border-b-2 border-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]'
+                : 'text-slate-400 hover:text-white border-b-2 border-transparent'
+            }`}
+          >
+            Resources
+          </button>
+        </nav>
 
         {/* Right Section: Weather, Clock, Role, Profile */}
         <div className="flex items-center space-x-4">
@@ -888,6 +995,390 @@ export const Bharati3DCanvas: React.FC = () => {
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── 5B. DATA & TELEMETRY HUB MODAL ── */}
+      {activeNavTab === 'data' && (
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-40 w-[94%] max-w-2xl backdrop-blur-2xl bg-slate-950/92 border border-cyan-500/50 rounded-2xl p-5 text-white shadow-[0_12px_60px_rgba(0,0,0,0.9)] animate-in fade-in slide-in-from-top-4 font-sans">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div className="flex items-center space-x-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#22d3ee]" />
+              <h3 className="font-extrabold text-sm text-white uppercase tracking-wider flex items-center space-x-2">
+                <span>Station Telemetry & Data Streams</span>
+                <span className="text-[10px] font-mono font-normal px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-800">
+                  LIVE 10 Hz
+                </span>
+              </h3>
+            </div>
+            <button 
+              onClick={() => setActiveNavTab('stations')}
+              className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="mt-4 space-y-4">
+            {/* 1. Atmospheric Grid */}
+            <div>
+              <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold mb-2 flex items-center space-x-1.5">
+                <Wind className="w-3 h-3 text-sky-400" />
+                <span>Atmospheric & Meteorological Sensors (Larsemann Hills)</span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono text-center">
+                <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
+                  <div className="text-[10px] text-slate-500">AMBIENT TEMP</div>
+                  <div className="text-sm font-bold text-amber-400 mt-0.5">
+                    {environment?.ambientTemp?.toFixed(1) ?? '-10.4'}°C
+                  </div>
+                </div>
+                <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
+                  <div className="text-[10px] text-slate-500">WIND SPEED</div>
+                  <div className="text-sm font-bold text-sky-400 mt-0.5">
+                    {environment?.windSpeed?.toFixed(1) ?? '16.2'} m/s
+                  </div>
+                </div>
+                <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
+                  <div className="text-[10px] text-slate-500">HUMIDITY</div>
+                  <div className="text-sm font-bold text-emerald-400 mt-0.5">
+                    {environment?.humidity?.toFixed(0) ?? '62'}%
+                  </div>
+                </div>
+                <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
+                  <div className="text-[10px] text-slate-500">PRESSURE</div>
+                  <div className="text-sm font-bold text-indigo-300 mt-0.5">
+                    {environment?.barometricPressure?.toFixed(0) ?? '989'} hPa
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 2. Microgrid & Power Grid */}
+            <div>
+              <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold mb-2 flex items-center space-x-1.5">
+                <Zap className="w-3 h-3 text-amber-400" />
+                <span>Energy & Microgrid Distribution</span>
+              </div>
+              <div className="grid grid-cols-3 gap-2 font-mono text-center">
+                <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
+                  <div className="text-[10px] text-slate-500">CHP SCANIA GEN</div>
+                  <div className="text-sm font-bold text-cyan-400 mt-0.5">
+                    {energy?.powerGeneration?.dieselKw?.toFixed(0) ?? '160'} kW
+                  </div>
+                </div>
+                <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
+                  <div className="text-[10px] text-slate-500">SOLAR ROOFTOP</div>
+                  <div className="text-sm font-bold text-amber-400 mt-0.5">
+                    {energy?.powerGeneration?.solarKw?.toFixed(1) ?? '32.4'} kW
+                  </div>
+                </div>
+                <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
+                  <div className="text-[10px] text-slate-500">BATTERY BANK SOC</div>
+                  <div className="text-sm font-bold text-emerald-400 mt-0.5">
+                    {energy?.batteryStorage?.batteryPercent?.toFixed(0) ?? '94'}%
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. Quick Action Buttons */}
+            <div className="pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2">
+              <div className="text-[11px] text-slate-400">
+                Explore deep sensor graphs & telemetry archives:
+              </div>
+              <div className="flex items-center space-x-2">
+                {onNavigate && (
+                  <>
+                    <button
+                      onClick={() => onNavigate('sensors')}
+                      className="px-3 py-1.5 rounded-xl bg-cyan-600/30 hover:bg-cyan-600/50 border border-cyan-500/60 text-cyan-200 text-xs font-bold transition flex items-center space-x-1.5 shadow-sm cursor-pointer"
+                    >
+                      <span>Sensor Matrix</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => onNavigate('analytics')}
+                      className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-bold transition flex items-center space-x-1.5 shadow-sm cursor-pointer"
+                    >
+                      <span>Trends & Logs</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── 5C. SIMULATION CONTROL OVERLAY ── */}
+      {activeNavTab === 'simulation' && (
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-40 w-[94%] max-w-2xl backdrop-blur-2xl bg-slate-950/92 border border-purple-500/50 rounded-2xl p-5 text-white shadow-[0_12px_60px_rgba(0,0,0,0.9)] animate-in fade-in slide-in-from-top-4 font-sans">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div className="flex items-center space-x-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-purple-400 animate-pulse shadow-[0_0_8px_#c084fc]" />
+              <h3 className="font-extrabold text-sm text-white uppercase tracking-wider flex items-center space-x-2">
+                <span>Polar Simulation Engine</span>
+                <span className="text-[10px] font-mono font-black px-2 py-0.5 rounded bg-purple-950/80 text-purple-300 border border-purple-800">
+                  {simulationState?.activeScenario ? simulationState.activeScenario.toUpperCase().replace('_', ' ') : 'NORMAL CONDITIONS'}
+                </span>
+              </h3>
+            </div>
+            <button 
+              onClick={() => setActiveNavTab('stations')}
+              className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="mt-4 space-y-4">
+            {/* Simulation Clock Speeds */}
+            <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center justify-between">
+              <div>
+                <div className="text-xs font-bold text-white">Simulation Engine State</div>
+                <div className="text-[11px] text-slate-400">Control clock progression rate across digital twin models</div>
+              </div>
+              <div className="flex items-center space-x-1.5 font-mono">
+                <button
+                  onClick={() => toggleSimulation?.()}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center space-x-1 cursor-pointer ${
+                    !simulationState?.isRunning ? 'bg-amber-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                  }`}
+                >
+                  <Pause className="w-3 h-3" />
+                  <span>Pause</span>
+                </button>
+                {[1, 5, 20].map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setSpeed?.(s)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                      simulationState?.speed === s && simulationState?.isRunning
+                        ? 'bg-purple-600 text-white shadow-sm'
+                        : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                    }`}
+                  >
+                    {s}x
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Scenario Triggers */}
+            <div>
+              <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold mb-2">
+                1-Click Antarctic Scenario Injection
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <button
+                  onClick={() => triggerScenario?.('normal')}
+                  className="p-2.5 rounded-xl bg-emerald-950/40 hover:bg-emerald-950/70 border border-emerald-600/50 text-emerald-200 text-left transition text-xs cursor-pointer"
+                >
+                  <div className="font-bold flex items-center space-x-1.5">
+                    <span>⚡</span>
+                    <span>Baseline Normal</span>
+                  </div>
+                  <div className="text-[10px] text-emerald-400/80 mt-0.5">Restore all safe nominals</div>
+                </button>
+
+                <button
+                  onClick={() => triggerScenario?.('blizzard')}
+                  className="p-2.5 rounded-xl bg-sky-950/40 hover:bg-sky-950/70 border border-sky-600/50 text-sky-200 text-left transition text-xs cursor-pointer"
+                >
+                  <div className="font-bold flex items-center space-x-1.5">
+                    <span>❄️</span>
+                    <span>Blizzard Surge</span>
+                  </div>
+                  <div className="text-[10px] text-sky-400/80 mt-0.5">65 kt winds & whiteout</div>
+                </button>
+
+                <button
+                  onClick={() => triggerScenario?.('generator_failure')}
+                  className="p-2.5 rounded-xl bg-rose-950/40 hover:bg-rose-950/70 border border-rose-600/50 text-rose-200 text-left transition text-xs cursor-pointer"
+                >
+                  <div className="font-bold flex items-center space-x-1.5">
+                    <span>🔥</span>
+                    <span>DG Generator Trip</span>
+                  </div>
+                  <div className="text-[10px] text-rose-400/80 mt-0.5">Auto-failover to backup</div>
+                </button>
+
+                <button
+                  onClick={() => triggerScenario?.('battery_low')}
+                  className="p-2.5 rounded-xl bg-amber-950/40 hover:bg-amber-950/70 border border-amber-600/50 text-amber-200 text-left transition text-xs cursor-pointer"
+                >
+                  <div className="font-bold flex items-center space-x-1.5">
+                    <span>🔋</span>
+                    <span>Battery Critical</span>
+                  </div>
+                  <div className="text-[10px] text-amber-400/80 mt-0.5">Load shedding & priority</div>
+                </button>
+
+                <button
+                  onClick={() => triggerScenario?.('multi_system_failure')}
+                  className="p-2.5 rounded-xl bg-red-950/50 hover:bg-red-950/80 border border-red-500/60 text-red-200 text-left transition text-xs col-span-2 sm:col-span-2 cursor-pointer"
+                >
+                  <div className="font-bold flex items-center space-x-1.5">
+                    <span>⚠️</span>
+                    <span>Compound Multi-System Disaster</span>
+                  </div>
+                  <div className="text-[10px] text-red-300/80 mt-0.5">Blizzard + power trip + heating crisis</div>
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Action Button */}
+            {onNavigate && (
+              <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between">
+                <div className="text-[11px] text-slate-400">
+                  Need advanced Monte Carlo what-if modeling?
+                </div>
+                <button
+                  onClick={() => onNavigate('scenarios')}
+                  className="px-3 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 border border-purple-500/60 text-purple-200 text-xs font-bold transition flex items-center space-x-1.5 shadow-sm cursor-pointer"
+                >
+                  <span>Open Full Scenario Lab</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── 5D. RESOURCES & LOGISTICS OVERLAY ── */}
+      {activeNavTab === 'resources' && (
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-40 w-[94%] max-w-2xl backdrop-blur-2xl bg-slate-950/92 border border-emerald-500/50 rounded-2xl p-5 text-white shadow-[0_12px_60px_rgba(0,0,0,0.9)] animate-in fade-in slide-in-from-top-4 font-sans">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div className="flex items-center space-x-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
+              <h3 className="font-extrabold text-sm text-white uppercase tracking-wider flex items-center space-x-2">
+                <span>Station Resources & Reserves</span>
+                <span className="text-[10px] font-mono font-normal px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-800">
+                  OVERWINTER RESERVES
+                </span>
+              </h3>
+            </div>
+            <button 
+              onClick={() => setActiveNavTab('stations')}
+              className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="mt-4 space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono">
+              {/* 1. Fuel Reserves */}
+              <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-400 flex items-center space-x-1.5 font-sans font-bold">
+                    <span>⛽</span>
+                    <span>ATF-50 Fuel Reserves</span>
+                  </span>
+                  <span className="text-emerald-400 font-bold">
+                    {energy?.fuelStorage?.fuelPercent ?? 82}%
+                  </span>
+                </div>
+                <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                  <div 
+                    className="bg-emerald-500 h-2 rounded-full transition-all duration-500" 
+                    style={{ width: `${energy?.fuelStorage?.fuelPercent ?? 82}%` }} 
+                  />
+                </div>
+                <div className="flex justify-between text-[11px] text-slate-400">
+                  <span>Capacity: 120,000 L</span>
+                  <span className="text-white font-bold">{energy?.fuelStorage?.estimatedDaysRemaining ?? 204} Days Remaining</span>
+                </div>
+              </div>
+
+              {/* 2. Freshwater & Melter */}
+              <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-400 flex items-center space-x-1.5 font-sans font-bold">
+                    <span>💧</span>
+                    <span>Freshwater Storage</span>
+                  </span>
+                  <span className="text-cyan-400 font-bold">91%</span>
+                </div>
+                <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                  <div className="bg-cyan-500 h-2 rounded-full w-[91%]" />
+                </div>
+                <div className="flex justify-between text-[11px] text-slate-400">
+                  <span>RO Plant: 1,500 L/d</span>
+                  <span className="text-white font-bold">Greywater Loop: 85%</span>
+                </div>
+              </div>
+
+              {/* 3. Battery Energy Reserves */}
+              <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-400 flex items-center space-x-1.5 font-sans font-bold">
+                    <span>🔋</span>
+                    <span>Battery Bank Storage</span>
+                  </span>
+                  <span className="text-amber-400 font-bold">
+                    {energy?.batteryStorage?.batteryPercent?.toFixed(0) ?? '94'}%
+                  </span>
+                </div>
+                <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                  <div 
+                    className="bg-amber-500 h-2 rounded-full" 
+                    style={{ width: `${energy?.batteryStorage?.batteryPercent ?? 94}%` }} 
+                  />
+                </div>
+                <div className="flex justify-between text-[11px] text-slate-400">
+                  <span>LiFePO4 300 kWh</span>
+                  <span className="text-white font-bold">Autonomy: 16.5 Hours</span>
+                </div>
+              </div>
+
+              {/* 4. Crew Provisions */}
+              <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-400 flex items-center space-x-1.5 font-sans font-bold">
+                    <span>📦</span>
+                    <span>Crew Rations & Medical</span>
+                  </span>
+                  <span className="text-emerald-400 font-bold">98%</span>
+                </div>
+                <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                  <div className="bg-emerald-500 h-2 rounded-full w-[98%]" />
+                </div>
+                <div className="flex justify-between text-[11px] text-slate-400">
+                  <span>Medical O2: 24 Cylinders</span>
+                  <span className="text-white font-bold">240 Days Food Stores</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Action Buttons */}
+            {onNavigate && (
+              <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between">
+                <div className="text-[11px] text-slate-400">
+                  Full inventory tracking & consumable dispatch:
+                </div>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => onNavigate('logistics')}
+                    className="px-3 py-1.5 rounded-xl bg-emerald-600/30 hover:bg-emerald-600/50 border border-emerald-500/60 text-emerald-200 text-xs font-bold transition flex items-center space-x-1.5 shadow-sm cursor-pointer"
+                  >
+                    <span>Station Stores Ledger</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => onNavigate('energy')}
+                    className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-bold transition flex items-center space-x-1.5 shadow-sm cursor-pointer"
+                  >
+                    <span>Power Grid</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
