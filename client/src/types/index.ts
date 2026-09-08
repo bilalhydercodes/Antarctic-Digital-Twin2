@@ -24,6 +24,142 @@ export type ConnectivityMode = 'LOCAL' | 'SATELLITE' | 'OFFLINE';
 
 export type RBACRole = 'ADMIN' | 'COMMANDER' | 'OPERATOR' | 'SCIENTIST' | 'VIEWER';
 
+export type NavTab = 
+  | 'dashboard'
+  | 'commander'
+  | 'incidents'
+  | 'twin'
+  | 'sensors'
+  | 'edge'
+  | 'dependencies'
+  | 'replay'
+  | 'compare'
+  | 'map'
+  | 'glaciology'
+  | 'environment'
+  | 'energy'
+  | 'logistics'
+  | 'infrastructure'
+  | 'maintenance'
+  | 'alerts'
+  | 'analytics'
+  | 'scenarios'
+  | 'assistant'
+  | 'settings';
+
+export const ROLE_ALLOWED_TABS: Record<RBACRole, NavTab[]> = {
+  ADMIN: [
+    'dashboard',
+    'commander',
+    'incidents',
+    'twin',
+    'sensors',
+    'edge',
+    'dependencies',
+    'replay',
+    'compare',
+    'map',
+    'glaciology',
+    'environment',
+    'energy',
+    'logistics',
+    'infrastructure',
+    'maintenance',
+    'alerts',
+    'analytics',
+    'scenarios',
+    'assistant',
+    'settings'
+  ],
+  COMMANDER: [
+    'commander',
+    'dashboard',
+    'incidents',
+    'twin',
+    'dependencies',
+    'compare',
+    'alerts',
+    'replay',
+    'scenarios',
+    'assistant'
+  ],
+  OPERATOR: [
+    'dashboard',
+    'twin',
+    'energy',
+    'logistics',
+    'infrastructure',
+    'maintenance',
+    'sensors',
+    'alerts',
+    'edge',
+    'analytics'
+  ],
+  SCIENTIST: [
+    'glaciology',
+    'environment',
+    'map',
+    'analytics',
+    'dashboard',
+    'sensors',
+    'compare',
+    'assistant'
+  ],
+  VIEWER: [
+    'dashboard',
+    'twin',
+    'map',
+    'environment',
+    'analytics'
+  ]
+};
+
+export interface RoleMetadata {
+  label: string;
+  badge: string;
+  description: string;
+  color: string;
+  defaultTab: NavTab;
+}
+
+export const ROLE_METADATA: Record<RBACRole, RoleMetadata> = {
+  ADMIN: {
+    label: 'ADMIN',
+    badge: 'SYSTEM ADMINISTRATOR',
+    description: 'Full unconstrained platform control, infrastructure & system settings',
+    color: 'rose',
+    defaultTab: 'dashboard'
+  },
+  COMMANDER: {
+    label: 'COMMANDER',
+    badge: 'STATION COMMANDER',
+    description: 'Executive mission authority, SITREP briefings, incident command & failovers',
+    color: 'amber',
+    defaultTab: 'commander'
+  },
+  OPERATOR: {
+    label: 'OPERATOR',
+    badge: 'STATION OPERATOR',
+    description: 'Station systems, 415V microgrid, equipment maintenance & logistics ledger',
+    color: 'blue',
+    defaultTab: 'dashboard'
+  },
+  SCIENTIST: {
+    label: 'SCIENTIST',
+    badge: 'POLAR RESEARCHER',
+    description: 'Glaciology radar, meteorological sensor suites & environmental trends',
+    color: 'emerald',
+    defaultTab: 'glaciology'
+  },
+  VIEWER: {
+    label: 'VIEWER',
+    badge: 'PUBLIC OBSERVER',
+    description: 'Read-only telemetry surveillance, 3D Digital Twin & geographic map',
+    color: 'stone',
+    defaultTab: 'dashboard'
+  }
+};
+
 export type TelemetryPriority = 
   | 'P0_LIFE_SAFETY'
   | 'P1_CRITICAL_INFRASTRUCTURE'

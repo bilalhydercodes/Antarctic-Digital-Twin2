@@ -122,12 +122,24 @@ export const Header: React.FC = () => {
         </div>
 
         {/* RBAC Role Selector */}
-        <div className="flex items-center space-x-1 px-2.5 py-1 bg-stone-100 border border-stone-300 rounded-xl text-xs">
-          <ShieldCheck className="w-3.5 h-3.5 text-blue-700 shrink-0" />
+        <div className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs border font-bold shadow-sm transition ${
+          userRole === 'ADMIN' ? 'bg-rose-50 border-rose-300 text-rose-900' :
+          userRole === 'COMMANDER' ? 'bg-amber-50 border-amber-300 text-amber-900' :
+          userRole === 'OPERATOR' ? 'bg-blue-50 border-blue-300 text-blue-900' :
+          userRole === 'SCIENTIST' ? 'bg-emerald-50 border-emerald-300 text-emerald-900' :
+          'bg-stone-100 border-stone-300 text-stone-800'
+        }`}>
+          <ShieldCheck className={`w-3.5 h-3.5 shrink-0 ${
+            userRole === 'ADMIN' ? 'text-rose-600' :
+            userRole === 'COMMANDER' ? 'text-amber-600' :
+            userRole === 'OPERATOR' ? 'text-blue-600' :
+            userRole === 'SCIENTIST' ? 'text-emerald-600' :
+            'text-stone-600'
+          }`} />
           <select
             value={userRole}
             onChange={(e) => setUserRole(e.target.value as RBACRole)}
-            className="bg-transparent text-stone-800 font-bold text-xs focus:outline-none cursor-pointer"
+            className="bg-transparent font-black text-xs focus:outline-none cursor-pointer uppercase"
           >
             <option value="ADMIN">ADMIN</option>
             <option value="COMMANDER">COMMANDER</option>
@@ -137,39 +149,46 @@ export const Header: React.FC = () => {
           </select>
         </div>
 
-        {/* Speed Controls */}
-        <div className="flex items-center space-x-1 bg-[#f8f7f4] p-1 rounded-xl border border-[#e5e3dc]">
-          <button
-            onClick={toggleSimulation}
-            title={simulationState.isRunning ? 'Pause' : 'Start'}
-            className="p-1.5 rounded-lg bg-white border border-[#e5e3dc] text-stone-700 hover:bg-stone-50 transition"
-          >
-            {simulationState.isRunning ? <Pause className="w-3.5 h-3.5 text-amber-600" /> : <Play className="w-3.5 h-3.5 text-emerald-600" />}
-          </button>
-          <button
-            onClick={resetSimulation}
-            title="Reset"
-            className="p-1.5 rounded-lg bg-white border border-[#e5e3dc] text-stone-700 hover:bg-stone-50 transition"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-          </button>
+        {/* Speed Controls (Locked to Read-Only stream for VIEWER role) */}
+        {userRole !== 'VIEWER' ? (
+          <div className="flex items-center space-x-1 bg-[#f8f7f4] p-1 rounded-xl border border-[#e5e3dc]">
+            <button
+              onClick={toggleSimulation}
+              title={simulationState.isRunning ? 'Pause' : 'Start'}
+              className="p-1.5 rounded-lg bg-white border border-[#e5e3dc] text-stone-700 hover:bg-stone-50 transition"
+            >
+              {simulationState.isRunning ? <Pause className="w-3.5 h-3.5 text-amber-600" /> : <Play className="w-3.5 h-3.5 text-emerald-600" />}
+            </button>
+            <button
+              onClick={resetSimulation}
+              title="Reset"
+              className="p-1.5 rounded-lg bg-white border border-[#e5e3dc] text-stone-700 hover:bg-stone-50 transition"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+            </button>
 
-          <div className="flex items-center space-x-0.5 px-1 font-mono text-xs font-bold">
-            {[1, 5, 20].map((s) => (
-              <button
-                key={s}
-                onClick={() => setSpeed(s)}
-                className={`px-2 py-0.5 rounded-md transition ${
-                  simulationState.speedMultiplier === s
-                    ? 'bg-blue-700 text-white'
-                    : 'text-stone-600 hover:bg-stone-200'
-                }`}
-              >
-                {s}x
-              </button>
-            ))}
+            <div className="flex items-center space-x-0.5 px-1 font-mono text-xs font-bold">
+              {[1, 5, 20].map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setSpeed(s)}
+                  className={`px-2 py-0.5 rounded-md transition ${
+                    simulationState.speedMultiplier === s
+                      ? 'bg-blue-700 text-white'
+                      : 'text-stone-600 hover:bg-stone-200'
+                  }`}
+                >
+                  {s}x
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-stone-100 border border-stone-200 text-stone-500 font-mono text-xs font-bold">
+            <span className="w-2 h-2 rounded-full bg-stone-400"></span>
+            <span>READ-ONLY VIEW</span>
+          </div>
+        )}
 
         {/* AUDIO MUTE TOGGLE & VOICE ALARM CONTROLS */}
         {alarmState.isAlarmLoopActive ? (

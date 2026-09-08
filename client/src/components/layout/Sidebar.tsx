@@ -1,6 +1,11 @@
 import React from 'react';
 import { useSimulation } from '../../context/SimulationContext';
 import { 
+  NavTab, 
+  ROLE_ALLOWED_TABS, 
+  ROLE_METADATA 
+} from '../../types';
+import { 
   LayoutDashboard, 
   Box, 
   Map, 
@@ -20,31 +25,11 @@ import {
   Radio,
   GitFork,
   Clock,
-  GitCompare
+  GitCompare,
+  ShieldCheck
 } from 'lucide-react';
 
-export type NavTab = 
-  | 'dashboard'
-  | 'commander'
-  | 'incidents'
-  | 'twin'
-  | 'sensors'
-  | 'edge'
-  | 'dependencies'
-  | 'replay'
-  | 'compare'
-  | 'map'
-  | 'glaciology'
-  | 'environment'
-  | 'energy'
-  | 'logistics'
-  | 'infrastructure'
-  | 'maintenance'
-  | 'alerts'
-  | 'analytics'
-  | 'scenarios'
-  | 'assistant'
-  | 'settings';
+export type { NavTab };
 
 interface SidebarProps {
   activeTab: NavTab;
@@ -52,12 +37,12 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
-  const { alerts, incidents } = useSimulation();
+  const { alerts, incidents, userRole } = useSimulation();
 
   const unhandledAlertsCount = alerts.filter(a => !a.acknowledged).length;
   const activeIncidentsCount = incidents.filter(i => i.status !== 'RESOLVED').length;
 
-  const navItems: { id: NavTab; label: string; icon: React.ReactNode; badge?: number }[] = [
+  const allNavItems: { id: NavTab; label: string; icon: React.ReactNode; badge?: number }[] = [
     { id: 'dashboard', label: 'Command Center', icon: <LayoutDashboard className="w-4 h-4" /> },
     { id: 'commander', label: 'Commander SITREP', icon: <Shield className="w-4 h-4 text-amber-600" /> },
     { 
@@ -91,14 +76,49 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
     { id: 'settings', label: 'System Architecture', icon: <Settings className="w-4 h-4" /> }
   ];
 
+  // Filter navigation items by active user role permissions
+  const allowedTabs = ROLE_ALLOWED_TABS[userRole] || ROLE_ALLOWED_TABS.ADMIN;
+  const visibleNavItems = allNavItems.filter(item => allowedTabs.includes(item.id));
+  const currentRoleMeta = ROLE_METADATA[userRole] || ROLE_METADATA.COMMANDER;
+
   return (
     <aside className="w-64 bg-[#f8f7f4] border-r border-[#e5e3dc] flex flex-col justify-between shrink-0 font-sans">
       <div className="p-4 space-y-1 overflow-y-auto">
-        <div className="px-2 py-1 text-[10px] font-bold tracking-wider text-stone-400 uppercase">
-          STATION NAVIGATION
+        {/* Active Role Scope Card */}
+        <div className="px-3 py-2.5 mb-3 bg-white rounded-xl border border-[#e5e3dc] shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-stone-400">
+              Role Scope
+            </span>
+            <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-black border ${
+              userRole === 'ADMIN' ? 'bg-rose-50 text-rose-800 border-rose-200' :
+              userRole === 'COMMANDER' ? 'bg-amber-50 text-amber-800 border-amber-200' :
+              userRole === 'OPERATOR' ? 'bg-blue-50 text-blue-800 border-blue-200' :
+              userRole === 'SCIENTIST' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' :
+              'bg-stone-100 text-stone-800 border-stone-200'
+            }`}>
+              {userRole}
+            </span>
+          </div>
+          <div className="text-xs font-black text-stone-900 mt-1 flex items-center justify-between">
+            <span>{currentRoleMeta.badge}</span>
+            <span className="text-[10px] font-mono font-semibold text-stone-500">
+              {visibleNavItems.length} active
+            </span>
+          </div>
+          <div className="text-[11px] text-stone-500 mt-1 leading-snug font-normal">
+            {currentRoleMeta.description}
+          </div>
         </div>
 
-        {navItems.map((item) => {
+        <div className="px-2 py-1 text-[10px] font-bold tracking-wider text-stone-400 uppercase flex items-center justify-between">
+          <span>NAVIGATION</span>
+          <span className="text-[10px] font-mono text-stone-400 font-normal">
+            {visibleNavItems.length} OF {allNavItems.length}
+          </span>
+        </div>
+
+        {visibleNavItems.map((item) => {
           const isActive = activeTab === item.id;
           return (
             <button
@@ -136,10 +156,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
           <span>NCPOR Goa HQ Active</span>
         </div>
-        <div className="text-[11px] text-stone-500 mt-1">
-          Telemetry Packet Rate: 3s
+        <div className="text-[11px] text-stone-500 mt-1 font-mono">
+          RBAC: Strict Profile Enforcement
         </div>
       </div>
     </aside>
   );
 };
+
