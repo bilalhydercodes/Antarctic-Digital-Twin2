@@ -29,12 +29,34 @@ import { ScenarioLabPage } from './pages/ScenarioLabPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { AssistantPage } from './pages/AssistantPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { AntarcticLandingPage } from './components/landing/AntarcticLandingPage';
+import { RBACRole } from './types';
 
 export const MainContent: React.FC = () => {
-  const { userRole } = useSimulation();
+  const { userRole, setUserRole } = useSimulation();
+  const [showLanding, setShowLanding] = useState<boolean>(() => {
+    return sessionStorage.getItem('entered_twin') !== 'true';
+  });
   const [activeTab, setActiveTab] = useState<NavTab>(() => {
     return ROLE_METADATA[userRole]?.defaultTab || 'dashboard';
   });
+
+  const handleEnterFromLanding = async (role: RBACRole, targetTab?: NavTab) => {
+    await setUserRole(role);
+    if (targetTab) {
+      setActiveTab(targetTab);
+    } else {
+      const defaultTab = ROLE_METADATA[role]?.defaultTab || 'dashboard';
+      setActiveTab(defaultTab);
+    }
+    sessionStorage.setItem('entered_twin', 'true');
+    setShowLanding(false);
+  };
+
+  const handleOpenLanding = () => {
+    sessionStorage.removeItem('entered_twin');
+    setShowLanding(true);
+  };
 
   // When user switches role in header, automatically switch to role's primary view
   // if the currently active tab is not accessible in that role
@@ -46,13 +68,22 @@ export const MainContent: React.FC = () => {
     }
   }, [userRole]);
 
+  if (showLanding) {
+    return (
+      <AntarcticLandingPage 
+        onEnter={handleEnterFromLanding}
+        initialRole={userRole}
+      />
+    );
+  }
+
   const allowedTabs = ROLE_ALLOWED_TABS[userRole] || ROLE_ALLOWED_TABS.ADMIN;
   const isTabPermitted = allowedTabs.includes(activeTab);
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-[#f4f3f0] font-sans">
       {/* Header & Satellite Bandwidth & Demo Stepper Banners */}
-      <Header />
+      <Header onOpenLanding={handleOpenLanding} />
       <CriticalVoiceAlarmBanner />
       <SatelliteBandwidthBanner />
       <DemoModeBanner />

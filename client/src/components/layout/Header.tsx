@@ -22,7 +22,11 @@ import {
 } from 'lucide-react';
 import { RBACRole } from '../../types';
 
-export const Header: React.FC = () => {
+interface HeaderProps {
+  onOpenLanding?: () => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({ onOpenLanding }) => {
   const [isMutedState, setIsMutedState] = useState(false);
   const [alarmState, setAlarmState] = useState<AudioAlarmState>(audioService.getAlarmState());
 
@@ -51,7 +55,7 @@ export const Header: React.FC = () => {
 
   return (
     <header className="bg-white border-b border-[#e5e3dc] px-6 py-3 flex flex-wrap items-center justify-between gap-4 sticky top-0 z-50 shadow-sm font-sans">
-      {/* 1. BRANDING & TITLE */}
+      {/* 1. BRANDING & TITLE & WELCOME PORTAL BUTTON */}
       <div className="flex items-center space-x-3 shrink-0">
         <div className="w-10 h-10 rounded-xl bg-blue-900 text-white flex items-center justify-center shadow-md">
           <Mountain className="w-6 h-6 text-sky-300" />
@@ -64,6 +68,17 @@ export const Header: React.FC = () => {
             Ministry of Earth Sciences • NCPOR #26060
           </p>
         </div>
+
+        {onOpenLanding && (
+          <button
+            onClick={onOpenLanding}
+            title="Return to Welcome Portal & Role Demo Access"
+            className="hidden sm:flex items-center space-x-1.5 ml-2 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-slate-700 font-bold text-xs shadow-sm transition"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+            <span>PORTAL</span>
+          </button>
+        )}
       </div>
 
       {/* 2. PROMINENT MAITRI & BHARATI STATION SWITCHER */}
