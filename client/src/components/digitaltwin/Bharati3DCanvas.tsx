@@ -3,1285 +3,1157 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { useSimulation } from '../../context/SimulationContext';
-import { EquipmentItem } from '../../types';
-import { Flame } from 'lucide-react';
+import { RBACRole } from '../../types';
 import { 
-  getAssetInspectionData, 
-  AssetInspectionData, 
-  InternalComponent, 
-  SensorDefinition 
-} from '../../services/AssetInternalCatalog';
-import { AssetCutaway3D } from './AssetCutaway3D';
-import { SensorMarkers3D } from './SensorMarkers3D';
-import { AssetInspectionPanel } from './AssetInspectionPanel';
-import { Drone3D } from './Drone3D';
+  Search, 
+  Wind, 
+  Droplets, 
+  Eye, 
+  Sun, 
+  CheckCircle2, 
+  X, 
+  ShieldCheck, 
+  Radio
+} from 'lucide-react';
 
-// ─── Static mesh helpers ───────────────────────────────────────────────────────
-const StaticBox: React.FC<{
-  position: [number, number, number];
-  size: [number, number, number];
-  color: string;
-  roughness?: number;
-  metalness?: number;
-}> = ({ position, size, color, roughness = 0.7, metalness = 0.1 }) => (
-  <mesh position={position} castShadow receiveShadow>
-    <boxGeometry args={size} />
-    <meshStandardMaterial color={color} roughness={roughness} metalness={metalness} />
-  </mesh>
-);
+// ─── DYNAMIC PROCEDURAL TEXTURE GENERATORS ───────────────────────────────────
+function createBharatiFacadeTexture(): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+  if (ctx) {
+    // Modern aerodynamic insulated composite cladding
+    ctx.fillStyle = '#e2e8f0';
+    ctx.fillRect(0, 0, 512, 256);
 
-const StaticCylinder: React.FC<{
-  position: [number, number, number];
-  args: [number, number, number, number];
-  color: string;
-  roughness?: number;
-  metalness?: number;
-}> = ({ position, args, color, roughness = 0.5, metalness = 0.4 }) => (
-  <mesh position={position} castShadow>
-    <cylinderGeometry args={args} />
-    <meshStandardMaterial color={color} roughness={roughness} metalness={metalness} />
-  </mesh>
-);
-
-// ─── Snow Particles ──────────────────────────────────────────────────────────
-const SnowParticles: React.FC<{ windSpeed: number; active: boolean }> = ({ windSpeed, active }) => {
-  const pointsRef = useRef<THREE.Points>(null);
-  const count = Math.min(Math.floor(windSpeed * 35), 3000);
-
-  const positions = useMemo(() => {
-    const arr = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      arr[i * 3]     = (Math.random() - 0.5) * 80;
-      arr[i * 3 + 1] = Math.random() * 30;
-      arr[i * 3 + 2] = (Math.random() - 0.5) * 80;
+    // Subtle horizontal aerodynamic panel lines
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = 2;
+    for (let y = 30; y < 256; y += 40) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(512, y);
+      ctx.stroke();
     }
-    return arr;
-  }, [count]);
 
+    // Vertical structural modular joints
+    for (let x = 32; x < 512; x += 48) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, 256);
+      ctx.stroke();
+    }
+
+    // Upper level observation panoramic window band
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(20, 45, 472, 35);
+    ctx.fillStyle = 'rgba(56, 189, 248, 0.85)';
+    ctx.fillRect(24, 48, 464, 29);
+
+    // Lower level crew cabin window modules
+    for (let x = 30; x < 480; x += 45) {
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(x, 150, 32, 26);
+      ctx.fillStyle = 'rgba(253, 230, 138, 0.9)';
+      ctx.fillRect(x + 3, 153, 26, 20);
+    }
+
+    // Indian National Flag 🇮🇳
+    const flagX = 35;
+    const flagY = 92;
+    const flagW = 85;
+    const flagH = 50;
+
+    // Saffron band
+    ctx.fillStyle = '#ff9933';
+    ctx.fillRect(flagX, flagY, flagW, flagH / 3);
+
+    // White band
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(flagX, flagY + flagH / 3, flagW, flagH / 3);
+
+    // Green band
+    ctx.fillStyle = '#138808';
+    ctx.fillRect(flagX, flagY + (2 * flagH) / 3, flagW, flagH / 3);
+
+    // Ashoka Chakra
+    ctx.strokeStyle = '#000080';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(flagX + flagW / 2, flagY + flagH / 2, flagH / 6.5, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Bold BHARATI Typography
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 36px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('BHARATI', 140, 130);
+
+    // Subtitle: LARSEMANN HILLS • ANTARCTICA
+    ctx.fillStyle = '#475569';
+    ctx.font = 'bold 12px sans-serif';
+    ctx.fillText('LARSEMANN HILLS • ANTARCTICA • 69°24\'S, 76°11\'E', 140, 146);
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.needsUpdate = true;
+  return texture;
+}
+
+function createHelipadTexture(): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+  if (ctx) {
+    // Dark asphalt pad
+    ctx.fillStyle = '#1e293b';
+    ctx.beginPath();
+    ctx.arc(256, 256, 250, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Outer ring
+    ctx.strokeStyle = '#64748b';
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.arc(256, 256, 240, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Yellow inner target circle
+    ctx.strokeStyle = '#eab308';
+    ctx.lineWidth = 10;
+    ctx.beginPath();
+    ctx.arc(256, 256, 175, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Yellow landing 'H'
+    ctx.fillStyle = '#eab308';
+    ctx.font = 'bold 160px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('H', 256, 256);
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.needsUpdate = true;
+  return texture;
+}
+
+// ─── 3D ANTARCTIC HELICOPTER ──────────────────────────────────────────────────
+const AntarcticHelicopter: React.FC<{ position: [number, number, number]; rotation?: number }> = ({ position, rotation = -0.3 }) => {
+  const rotorRef = useRef<THREE.Group>(null);
   useFrame((_, delta) => {
-    if (!pointsRef.current || !active) return;
-    const pos = pointsRef.current.geometry.attributes.position;
-    const drift = (windSpeed / 80) * 12 * delta;
-    for (let i = 0; i < count; i++) {
-      pos.setY(i, pos.getY(i) - (2 + windSpeed * 0.04) * delta);
-      pos.setX(i, pos.getX(i) + drift);
-      if (pos.getY(i) < -1) pos.setY(i, 30);
-      if (pos.getX(i) > 40) pos.setX(i, -40);
-    }
-    pos.needsUpdate = true;
-  });
-
-  if (!active) return null;
-  return (
-    <points ref={pointsRef}>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
-      </bufferGeometry>
-      <pointsMaterial size={0.15} color="#ddeeff" transparent opacity={0.75} sizeAttenuation />
-    </points>
-  );
-};
-
-// ─── Power Flow Line ──────────────────────────────────────────────────────────
-const PowerFlowLine: React.FC<{
-  from: [number, number, number];
-  to: [number, number, number];
-  color: string;
-  active: boolean;
-}> = ({ from, to, color, active }) => {
-  const matRef = useRef<THREE.MeshStandardMaterial>(null);
-  useFrame((state) => {
-    if (matRef.current) {
-      matRef.current.emissiveIntensity = active
-        ? 0.4 + Math.sin(state.clock.getElapsedTime() * 3) * 0.3
-        : 0.05;
+    if (rotorRef.current) {
+      rotorRef.current.rotation.y += delta * 5;
     }
   });
-  const points = [new THREE.Vector3(...from), new THREE.Vector3(...to)];
-  const curve = new THREE.CatmullRomCurve3(points);
-  const tubeGeo = new THREE.TubeGeometry(curve, 12, 0.06, 6, false);
-  return (
-    <mesh geometry={tubeGeo}>
-      <meshStandardMaterial
-        ref={matRef}
-        color={active ? color : '#374151'}
-        emissive={active ? color : '#000'}
-        emissiveIntensity={0.4}
-        roughness={0.3}
-        metalness={0.8}
-        transparent
-        opacity={active ? 0.9 : 0.3}
-      />
-    </mesh>
-  );
-};
 
-// ─── Exhaust Smoke ──────────────────────────────────────────────────────────
-const ExhaustSmoke: React.FC<{ position: [number, number, number]; loadPercent: number; isThermalIR: boolean }> = ({ position, loadPercent, isThermalIR }) => {
-  const pRef = useRef<THREE.Points>(null);
-  const count = Math.max(4, Math.floor(loadPercent / 10));
-  const pos = useMemo(() => {
-    const a = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      a[i*3] = (Math.random()-0.5)*0.3; a[i*3+1] = Math.random()*2; a[i*3+2] = (Math.random()-0.5)*0.3;
-    }
-    return a;
-  }, [count]);
-  useFrame((_, delta) => {
-    if (!pRef.current) return;
-    const p = pRef.current.geometry.attributes.position;
-    for (let i = 0; i < count; i++) {
-      p.setY(i, p.getY(i) + delta * (0.5 + Math.random() * 0.5));
-      if (p.getY(i) > 2.5) p.setY(i, 0);
-    }
-    p.needsUpdate = true;
-  });
   return (
-    <points ref={pRef} position={position}>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" count={count} array={pos} itemSize={3} />
-      </bufferGeometry>
-      <pointsMaterial size={isThermalIR ? 0.25 : 0.18} color={isThermalIR ? '#ff6600' : '#9ca3af'} transparent opacity={0.5} sizeAttenuation />
-    </points>
-  );
-};
-
-// ─── Fuel Level Mesh ──────────────────────────────────────────────────────────
-const FuelLevelMesh: React.FC<{ position: [number, number, number]; fuelPercent: number; radius: number }> = ({ position, fuelPercent, radius }) => {
-  const fillH = (radius * 2.5) * (fuelPercent / 100);
-  const color = fuelPercent < 20 ? '#ef4444' : fuelPercent < 40 ? '#f59e0b' : '#22c55e';
-  return (
-    <mesh position={[position[0], position[1] - radius * 1.25 + fillH / 2, position[2]]} rotation={[Math.PI/2,0,0]}>
-      <cylinderGeometry args={[radius * 0.85, radius * 0.85, fillH, 16]} />
-      <meshStandardMaterial color={color} roughness={0.3} metalness={0.3} transparent opacity={0.75}
-        emissive={fuelPercent < 20 ? '#ef4444' : '#000'} emissiveIntensity={fuelPercent < 20 ? 0.4 : 0} />
-    </mesh>
-  );
-};
-
-// ─── Fire Effect (scenario) ───────────────────────────────────────────────────
-const FireEffect: React.FC<{ position: [number, number, number]; active: boolean }> = ({ position, active }) => {
-  const pRef = useRef<THREE.Points>(null);
-  const count = 60;
-  const pos = useMemo(() => {
-    const a = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) { a[i*3]=(Math.random()-0.5)*1.2; a[i*3+1]=Math.random()*3; a[i*3+2]=(Math.random()-0.5)*1.2; }
-    return a;
-  }, []);
-  useFrame((state, delta) => {
-    if (!pRef.current || !active) return;
-    const p = pRef.current.geometry.attributes.position;
-    for (let i = 0; i < count; i++) {
-      p.setY(i, p.getY(i) + delta * (1.5 + Math.random()));
-      p.setX(i, p.getX(i) + (Math.random()-0.5)*0.05);
-      if (p.getY(i) > 4) p.setY(i, 0);
-    }
-    p.needsUpdate = true;
-  });
-  if (!active) return null;
-  return (
-    <group position={position}>
-      <points ref={pRef}>
-        <bufferGeometry><bufferAttribute attach="attributes-position" count={count} array={pos} itemSize={3} /></bufferGeometry>
-        <pointsMaterial size={0.3} color="#ff6600" transparent opacity={0.85} sizeAttenuation />
-      </points>
-      <pointLight color="#ff4400" intensity={3} distance={8} />
+    <group position={position} rotation={[0, rotation, 0]}>
+      {/* Fuselage body */}
+      <mesh position={[0, 0.7, 0]} castShadow>
+        <boxGeometry args={[1.2, 0.8, 2.4]} />
+        <meshStandardMaterial color="#0284c7" roughness={0.3} metalness={0.4} />
+      </mesh>
+      {/* Cockpit Canopy */}
+      <mesh position={[0, 0.65, 1.4]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+        <coneGeometry args={[0.55, 0.8, 16]} />
+        <meshStandardMaterial color="#0f172a" roughness={0.1} metalness={0.9} transparent opacity={0.8} />
+      </mesh>
+      {/* Tail boom */}
+      <mesh position={[0, 0.8, -1.8]} rotation={[0.08, 0, 0]} castShadow>
+        <cylinderGeometry args={[0.1, 0.22, 1.8, 8]} />
+        <meshStandardMaterial color="#ffffff" roughness={0.4} />
+      </mesh>
+      {/* Vertical tail stabilizer */}
+      <mesh position={[0, 1.1, -2.6]} castShadow>
+        <boxGeometry args={[0.06, 0.7, 0.4]} />
+        <meshStandardMaterial color="#0284c7" />
+      </mesh>
+      {/* Landing Skids */}
+      {[-0.55, 0.55].map((x, i) => (
+        <group key={i} position={[x, 0.1, 0]}>
+          <mesh rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.04, 0.04, 2.6, 8]} />
+            <meshStandardMaterial color="#1f2937" metalness={0.8} />
+          </mesh>
+          <mesh position={[0, 0.3, 0.5]} rotation={[0, 0, (x > 0 ? -1 : 1) * 0.2]}>
+            <cylinderGeometry args={[0.03, 0.03, 0.6, 6]} />
+            <meshStandardMaterial color="#1f2937" />
+          </mesh>
+          <mesh position={[0, 0.3, -0.5]} rotation={[0, 0, (x > 0 ? -1 : 1) * 0.2]}>
+            <cylinderGeometry args={[0.03, 0.03, 0.6, 6]} />
+            <meshStandardMaterial color="#1f2937" />
+          </mesh>
+        </group>
+      ))}
+      {/* Main Rotor */}
+      <group position={[0, 1.15, 0.2]}>
+        <mesh>
+          <cylinderGeometry args={[0.05, 0.05, 0.3, 8]} />
+          <meshStandardMaterial color="#374151" metalness={0.9} />
+        </mesh>
+        <group ref={rotorRef} position={[0, 0.16, 0]}>
+          <mesh>
+            <boxGeometry args={[0.12, 0.02, 4.4]} />
+            <meshStandardMaterial color="#111827" roughness={0.5} />
+          </mesh>
+          <mesh rotation={[0, Math.PI / 2, 0]}>
+            <boxGeometry args={[0.12, 0.02, 4.4]} />
+            <meshStandardMaterial color="#111827" roughness={0.5} />
+          </mesh>
+        </group>
+      </group>
     </group>
   );
 };
 
-// ─── Camera Controller ────────────────────────────────────────────────────────
-interface CameraPreset { position: [number,number,number]; target: [number,number,number]; }
-const CameraController: React.FC<{ preset: CameraPreset | null; controlsRef: React.RefObject<any>; onDone: () => void }> = ({ preset, controlsRef, onDone }) => {
+// ─── 3D ISRO IMGEOS SATELLITE EARTH STATION RADOMES & DISHES ──────────────────
+const ISROGroundStation: React.FC<{ position: [number, number, number] }> = ({ position }) => {
+  return (
+    <group position={position}>
+      {/* Main Large Radome for IRS/Cartosat Tracking */}
+      <group position={[-2.5, 0, 0]}>
+        {/* Concrete circular pedestal */}
+        <mesh position={[0, 1.2, 0]} castShadow receiveShadow>
+          <cylinderGeometry args={[2.2, 2.5, 2.4, 16]} />
+          <meshStandardMaterial color="#475569" roughness={0.7} metalness={0.2} />
+        </mesh>
+        {/* Spherical tracking radome */}
+        <mesh position={[0, 3.8, 0]} castShadow>
+          <sphereGeometry args={[2.4, 28, 28]} />
+          <meshStandardMaterial color="#f8fafc" roughness={0.2} metalness={0.1} />
+        </mesh>
+        {/* Foundation support ring */}
+        <mesh position={[0, 0.1, 0]} receiveShadow>
+          <cylinderGeometry args={[2.8, 2.8, 0.2, 16]} />
+          <meshStandardMaterial color="#334155" roughness={0.9} />
+        </mesh>
+      </group>
+
+      {/* Secondary Steerable Parabolic Satellite Dish */}
+      <group position={[3.2, 0, -1]}>
+        {/* Pedestal & Azimuth mount */}
+        <mesh position={[0, 1.5, 0]} castShadow>
+          <cylinderGeometry args={[0.4, 0.6, 3, 12]} />
+          <meshStandardMaterial color="#334155" metalness={0.8} roughness={0.3} />
+        </mesh>
+        {/* Parabolic reflector dish */}
+        <group position={[0, 3.2, 0]} rotation={[0.4, 0.8, -0.2]}>
+          <mesh castShadow>
+            <cylinderGeometry args={[2.2, 0.2, 0.6, 24, 1, true]} />
+            <meshStandardMaterial color="#ffffff" metalness={0.4} roughness={0.3} side={THREE.DoubleSide} />
+          </mesh>
+          {/* Feed horn center mast */}
+          <mesh position={[0, 0.9, 0]}>
+            <cylinderGeometry args={[0.05, 0.05, 1.2, 8]} />
+            <meshStandardMaterial color="#0f172a" metalness={0.9} />
+          </mesh>
+          <mesh position={[0, 1.5, 0]}>
+            <sphereGeometry args={[0.16, 12, 12]} />
+            <meshStandardMaterial color="#38bdf8" emissive="#38bdf8" emissiveIntensity={0.8} />
+          </mesh>
+        </group>
+      </group>
+
+      {/* Microwave link transceiver tower */}
+      <group position={[1.5, 0, 3.5]}>
+        <mesh position={[0, 2.5, 0]} castShadow>
+          <cylinderGeometry args={[0.08, 0.15, 5, 8]} />
+          <meshStandardMaterial color="#94a3b8" metalness={0.8} />
+        </mesh>
+        <mesh position={[0, 4.2, 0]} rotation={[0, 0.5, 0]}>
+          <cylinderGeometry args={[0.6, 0.6, 0.1, 16]} />
+          <meshStandardMaterial color="#f1f5f9" metalness={0.5} />
+        </mesh>
+      </group>
+    </group>
+  );
+};
+
+// ─── 3D FUEL STORAGE COMPLEX ──────────────────────────────────────────────────
+const BharatiFuelStorage: React.FC<{ position: [number, number, number] }> = ({ position }) => {
+  return (
+    <group position={position}>
+      {/* 4 large white cylindrical fuel tanks */}
+      {[
+        [-1.8, -1.8, 1.4],
+        [ 1.8, -1.8, 1.4],
+        [-1.8,  1.8, 1.4],
+        [ 1.8,  1.8, 1.4]
+      ].map(([x, z, r], idx) => (
+        <group key={idx} position={[x, 0, z]}>
+          {/* Main vertical tank cylinder */}
+          <mesh position={[0, 1.8, 0]} castShadow receiveShadow>
+            <cylinderGeometry args={[r, r, 3.6, 24]} />
+            <meshStandardMaterial color="#f8fafc" roughness={0.35} metalness={0.4} />
+          </mesh>
+          {/* Domed top cap */}
+          <mesh position={[0, 3.6, 0]} castShadow>
+            <sphereGeometry args={[r * 0.98, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2]} />
+            <meshStandardMaterial color="#e2e8f0" roughness={0.3} metalness={0.5} />
+          </mesh>
+          {/* Tank Ladder */}
+          <mesh position={[0, 1.8, r + 0.05]}>
+            <boxGeometry args={[0.25, 3.6, 0.04]} />
+            <meshStandardMaterial color="#475569" metalness={0.8} />
+          </mesh>
+        </group>
+      ))}
+      {/* Interconnecting transfer pipes */}
+      <mesh position={[0, 0.6, 0]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.08, 0.08, 4.2, 8]} />
+        <meshStandardMaterial color="#64748b" metalness={0.8} />
+      </mesh>
+      <mesh position={[0, 0.6, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.08, 0.08, 4.2, 8]} />
+        <meshStandardMaterial color="#64748b" metalness={0.8} />
+      </mesh>
+      {/* Concrete containment pad */}
+      <mesh position={[0, 0.05, 0]} receiveShadow>
+        <boxGeometry args={[6.8, 0.1, 6.8]} />
+        <meshStandardMaterial color="#94a3b8" roughness={0.9} />
+      </mesh>
+    </group>
+  );
+};
+
+// ─── 3D POLAR SNOWCAT VEHICLE ─────────────────────────────────────────────────
+const PolarSnowcat: React.FC<{ position: [number, number, number]; rotation?: number; color?: string }> = ({ position, rotation = 0, color = '#dc2626' }) => (
+  <group position={position} rotation={[0, rotation, 0]}>
+    {/* Chassis */}
+    <mesh position={[0, 0.45, 0]} castShadow>
+      <boxGeometry args={[1.5, 0.6, 2.4]} />
+      <meshStandardMaterial color={color} roughness={0.4} metalness={0.3} />
+    </mesh>
+    {/* Cabin & Windshield */}
+    <mesh position={[0, 0.95, 0.3]} castShadow>
+      <boxGeometry args={[1.3, 0.6, 1.2]} />
+      <meshStandardMaterial color={color} roughness={0.4} />
+    </mesh>
+    <mesh position={[0, 0.95, 0.92]}>
+      <boxGeometry args={[1.1, 0.4, 0.05]} />
+      <meshStandardMaterial color="#0f172a" roughness={0.1} metalness={0.9} transparent opacity={0.7} />
+    </mesh>
+    {/* Dual Tracks */}
+    {[-0.8, 0.8].map((x, i) => (
+      <mesh key={i} position={[x, 0.2, 0]} castShadow>
+        <boxGeometry args={[0.3, 0.35, 2.5]} />
+        <meshStandardMaterial color="#1c1917" roughness={0.9} />
+      </mesh>
+    ))}
+  </group>
+);
+
+// ─── 3D LARSEMANN HILLS & PRYDZ BAY OCEAN BACKDROP ────────────────────────────
+const LarsemannHillsTerrain: React.FC = () => {
+  // Rocky promontories typical of Larsemann Hills oasis
+  const rocks = useMemo(() => {
+    const list = [];
+    for (let i = 0; i < 24; i++) {
+      const angle = (i / 24) * Math.PI * 2;
+      const dist = 32 + (i % 5) * 6;
+      list.push({
+        x: Math.cos(angle) * dist,
+        z: Math.sin(angle) * dist,
+        scale: [3 + (i % 4) * 2, 2 + (i % 3) * 1.5, 3 + (i % 3) * 2] as [number, number, number],
+        rotY: i * 0.4
+      });
+    }
+    return list;
+  }, []);
+
+  return (
+    <group>
+      {/* Rocky Outcrops (Larsemann Hills gneiss & granite ridges) */}
+      {rocks.map((r, i) => (
+        <mesh key={i} position={[r.x, r.scale[1] / 2 - 0.5, r.z]} rotation={[0, r.rotY, 0]} castShadow receiveShadow>
+          <dodecahedronGeometry args={[r.scale[0] * 0.6, 1]} />
+          <meshStandardMaterial color="#475569" roughness={0.95} metalness={0.1} />
+        </mesh>
+      ))}
+
+      {/* Prydz Bay Antarctic Ocean Water */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.35, -45]} receiveShadow>
+        <planeGeometry args={[140, 50]} />
+        <meshStandardMaterial 
+          color="#0369a1" 
+          roughness={0.1} 
+          metalness={0.7} 
+          transparent 
+          opacity={0.92} 
+        />
+      </mesh>
+
+      {/* Floating Icebergs & Sea Ice Floes in Prydz Bay */}
+      {[
+        [-25, -0.1, -40, 8, 3, 10],
+        [  5, -0.1, -48, 12, 4, 14],
+        [ 32, -0.1, -38, 7, 2.5, 8],
+        [-12, -0.1, -55, 15, 5, 18],
+        [ 20, -0.1, -52, 9, 3.2, 11]
+      ].map(([x, y, z, sx, sy, sz], i) => (
+        <mesh key={i} position={[x, y + sy / 2, z]} castShadow receiveShadow>
+          <boxGeometry args={[sx, sy, sz]} />
+          <meshStandardMaterial color="#e0f2fe" roughness={0.3} metalness={0.1} />
+        </mesh>
+      ))}
+    </group>
+  );
+};
+
+// ─── COMPASS AZIMUTH TRACKER ──────────────────────────────────────────────────
+const CompassAzimuthTracker: React.FC<{ onAngleChange: (angle: number) => void }> = ({ onAngleChange }) => {
   const { camera } = useThree();
-  const startCamPos = useRef(new THREE.Vector3());
-  const startTargetPos = useRef(new THREE.Vector3());
-  const endCamPos = useRef(new THREE.Vector3());
-  const endTargetPos = useRef(new THREE.Vector3());
-  const progress = useRef(0);
-  const isAnimating = useRef(false);
-
-  useEffect(() => {
-    if (!preset) return;
-
-    startCamPos.current.copy(camera.position);
-    if (controlsRef.current) {
-      startTargetPos.current.copy(controlsRef.current.target);
-      controlsRef.current.enabled = false;
-    } else {
-      startTargetPos.current.set(0, 0, 0);
-    }
-
-    endCamPos.current.set(...preset.position);
-    endTargetPos.current.set(...preset.target);
-
-    progress.current = 0;
-    isAnimating.current = true;
-  }, [preset]);
-
-  useFrame((_, delta) => {
-    if (!isAnimating.current) return;
-
-    progress.current += delta * 2.2;
-
-    if (progress.current >= 1.0) {
-      progress.current = 1.0;
-      camera.position.copy(endCamPos.current);
-      if (controlsRef.current) {
-        controlsRef.current.target.copy(endTargetPos.current);
-        controlsRef.current.update();
-        controlsRef.current.enabled = true;
-      }
-      isAnimating.current = false;
-      onDone();
-      return;
-    }
-
-    const t = progress.current;
-    const ease = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-
-    camera.position.lerpVectors(startCamPos.current, endCamPos.current, ease);
-
-    if (controlsRef.current) {
-      controlsRef.current.target.lerpVectors(startTargetPos.current, endTargetPos.current, ease);
-      controlsRef.current.update();
-    }
+  useFrame(() => {
+    const angle = Math.atan2(camera.position.x, camera.position.z) * (180 / Math.PI);
+    onAngleChange(angle);
   });
-
   return null;
 };
 
-// ─── Interactive 3D Building ───────────────────────────────────────────────────
-interface Interactive3DBuildingProps {
-  assetId: string;
-  position: [number, number, number];
-  size: [number, number, number];
-  color: string;
-  status?: 'HEALTHY' | 'WARNING' | 'CRITICAL' | 'OFFLINE';
+// ─── HOTSPOT DEFINITIONS FOR BHARATI STATION ─────────────────────────────────
+interface StationHotspot {
+  id: string;
   label: string;
-  isThermalIR: boolean;
-  isSelected?: boolean;
-  isCutawayMode?: boolean;
-  showSensors?: boolean;
-  inspectionData?: AssetInspectionData | null;
-  selectedComponentId?: string | null;
-  onSelectComponent?: (comp: InternalComponent) => void;
-  selectedSensorId?: string | null;
-  onSelectSensor?: (sensor: SensorDefinition) => void;
-  onClick: () => void;
-  roofColor?: string;
-  hasRoof?: boolean;
+  pos: [number, number, number];
+  category: string;
+  status: string;
+  temp: string;
+  power: string;
+  description: string;
+  equipment: string[];
 }
 
-const Interactive3DBuilding: React.FC<Interactive3DBuildingProps> = ({
-  assetId, position, size, color, status = 'HEALTHY', label, isThermalIR, isSelected = false,
-  isCutawayMode = false, showSensors = false, inspectionData = null, selectedComponentId = null,
-  onSelectComponent, selectedSensorId = null, onSelectSensor, onClick, roofColor, hasRoof = false,
-}) => {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const [hovered, setHovered] = useState(false);
+const BHARATI_HOTSPOTS: StationHotspot[] = [
+  {
+    id: 'main-complex',
+    label: 'Main Station Complex',
+    pos: [0, 6.8, 0],
+    category: 'INTEGRATED COMMAND & LIVING',
+    status: 'OPERATIONAL (24 CREW)',
+    temp: '+22.4°C',
+    power: '65 kW Load',
+    description: 'Elevated 3-story aerodynamic modular monolith constructed of 134 ISO containers on 24 steel pilings to prevent katabatic snowdrift accumulation.',
+    equipment: ['Mission Operations Center', 'Pressurized Airlock Gantry', 'Infirmary & Telemedicine Suite', 'HVAC Air Recirculation Matrix']
+  },
+  {
+    id: 'isro-earth-station',
+    label: 'ISRO Earth Station Radome',
+    pos: [-14, 4.2, -6],
+    category: 'SPACE & SATELLITE COMMUNICATIONS',
+    status: 'ACTIVE TRACKING (IMGEOS)',
+    temp: '+18.5°C',
+    power: '28.5 kW Load',
+    description: 'National Remote Sensing Centre (NRSC / ISRO) ground station downlinking high-rate satellite telemetry from Cartosat, Oceansat, and RISAT constellations.',
+    equipment: ['7.5m S/X-Band Tracking Dish', 'Cryo-cooled Low Noise Amplifiers', 'Ultra-High-Speed Fiber Terminal', 'Geodesic RF Radome Enclosure']
+  },
+  {
+    id: 'helipad',
+    label: 'Helipad & Flight Deck',
+    pos: [16, 1.2, 8],
+    category: 'AVIATION & LOGISTICS',
+    status: 'ACTIVE / LANDING CLEAR',
+    temp: '-10.4°C',
+    power: '2.8 kW Lighting',
+    description: 'Raised circular aviation deck engineered for severe maritime katabatic winds, equipped with green omnidirectional perimeter lighting and foam fire monitors.',
+    equipment: ['Antarctic Search & Rescue Helicopter', 'Automated De-Icing Runway Grid', 'Aviation Fuel Hydrant Pit', 'Omnidirectional Runway Beacons']
+  },
+  {
+    id: 'power-plant',
+    label: 'Power Generation Plant',
+    pos: [-12, 2.5, 8],
+    category: 'ENERGY & MICROGRID',
+    status: 'OPTIMAL (3/3 CHP ONLINE)',
+    temp: '72.1°C',
+    power: '160 kW Gen',
+    description: 'Triple Combined Heat & Power (CHP) co-generation facility utilizing Arctic-grade diesel with 85% thermal heat recovery into station water loop.',
+    equipment: ['Scania 100 kVA Co-gen #1', 'Scania 100 kVA Co-gen #2', 'Scania 100 kVA Standby #3', 'Plate Heat Exchanger Manifold']
+  },
+  {
+    id: 'fuel-storage',
+    label: 'Fuel Storage Farm',
+    pos: [-14, 2.8, 16],
+    category: 'RESERVES & LOGISTICS',
+    status: 'NORMAL (82% CAPACITY)',
+    temp: '-2.8°C',
+    power: '1.8 kW Tracing',
+    description: 'Double-walled insulated bulk fuel tank farm storing 120,000L of Jet A-1 / ATF-50 with automated electronic leak detection and heat-traced pumping.',
+    equipment: ['Tank #1 (30,000L ATF-50)', 'Tank #2 (30,000L ATF-50)', 'Tank #3 (30,000L ATF-50)', 'Tank #4 (30,000L ATF-50)']
+  },
+  {
+    id: 'research-labs',
+    label: 'Research Laboratories',
+    pos: [8, 5.0, -4],
+    category: 'SCIENTIFIC RESEARCH',
+    status: 'CALIBRATED & RECORDING',
+    temp: '+20.5°C',
+    power: '22 kW Load',
+    description: 'Advanced laboratories for polar microbiology, atmospheric aerosol profiling, glaciological ice-core analysis, and Southern Ocean biogeochemistry.',
+    equipment: ['Spectroradiometer Profiler', 'Clean Air Aerosol Sampler', 'Cryogenic Ice Core Vault', 'Liquid Nitrogen Generator']
+  },
+  {
+    id: 'living-modules',
+    label: 'Living Modules',
+    pos: [0, 3.8, 0],
+    category: 'LIFE SUPPORT & CREW',
+    status: 'CLIMATE CONTROLLED',
+    temp: '+21.8°C',
+    power: '32 kW Load',
+    description: '24 individual heated acoustic-insulated sleeping cabins, mess hall, lounge, sauna, gym, and medical surgery for overwintering expeditions.',
+    equipment: ['Freshwater Reverse Osmosis Loop', 'Acoustic Barrier Cladding', 'Emergency Oxygen Cascade', 'Hydroponic Salad Farm']
+  },
+  {
+    id: 'met-mast',
+    label: 'Meteorological Mast',
+    pos: [18, 4.5, -12],
+    category: 'SYNOPTIC WEATHER',
+    status: 'TRANSMITTING (WMO 89512)',
+    temp: '-10.4°C',
+    power: '0.6 kW',
+    description: '15m WMO synoptic tower monitoring Larsemann Hills maritime weather, katabatic wind shear, surface ozone, and solar UV radiation.',
+    equipment: ['Ultrasonic 3D Wind Vector Sensor', 'Chilled-Mirror Hygrometer', 'Net Solar Radiometer', 'Barometric Pressure Transducer']
+  }
+];
 
-  const getNormalColor = () => {
-    switch (status) {
-      case 'WARNING': return '#f59e0b';
-      case 'CRITICAL': return '#ef4444';
-      case 'OFFLINE': return '#78716c';
-      default: return color;
-    }
-  };
-
-  const getThermalColor = () => {
-    switch (status) {
-      case 'CRITICAL': return '#ff0000';
-      case 'WARNING': return '#ff7700';
-      default: return '#0077ff';
-    }
-  };
-
-  useFrame((state) => {
-    if (meshRef.current && status === 'CRITICAL') {
-      meshRef.current.scale.y = size[1] + Math.sin(state.clock.getElapsedTime() * 5) * 0.05;
-    }
-  });
-
-  const displayColor = isThermalIR ? getThermalColor() : getNormalColor();
-  const emissiveColor = isThermalIR
-    ? (status === 'CRITICAL' ? '#ff0000' : '#0055ff')
-    : (isSelected ? '#0284c7' : hovered ? '#0369a1' : status === 'CRITICAL' ? '#ef4444' : '#000000');
-
-  const isCutaway = isSelected && isCutawayMode;
-
-  return (
-    <group position={position}>
-      <mesh
-        ref={meshRef}
-        onClick={(e) => { e.stopPropagation(); onClick(); }}
-        onPointerOver={(e) => { e.stopPropagation(); setHovered(true); }}
-        onPointerOut={(e) => { e.stopPropagation(); setHovered(false); }}
-        castShadow
-        receiveShadow
-      >
-        <boxGeometry args={size} />
-        <meshStandardMaterial
-          color={displayColor}
-          roughness={isCutaway ? 0.1 : 0.35}
-          metalness={isCutaway ? 0.9 : 0.55}
-          emissive={emissiveColor}
-          emissiveIntensity={isThermalIR ? 0.6 : (isSelected ? 0.4 : hovered ? 0.25 : status === 'CRITICAL' ? 0.4 : 0)}
-          transparent={isCutaway}
-          opacity={isCutaway ? 0.15 : 1.0}
-        />
-      </mesh>
-
-      {hasRoof && !isCutaway && (
-        <mesh position={[0, size[1] / 2 + size[1] * 0.15, 0]} castShadow>
-          <coneGeometry args={[Math.max(size[0], size[2]) * 0.72, size[1] * 0.3, 4]} />
-          <meshStandardMaterial color={roofColor || '#475569'} roughness={0.7} />
-        </mesh>
-      )}
-
-      {isCutaway && inspectionData && onSelectComponent && (
-        <AssetCutaway3D
-          components={inspectionData.components}
-          selectedComponentId={selectedComponentId}
-          onSelectComponent={onSelectComponent}
-          isThermalIR={isThermalIR}
-        />
-      )}
-
-      {isSelected && showSensors && inspectionData && onSelectSensor && (
-        <SensorMarkers3D
-          sensors={inspectionData.components.flatMap(c => c.sensors)}
-          selectedSensorId={selectedSensorId}
-          onSelectSensor={onSelectSensor}
-          visible={true}
-        />
-      )}
-
-      <Html position={[0, size[1] / 2 + 0.7, 0]} center distanceFactor={22} zIndexRange={[0, 5]} style={{ pointerEvents: 'none' }}>
-        <button
-          onClick={(e) => { e.stopPropagation(); onClick(); }}
-          style={{ pointerEvents: 'auto' }}
-          className={`px-2 py-0.5 rounded-lg text-[10px] font-sans font-bold shadow-md whitespace-nowrap transition-all ${
-            isSelected ? 'scale-110 ring-2 ring-blue-400 font-black' : hovered ? 'scale-105' : ''
-          } ${
-            isThermalIR ? 'bg-stone-900 text-orange-400 border border-orange-500'
-            : isSelected ? 'bg-blue-600 text-white shadow-blue-500/50'
-            : status === 'CRITICAL' ? 'bg-rose-600 text-white'
-            : status === 'WARNING' ? 'bg-amber-500 text-white'
-            : status === 'OFFLINE' ? 'bg-stone-600 text-white'
-            : 'bg-white/90 text-stone-900 border border-stone-200'
-          }`}
-        >
-          {isThermalIR ? `🔥 ${label}` : label}
-        </button>
-      </Html>
-    </group>
-  );
-};
-
-// ─── Wind Turbine ─────────────────────────────────────────────────────────────
-const WindTurbine3D: React.FC<{
-  position: [number, number, number];
-  speed: number;
-  scale?: number;
-  isSelected?: boolean;
-  isCutawayMode?: boolean;
-  showSensors?: boolean;
-  inspectionData?: AssetInspectionData | null;
-  onSelectComponent?: (comp: InternalComponent) => void;
-  onSelectSensor?: (sensor: SensorDefinition) => void;
-  onClick: () => void;
-}> = ({ position, speed, scale = 1, isSelected = false, isCutawayMode = false, showSensors = false, inspectionData = null, onSelectComponent, onSelectSensor, onClick }) => {
-  const bladesRef = useRef<THREE.Group>(null);
-  const [hovered, setHovered] = useState(false);
-
-  useFrame((_, delta) => {
-    if (bladesRef.current) bladesRef.current.rotation.z += delta * (speed / 12);
-  });
-
-  const h = 5 * scale;
-  const isCutaway = isSelected && isCutawayMode;
-
-  return (
-    <group position={position} onClick={(e) => { e.stopPropagation(); onClick(); }} onPointerOver={() => setHovered(true)} onPointerOut={() => setHovered(false)}>
-      <mesh position={[0, h / 2, 0]} castShadow>
-        <cylinderGeometry args={[0.1 * scale, 0.22 * scale, h, 12]} />
-        <meshStandardMaterial color="#94a3b8" metalness={0.7} roughness={0.3} />
-      </mesh>
-      <mesh position={[0, h, 0]} castShadow>
-        <boxGeometry args={[0.6 * scale, 0.35 * scale, 0.35 * scale]} />
-        <meshStandardMaterial
-          color={isSelected ? '#0284c7' : hovered ? '#38bdf8' : '#64748b'}
-          metalness={0.6}
-          roughness={isCutaway ? 0.1 : 0.4}
-          transparent={isCutaway}
-          opacity={isCutaway ? 0.2 : 1.0}
-        />
-      </mesh>
-      {isCutaway && inspectionData && onSelectComponent && (
-        <group position={[0, h, 0]} scale={scale * 0.4}>
-          <AssetCutaway3D
-            components={inspectionData.components}
-            selectedComponentId={null}
-            onSelectComponent={onSelectComponent}
-          />
-        </group>
-      )}
-      {isSelected && showSensors && inspectionData && onSelectSensor && (
-        <group position={[0, h, 0]} scale={scale * 0.4}>
-          <SensorMarkers3D
-            sensors={inspectionData.components.flatMap(c => c.sensors)}
-            selectedSensorId={null}
-            onSelectSensor={onSelectSensor}
-          />
-        </group>
-      )}
-      <group ref={bladesRef} position={[0.3 * scale, h, 0]}>
-        {[0, 120, 240].map((deg, i) => (
-          <mesh key={i} rotation={[0, 0, (deg * Math.PI) / 180]} position={[0, 1.0 * scale, 0]}>
-            <boxGeometry args={[0.07 * scale, 2.0 * scale, 0.035 * scale]} />
-            <meshStandardMaterial color="#f0f4ff" />
-          </mesh>
-        ))}
-      </group>
-    </group>
-  );
-};
-
-// ─── Solar Panel Array ────────────────────────────────────────────────────────
-const SolarArray: React.FC<{ position: [number, number, number]; count?: number; onClick?: () => void }> = ({ position, count = 6, onClick }) => (
-  <group position={position} onClick={onClick}>
-    {Array.from({ length: count }).map((_, i) => (
-      <group key={i} position={[i * 1.1 - (count / 2) * 1.1 + 0.55, 0, 0]}>
-        <mesh position={[0, 0.4, 0]} rotation={[-0.35, 0, 0]} castShadow>
-          <boxGeometry args={[0.9, 0.06, 1.6]} />
-          <meshStandardMaterial color="#1e3a5f" roughness={0.1} metalness={0.9} />
-        </mesh>
-        <mesh position={[0, 0.04, 0]}>
-          <cylinderGeometry args={[0.03, 0.03, 0.8, 6]} />
-          <meshStandardMaterial color="#78716c" metalness={0.8} />
-        </mesh>
-      </group>
-    ))}
-  </group>
-);
-
-// ─── Comms Tower ─────────────────────────────────────────────────────────────
-const CommsTower: React.FC<{
-  position: [number, number, number];
-  height?: number;
-  isSelected?: boolean;
-  isCutawayMode?: boolean;
-  showSensors?: boolean;
-  inspectionData?: AssetInspectionData | null;
-  onSelectComponent?: (comp: InternalComponent) => void;
-  onSelectSensor?: (sensor: SensorDefinition) => void;
-  onClick: () => void;
-}> = ({ position, height = 7, isSelected = false, isCutawayMode = false, showSensors = false, inspectionData = null, onSelectComponent, onSelectSensor, onClick }) => (
-  <group position={position} onClick={(e) => { e.stopPropagation(); onClick(); }}>
-    {[[-0.3, -0.3], [0.3, -0.3], [0.3, 0.3], [-0.3, 0.3]].map(([x, z], i) => (
-      <mesh key={i} position={[x * 0.5, height / 2, z * 0.5]} castShadow>
-        <cylinderGeometry args={[0.04, 0.07, height, 6]} />
-        <meshStandardMaterial color="#94a3b8" metalness={0.8} roughness={0.3} />
-      </mesh>
-    ))}
-    {[1.5, 3, 4.5, 6].map((y, i) => (
-      <mesh key={i} position={[0, y, 0]} rotation={[0, (i % 2) * Math.PI / 4, 0]}>
-        <boxGeometry args={[0.7, 0.04, 0.04]} />
-        <meshStandardMaterial color="#64748b" metalness={0.7} />
-      </mesh>
-    ))}
-    <mesh position={[0, height + 0.5, 0]} rotation={[-0.4, 0, 0]}>
-      <cylinderGeometry args={[0.7, 0.7, 0.06, 20, 1, true]} />
-      <meshStandardMaterial color={isSelected ? '#38bdf8' : '#e2e8f0'} side={THREE.DoubleSide} metalness={0.5} />
-    </mesh>
-    <mesh position={[0, height + 1, 0]}>
-      <sphereGeometry args={[0.12, 8, 8]} />
-      <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={0.8} />
-    </mesh>
-    {isSelected && showSensors && inspectionData && onSelectSensor && (
-      <group position={[0, height * 0.5, 0]}>
-        <SensorMarkers3D
-          sensors={inspectionData.components.flatMap(c => c.sensors)}
-          selectedSensorId={null}
-          onSelectSensor={onSelectSensor}
-        />
-      </group>
-    )}
-  </group>
-);
-
-// ─── Fuel Tank ────────────────────────────────────────────────────────────────
-const FuelTank: React.FC<{
-  position: [number, number, number];
-  radius?: number;
-  color?: string;
-  isSelected?: boolean;
-  isCutawayMode?: boolean;
-  showSensors?: boolean;
-  inspectionData?: AssetInspectionData | null;
-  onSelectComponent?: (comp: InternalComponent) => void;
-  onSelectSensor?: (sensor: SensorDefinition) => void;
-  onClick: () => void;
-}> = ({ position, radius = 0.7, color = '#d97706', isSelected = false, isCutawayMode = false, showSensors = false, inspectionData = null, onSelectComponent, onSelectSensor, onClick }) => {
-  const isCutaway = isSelected && isCutawayMode;
-
-  return (
-    <group position={position} onClick={(e) => { e.stopPropagation(); onClick(); }}>
-      <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
-        <cylinderGeometry args={[radius, radius, radius * 2.5, 20]} />
-        <meshStandardMaterial
-          color={isSelected ? '#f59e0b' : color}
-          roughness={isCutaway ? 0.1 : 0.4}
-          metalness={0.5}
-          transparent={isCutaway}
-          opacity={isCutaway ? 0.2 : 1.0}
-        />
-      </mesh>
-      {[-0.5, 0.5].map((dx, i) => (
-        <mesh key={i} position={[dx * radius * 1.5, -radius * 0.9, 0]}>
-          <boxGeometry args={[0.08, radius * 0.4, 0.08]} />
-          <meshStandardMaterial color="#78716c" metalness={0.7} />
-        </mesh>
-      ))}
-
-      {isSelected && showSensors && inspectionData && onSelectSensor && (
-        <group position={[0, 0, 0]}>
-          <SensorMarkers3D
-            sensors={inspectionData.components.flatMap(c => c.sensors)}
-            selectedSensorId={null}
-            onSelectSensor={onSelectSensor}
-          />
-        </group>
-      )}
-    </group>
-  );
-};
-
-// ─── Snow Vehicle ─────────────────────────────────────────────────────────────
-const SnowVehicle: React.FC<{ position: [number, number, number]; rotation?: number; color?: string }> = ({ position, rotation = 0, color = '#f59e0b' }) => (
-  <group position={position} rotation={[0, rotation, 0]}>
-    <mesh position={[0, 0.4, 0]} castShadow><boxGeometry args={[2.2, 0.6, 1.0]} /><meshStandardMaterial color={color} roughness={0.5} metalness={0.4} /></mesh>
-    <mesh position={[0.5, 0.85, 0]} castShadow><boxGeometry args={[0.9, 0.5, 0.85]} /><meshStandardMaterial color={color} roughness={0.4} /></mesh>
-    <mesh position={[0.5, 0.85, 0]}><boxGeometry args={[0.92, 0.48, 0.83]} /><meshStandardMaterial color="#93c5fd" roughness={0.1} metalness={0.8} opacity={0.6} transparent /></mesh>
-    {[-0.45, 0.45].map((z, i) => (
-      <mesh key={i} position={[0, 0.15, z]}><boxGeometry args={[2.4, 0.22, 0.28]} /><meshStandardMaterial color="#292524" roughness={0.9} metalness={0.2} /></mesh>
-    ))}
-    <mesh position={[-1.25, 0.35, 0]}><boxGeometry args={[0.12, 0.6, 1.2]} /><meshStandardMaterial color="#94a3b8" metalness={0.7} roughness={0.3} /></mesh>
-  </group>
-);
-
-// ─── Rocky Boulder & Ice ──────────────────────────────────────────────────────
-const RockyBoulder: React.FC<{ position: [number, number, number]; size?: number }> = ({ position, size = 1 }) => {
-  const rng = Math.sin(position[0] * 13.7 + position[2] * 7.3);
-  return (
-    <mesh position={position} rotation={[rng * 0.5, rng * 2, rng * 0.3]} castShadow receiveShadow>
-      <dodecahedronGeometry args={[size * 0.6, 0]} />
-      <meshStandardMaterial color={`hsl(${25 + rng * 10}, ${15 + Math.abs(rng) * 8}%, ${45 + Math.abs(rng) * 10}%)`} roughness={0.95} metalness={0.05} />
-    </mesh>
-  );
-};
-
-const IceChunk: React.FC<{ position: [number, number, number]; size?: [number, number, number] }> = ({ position, size = [2, 0.8, 1.5] }) => (
-  <mesh position={position} castShadow>
-    <boxGeometry args={size} />
-    <meshStandardMaterial color="#cce8f4" roughness={0.2} metalness={0.1} opacity={0.85} transparent />
-  </mesh>
-);
-
-// ─── Battery Bank ─────────────────────────────────────────────────────────────
-const BatteryBank: React.FC<{
-  position: [number, number, number];
-  isThermalIR: boolean;
-  status?: string;
-  isSelected?: boolean;
-  isCutawayMode?: boolean;
-  showSensors?: boolean;
-  inspectionData?: AssetInspectionData | null;
-  onSelectComponent?: (comp: InternalComponent) => void;
-  onSelectSensor?: (sensor: SensorDefinition) => void;
-  onClick: () => void;
-}> = ({ position, isThermalIR, status = 'HEALTHY', isSelected = false, isCutawayMode = false, showSensors = false, inspectionData = null, onSelectComponent, onSelectSensor, onClick }) => {
-  const isCutaway = isSelected && isCutawayMode;
-
-  return (
-    <group position={position} onClick={(e) => { e.stopPropagation(); onClick(); }}>
-      {[0, 1, 2].map((i) => (
-        <mesh key={i} position={[i * 1.1 - 1.1, 0.5, 0]} castShadow>
-          <boxGeometry args={[0.9, 1.0, 0.6]} />
-          <meshStandardMaterial
-            color={isThermalIR ? '#0055ff' : isSelected ? '#38bdf8' : '#10b981'}
-            roughness={isCutaway ? 0.1 : 0.3}
-            metalness={0.7}
-            emissive={isSelected ? '#0284c7' : status === 'CRITICAL' ? '#ef4444' : '#064e3b'}
-            emissiveIntensity={0.3}
-            transparent={isCutaway}
-            opacity={isCutaway ? 0.2 : 1.0}
-          />
-        </mesh>
-      ))}
-
-      {isCutaway && inspectionData && onSelectComponent && (
-        <group position={[0, 0.5, 0]}>
-          <AssetCutaway3D
-            components={inspectionData.components}
-            selectedComponentId={null}
-            onSelectComponent={onSelectComponent}
-            isThermalIR={isThermalIR}
-          />
-        </group>
-      )}
-
-      {isSelected && showSensors && inspectionData && onSelectSensor && (
-        <group position={[0, 0.5, 0]}>
-          <SensorMarkers3D
-            sensors={inspectionData.components.flatMap(c => c.sensors)}
-            selectedSensorId={null}
-            onSelectSensor={onSelectSensor}
-          />
-        </group>
-      )}
-
-      <Html position={[0, 1.4, 0]} center distanceFactor={22} zIndexRange={[0, 5]} style={{ pointerEvents: 'none' }}>
-        <button onClick={(e) => { e.stopPropagation(); onClick(); }} style={{ pointerEvents: 'auto' }} className={`px-2 py-0.5 rounded-lg text-[10px] font-bold shadow whitespace-nowrap transition ${isSelected ? 'scale-110 bg-emerald-500 text-stone-950 font-black' : 'bg-emerald-700 text-white'}`}>
-          🔋 BATTERY BANK
-        </button>
-      </Html>
-    </group>
-  );
-};
-
-// ─── Water Tank ───────────────────────────────────────────────────────────────
-const WaterTank: React.FC<{
-  position: [number, number, number];
-  label?: string;
-  isSelected?: boolean;
-  isCutawayMode?: boolean;
-  showSensors?: boolean;
-  inspectionData?: AssetInspectionData | null;
-  onSelectComponent?: (comp: InternalComponent) => void;
-  onSelectSensor?: (sensor: SensorDefinition) => void;
-  onClick: () => void;
-}> = ({ position, label = 'WATER SYSTEM', isSelected = false, isCutawayMode = false, showSensors = false, inspectionData = null, onSelectComponent, onSelectSensor, onClick }) => {
-  const isCutaway = isSelected && isCutawayMode;
-
-  return (
-    <group position={position} onClick={(e) => { e.stopPropagation(); onClick(); }}>
-      <mesh position={[0, 1.0, 0]} castShadow>
-        <cylinderGeometry args={[0.9, 0.9, 2.0, 20]} />
-        <meshStandardMaterial
-          color={isSelected ? '#38bdf8' : '#0369a1'}
-          metalness={0.6}
-          roughness={isCutaway ? 0.1 : 0.4}
-          transparent={isCutaway}
-          opacity={isCutaway ? 0.2 : 1.0}
-        />
-      </mesh>
-      <StaticCylinder position={[0, 2.05, 0]} args={[0.92, 0.92, 0.1, 20]} color="#0284c7" metalness={0.7} />
-
-      {isCutaway && inspectionData && onSelectComponent && (
-        <group position={[0, 1.0, 0]}>
-          <AssetCutaway3D
-            components={inspectionData.components}
-            selectedComponentId={null}
-            onSelectComponent={onSelectComponent}
-          />
-        </group>
-      )}
-
-      {isSelected && showSensors && inspectionData && onSelectSensor && (
-        <group position={[0, 1.0, 0]}>
-          <SensorMarkers3D
-            sensors={inspectionData.components.flatMap(c => c.sensors)}
-            selectedSensorId={null}
-            onSelectSensor={onSelectSensor}
-          />
-        </group>
-      )}
-
-      <Html position={[0, 2.5, 0]} center distanceFactor={22} zIndexRange={[0, 5]} style={{ pointerEvents: 'none' }}>
-        <button onClick={(e) => { e.stopPropagation(); onClick(); }} style={{ pointerEvents: 'auto' }} className={`px-2 py-0.5 rounded-lg text-[10px] font-bold shadow whitespace-nowrap transition ${isSelected ? 'scale-110 bg-blue-500 text-stone-950 font-black' : 'bg-blue-700 text-white'}`}>
-          💧 {label}
-        </button>
-      </Html>
-    </group>
-  );
-};
-
-// ─── Generator Unit ───────────────────────────────────────────────────────────
-const GeneratorUnit: React.FC<{
-  assetId: string;
-  position: [number, number, number];
-  label: string;
-  status: string;
-  isThermalIR: boolean;
-  isSelected?: boolean;
-  isCutawayMode?: boolean;
-  showSensors?: boolean;
-  inspectionData?: AssetInspectionData | null;
-  selectedComponentId?: string | null;
-  onSelectComponent?: (comp: InternalComponent) => void;
-  selectedSensorId?: string | null;
-  onSelectSensor?: (sensor: SensorDefinition) => void;
-  onClick: () => void;
-}> = ({
-  position, label, status, isThermalIR, isSelected = false, isCutawayMode = false,
-  showSensors = false, inspectionData = null, selectedComponentId = null, onSelectComponent,
-  selectedSensorId = null, onSelectSensor, onClick
-}) => {
-  const isCutaway = isSelected && isCutawayMode;
-  const color = isThermalIR
-    ? (status === 'CRITICAL' ? '#ff0000' : '#0077ff')
-    : (isSelected ? '#0284c7' : status === 'CRITICAL' ? '#ef4444' : status === 'WARNING' ? '#f59e0b' : '#374151');
-
-  return (
-    <group position={position}>
-      <mesh
-        onClick={(e) => { e.stopPropagation(); onClick(); }}
-        castShadow
-        receiveShadow
-      >
-        <boxGeometry args={[2.2, 1.0, 1.1]} />
-        <meshStandardMaterial
-          color={color}
-          roughness={isCutaway ? 0.1 : 0.4}
-          metalness={isCutaway ? 0.9 : 0.6}
-          emissive={isSelected ? '#38bdf8' : status === 'CRITICAL' ? '#ef4444' : '#000'}
-          emissiveIntensity={isSelected ? 0.35 : status === 'CRITICAL' ? 0.4 : 0}
-          transparent={isCutaway}
-          opacity={isCutaway ? 0.15 : 1.0}
-        />
-      </mesh>
-
-      {!isCutaway && (
-        <>
-          <mesh position={[0.8, 0.85, 0]} castShadow>
-            <cylinderGeometry args={[0.08, 0.08, 0.7, 8]} />
-            <meshStandardMaterial color="#292524" metalness={0.8} />
-          </mesh>
-          <mesh position={[0, 0, 0.56]}>
-            <boxGeometry args={[1.8, 0.7, 0.04]} />
-            <meshStandardMaterial color="#1c1917" roughness={0.8} />
-          </mesh>
-        </>
-      )}
-
-      {isCutaway && inspectionData && onSelectComponent && (
-        <group position={[0, 0, 0]}>
-          <AssetCutaway3D
-            components={inspectionData.components}
-            selectedComponentId={selectedComponentId}
-            onSelectComponent={onSelectComponent}
-            isThermalIR={isThermalIR}
-          />
-        </group>
-      )}
-
-      {isSelected && showSensors && inspectionData && onSelectSensor && (
-        <group position={[0, 0, 0]}>
-          <SensorMarkers3D
-            sensors={inspectionData.components.flatMap(c => c.sensors)}
-            selectedSensorId={selectedSensorId}
-            onSelectSensor={onSelectSensor}
-            visible={true}
-          />
-        </group>
-      )}
-
-      <Html position={[0, 1.0, 0]} center distanceFactor={22} zIndexRange={[0, 5]} style={{ pointerEvents: 'none' }}>
-        <button
-          onClick={(e) => { e.stopPropagation(); onClick(); }}
-          style={{ pointerEvents: 'auto' }}
-          className={`px-2 py-0.5 rounded-lg text-[10px] font-bold shadow whitespace-nowrap transition-transform ${
-            isSelected ? 'scale-110 ring-2 ring-blue-400 font-black' : ''
-          } ${
-            isThermalIR ? 'bg-stone-900 text-orange-400 border border-orange-500'
-            : isSelected ? 'bg-blue-600 text-white shadow-blue-500/50'
-            : status === 'CRITICAL' ? 'bg-rose-600 text-white'
-            : status === 'WARNING' ? 'bg-amber-500 text-white'
-            : 'bg-stone-800 text-amber-300 border border-stone-600'
-          }`}
-        >
-          ⚡ {label}
-        </button>
-      </Html>
-    </group>
-  );
-};
-
-// ─── BHARATI STATION 3D COMPONENT ─────────────────────────────────────────────
+// ─── MAIN BHARATI 3D DIGITAL TWIN CANVAS COMPONENT ───────────────────────────
 export const Bharati3DCanvas: React.FC = () => {
   const { 
-    environment, 
-    energy, 
-    equipment, 
-    simulationState,
-    alerts,
-    acknowledgeAlert,
-    resolveAlert,
-    triggerScenario
+    userRole, 
+    setUserRole, 
+    activeStationId, 
+    setActiveStationId 
   } = useSimulation();
 
-  const [isThermalIR, setIsThermalIR] = useState(false);
-  const [autoRotate, setAutoRotate] = useState(false);
-  const [droneActive, setDroneActive] = useState(true);
-  const [cameraPreset, setCameraPreset] = useState<CameraPreset | null>(null);
-  const controlsRef = useRef<any>(null);
+  const [selectedHotspot, setSelectedHotspot] = useState<StationHotspot | null>(null);
+  const [compassAngle, setCompassAngle] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [currentTime, setCurrentTime] = useState('');
 
-  const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
-  const [selectedAssetPos, setSelectedAssetPos] = useState<[number, number, number] | null>(null);
-  const [isCutawayMode, setIsCutawayMode] = useState(false);
-  const [showSensors, setShowSensors] = useState(false);
-  const [selectedComponent, setSelectedComponent] = useState<InternalComponent | null>(null);
-  const [selectedSensor, setSelectedSensor] = useState<SensorDefinition | null>(null);
+  // Live IST Clock
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false });
+      setCurrentTime(`Mon, 8 Sep 2026 ${timeStr} IST`);
+    };
+    updateTime();
+    const timer = setInterval(updateTime, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
-  const windSpeed = environment?.windSpeed || 38;
-  const fuelPercent = energy?.fuelStorage?.fuelPercent ?? 60;
-  const scenario = simulationState.activeScenario;
+  // Keyboard shortcut Ctrl+K for search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setSearchOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
-  const isBlizzard = scenario === 'blizzard' || scenario === 'multi_system_failure';
-  const isFire = scenario === 'generator_failure' || scenario === 'multi_system_failure';
-  const isBlackout = scenario === 'battery_low' || scenario === 'multi_system_failure';
-  const snowActive = windSpeed > 25 || isBlizzard;
+  // Memoized procedural textures
+  const bharatiFacadeTexture = useMemo(() => createBharatiFacadeTexture(), []);
+  const helipadTexture = useMemo(() => createHelipadTexture(), []);
 
-  const inspectionData: AssetInspectionData | null = useMemo(() => {
-    if (!selectedAssetId) return null;
-    return getAssetInspectionData(selectedAssetId, 'bharati', energy, environment, equipment, scenario);
-  }, [selectedAssetId, energy, environment, equipment, scenario]);
-
-  const handleSelectAsset = (assetId: string, position: [number, number, number]) => {
-    setSelectedAssetId(assetId);
-    setSelectedAssetPos(position);
-    setSelectedComponent(null);
-    setSelectedSensor(null);
-
-    setCameraPreset({
-      position: [position[0] + 6.0, position[1] + 10.0, position[2] + 10.0],
-      target: position
-    });
-  };
-
-  const handleSelectComponent = (comp: InternalComponent | null) => {
-    setSelectedComponent(comp);
-    if (comp && selectedAssetPos) {
-      setCameraPreset({
-        position: [
-          selectedAssetPos[0] + comp.relativePosition[0] + 3.5,
-          selectedAssetPos[1] + comp.relativePosition[1] + 5.0,
-          selectedAssetPos[2] + comp.relativePosition[2] + 5.0
-        ],
-        target: [
-          selectedAssetPos[0] + comp.relativePosition[0],
-          selectedAssetPos[1] + comp.relativePosition[1],
-          selectedAssetPos[2] + comp.relativePosition[2]
-        ]
-      });
-    }
-  };
-
-  const handleFocusCurrentAsset = () => {
-    if (selectedAssetPos) {
-      setCameraPreset({
-        position: [selectedAssetPos[0] + 6.0, selectedAssetPos[1] + 10.0, selectedAssetPos[2] + 10.0],
-        target: selectedAssetPos
-      });
-    }
-  };
-
-  const handleResetCamera = () => {
-    setSelectedAssetId(null);
-    setSelectedAssetPos(null);
-    setIsCutawayMode(false);
-    setShowSensors(false);
-    setSelectedComponent(null);
-    setSelectedSensor(null);
-    setCameraPreset({ position: [0, 22, 30], target: [0, 0, 0] });
-  };
-
-  const handleExecuteFailover = () => {
-    triggerScenario('normal');
-  };
-
-  const presets: Record<string, CameraPreset> = {
-    birdsEye:  { position: [0, 52, 10],   target: [0, 0, 0] },
-    station:   { position: [0, 22, 30],   target: [0, 2.5, 0] },
-    helipad:   { position: [0, 20, 30],   target: [0, 0.3, 15] },
-    genBay:    { position: [-22, 18, 0.75], target: [-11, 0.5, 0.75] },
-  };
-
-  const getEq = (id: string) => equipment.find(e => e.id.includes(id));
-  const gen1 = getEq('gen-b1');
-  const gen2 = getEq('gen-b2');
-  const battery = getEq('eq-b3') || getEq('battery');
-
-  const bgColor = isThermalIR ? '#090d16' : isBlackout ? '#0a0a0f' : '#bae6fd';
-  const canvasBg = isThermalIR ? '#090d16' : isBlackout ? '#05050a' : '#a5d8f3';
-  const powerActive = !isBlackout;
+  const filteredHotspots = useMemo(() => {
+    if (!searchQuery) return BHARATI_HOTSPOTS;
+    return BHARATI_HOTSPOTS.filter(h => 
+      h.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      h.category.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery]);
 
   return (
-    <div className="relative w-full h-full overflow-hidden font-sans select-none" style={{ background: bgColor }}>
-      {/* ── LEFT HUD PANEL ── */}
-      <div className="absolute top-4 left-4 z-10 flex flex-col items-start space-y-2">
-        <button
-          onClick={() => setIsThermalIR(!isThermalIR)}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold shadow-md transition flex items-center space-x-1.5 ${
-            isThermalIR ? 'bg-rose-600 text-white animate-pulse' : 'bg-white text-stone-800 border border-[#e5e3dc] hover:bg-stone-50'
-          }`}
-        >
-          <Flame className="w-3.5 h-3.5 text-orange-400" />
-          <span>{isThermalIR ? '🛸 DRONE IR ACTIVE' : '🛸 DRONE IR VIEW'}</span>
-        </button>
-
-        <button
-          onClick={() => setAutoRotate(!autoRotate)}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold shadow-md transition flex items-center space-x-1.5 ${
-            autoRotate ? 'bg-indigo-600 text-white' : 'bg-white text-stone-800 border border-[#e5e3dc] hover:bg-stone-50'
-          }`}
-        >
-          <span style={{ display:'inline-block', animation: autoRotate ? 'spin 2s linear infinite' : 'none' }}>🔄</span>
-          <span>{autoRotate ? '360° ROTATING' : '360° AUTO-ROTATE'}</span>
-        </button>
-
-        <div className="flex flex-col space-y-1 mt-1">
-          <div className="text-[9px] font-bold text-stone-400 uppercase px-1">Camera Views</div>
-          {[
-            { key: 'birdsEye', label: "Bird's Eye", icon: '🦅' },
-            { key: 'station',  label: 'Main Station', icon: '🏢' },
-            { key: 'helipad',  label: 'Helipad', icon: '🛬' },
-            { key: 'genBay',   label: 'Generator Bay', icon: '⚡' },
-          ].map(({ key, label, icon }) => (
-            <button
-              key={key}
-              onClick={() => {
-                setSelectedAssetId(null);
-                setSelectedAssetPos(null);
-                const p = presets[key];
-                setCameraPreset({ position: [...p.position], target: [...p.target] });
-              }}
-              className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white/90 text-stone-700 border border-stone-200 hover:bg-stone-100 shadow-sm transition flex items-center space-x-1.5"
-            >
-              <span>{icon}</span><span>{label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ── TOP RIGHT: Scenario Alert & Fuel Indicator ── */}
-      <div className={`absolute top-4 ${selectedAssetId ? 'right-[26rem]' : 'right-4'} z-10 flex flex-col items-end space-y-2 transition-all duration-300`}>
-        {scenario !== 'normal' && (
-          <div className="px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-700 text-white shadow-lg border border-rose-500 animate-pulse">
-            ⚠️ {simulationState.scenarioTitle}
+    <div className="relative w-full h-full min-h-[720px] bg-slate-950 font-sans overflow-hidden select-none">
+      
+      {/* ── 1. TOP HEADER OVERLAY (EXACT COPY OF HUD STANDARD) ── */}
+      <div className="absolute top-0 inset-x-0 z-30 px-6 py-3 bg-slate-950/85 backdrop-blur-xl border-b border-slate-800/80 flex items-center justify-between gap-4 text-white text-xs">
+        
+        {/* Left: Search Bar */}
+        <div className="relative flex items-center">
+          <div 
+            onClick={() => setSearchOpen(true)}
+            className="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-slate-900/90 border border-slate-700/80 hover:border-slate-500 text-slate-300 w-64 md:w-80 cursor-pointer shadow-inner transition"
+          >
+            <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <span className="text-xs text-slate-400 font-medium truncate">
+              {searchQuery || 'Search systems, buildings, or data...'}
+            </span>
+            <span className="ml-auto px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] font-mono text-slate-400">
+              Ctrl K
+            </span>
           </div>
-        )}
-        <div className={`px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm border ${
-          fuelPercent < 20 ? 'bg-rose-900 text-rose-100 border-rose-700'
-          : fuelPercent < 40 ? 'bg-amber-900 text-amber-100 border-amber-700'
-          : 'bg-stone-800 text-stone-200 border-stone-600'
-        }`}>
-          ⛽ {fuelPercent.toFixed(0)}% Fuel · {energy?.fuelStorage?.estimatedDaysRemaining ?? '--'} days
+
+          {/* Quick Jump Search Dropdown */}
+          {searchOpen && (
+            <div className="absolute top-10 left-0 w-80 bg-slate-900/95 border border-cyan-500/40 rounded-xl shadow-2xl p-2 z-50 divide-y divide-slate-800 backdrop-blur-xl">
+              <div className="p-1 flex items-center justify-between">
+                <input
+                  type="text"
+                  placeholder="Type to filter station facilities..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  autoFocus
+                  className="w-full bg-transparent text-xs text-white placeholder-slate-500 focus:outline-none px-2 py-1 font-sans"
+                />
+                <button onClick={() => setSearchOpen(false)} className="text-slate-400 hover:text-white p-1">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              <div className="pt-2 max-h-56 overflow-y-auto space-y-1">
+                {filteredHotspots.map((h) => (
+                  <button
+                    key={h.id}
+                    onClick={() => {
+                      setSelectedHotspot(h);
+                      setSearchOpen(false);
+                    }}
+                    className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-slate-800 text-left transition"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                      <span className="font-bold text-xs text-white">{h.label}</span>
+                    </div>
+                    <span className="text-[10px] text-slate-400 font-mono">{h.category}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Center: Main Navigation Tabs & Station Switcher */}
+        <div className="hidden lg:flex items-center space-x-6">
+          {/* Station Switcher Pill */}
+          <div className="flex items-center p-1 rounded-xl bg-slate-900/90 border border-slate-700/80 shadow-inner">
+            <button
+              onClick={() => setActiveStationId('maitri')}
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 ${
+                activeStationId === 'maitri'
+                  ? 'bg-blue-600 text-white shadow-[0_0_12px_rgba(37,99,235,0.6)]'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <span>Maitri 3D</span>
+            </button>
+            <button
+              onClick={() => setActiveStationId('bharati')}
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 ${
+                activeStationId === 'bharati'
+                  ? 'bg-cyan-500 text-slate-950 shadow-[0_0_12px_rgba(6,182,212,0.6)] font-black'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <span>Bharati 3D</span>
+            </button>
+          </div>
+
+          <nav className="flex items-center space-x-6 text-xs font-semibold tracking-wider">
+            <button className="text-white border-b-2 border-cyan-400 pb-0.5 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]">
+              Stations
+            </button>
+            <button className="text-slate-400 hover:text-white transition">
+              Data
+            </button>
+            <button className="text-slate-400 hover:text-white transition">
+              Simulation
+            </button>
+            <button className="text-slate-400 hover:text-white transition">
+              Resources
+            </button>
+          </nav>
+        </div>
+
+        {/* Right Section: Weather, Clock, Role, Profile */}
+        <div className="flex items-center space-x-4">
+          {/* Weather pill */}
+          <div className="hidden sm:flex items-center space-x-1.5 font-mono text-xs text-slate-200">
+            <Sun className="w-4 h-4 text-amber-400" />
+            <span className="font-bold">-10.4°C</span>
+            <span className="text-[11px] text-slate-400">Clear Sky</span>
+          </div>
+
+          {/* Time indicator */}
+          <div className="hidden md:flex flex-col text-right font-mono text-[11px] leading-tight text-slate-300">
+            <span>{currentTime || 'Mon, 8 Sep 2026 15:42 IST'}</span>
+          </div>
+
+          {/* Role selector dropdown */}
+          <div className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 text-xs font-bold text-white shadow-sm">
+            <ShieldCheck className="w-3.5 h-3.5 text-sky-400" />
+            <select
+              value={userRole}
+              onChange={(e) => setUserRole(e.target.value as RBACRole)}
+              className="bg-transparent font-black text-xs text-white focus:outline-none cursor-pointer uppercase tracking-wider"
+            >
+              <option value="COMMANDER" className="bg-slate-900">COMMANDER</option>
+              <option value="ADMIN" className="bg-slate-900">ADMIN</option>
+              <option value="OPERATOR" className="bg-slate-900">OPERATOR</option>
+              <option value="SCIENTIST" className="bg-slate-900">SCIENTIST</option>
+              <option value="VIEWER" className="bg-slate-900">VIEWER</option>
+            </select>
+          </div>
+
+          {/* User Profile Avatar */}
+          <div className="flex items-center space-x-2 pl-2 border-l border-slate-800">
+            <div className="w-7 h-7 rounded-full bg-emerald-600 text-white font-black text-xs flex items-center justify-center shadow-md">
+              B
+            </div>
+            <div className="hidden sm:flex flex-col text-left leading-tight">
+              <span className="font-bold text-white text-xs">Bilal</span>
+              <span className="text-[10px] text-emerald-400 flex items-center space-x-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
+                <span>Online</span>
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* ── INSPECTION PANEL ── */}
-      {selectedAssetId && inspectionData && (
-        <AssetInspectionPanel
-          data={inspectionData}
-          isCutawayMode={isCutawayMode}
-          onToggleCutaway={() => setIsCutawayMode(!isCutawayMode)}
-          showSensors={showSensors}
-          onToggleSensors={() => setShowSensors(!showSensors)}
-          selectedComponent={selectedComponent}
-          onSelectComponent={handleSelectComponent}
-          selectedSensor={selectedSensor}
-          onSelectSensor={setSelectedSensor}
-          onFocusCamera={handleFocusCurrentAsset}
-          onResetCamera={handleResetCamera}
-          onClose={() => { setSelectedAssetId(null); setIsCutawayMode(false); }}
-          onExecuteFailover={handleExecuteFailover}
-          alerts={alerts}
-          onAcknowledgeAlert={acknowledgeAlert}
-          onResolveAlert={resolveAlert}
-        />
+      {/* ── 2. TOP-LEFT STATION METADATA OVERLAY ── */}
+      <div className="absolute top-16 left-6 z-20 space-y-1.5 text-white pointer-events-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+        <div className="flex items-center space-x-2 text-xs font-bold tracking-widest text-sky-300 uppercase">
+          <span className="w-3 h-3 rounded-full border border-sky-400 flex items-center justify-center">
+            <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
+          </span>
+          <span>INDIA</span>
+        </div>
+
+        <h1 className="text-3xl sm:text-4xl font-black tracking-tight uppercase text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
+          BHARATI STATION
+        </h1>
+
+        <div className="text-xs text-slate-300 font-medium">
+          Larsemann Hills, East Antarctica
+        </div>
+
+        <div className="flex items-center space-x-2 text-xs text-slate-300 font-mono">
+          <span>69°24&apos;S, 76°11&apos;E</span>
+          <span>•</span>
+          <span>Elevation: 35 m</span>
+        </div>
+
+        <div className="pt-1 flex items-center space-x-3">
+          <span className="px-2.5 py-0.5 rounded-md bg-emerald-950/80 border border-emerald-500 text-emerald-400 text-[10px] font-mono font-extrabold tracking-wider flex items-center space-x-1.5 shadow-md">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span>OPERATIONAL</span>
+          </span>
+        </div>
+
+        <div className="text-xs text-slate-400 italic font-serif pt-1 max-w-xs leading-snug">
+          &ldquo;Pioneering Earth observation and polar frontiers for tomorrow.&rdquo;
+        </div>
+      </div>
+
+      {/* ── 3. TOP-RIGHT LOCAL WEATHER CARD & COMPASS ── */}
+      <div className="absolute top-16 right-6 z-20 flex flex-col items-end space-y-3 pointer-events-auto">
+        {/* Weather Card */}
+        <div className="backdrop-blur-xl bg-slate-900/65 border border-slate-700/70 rounded-2xl p-4 text-white shadow-2xl w-60">
+          <div className="flex items-center space-x-2 text-[11px] font-semibold text-sky-300 mb-2">
+            <Radio className="w-3.5 h-3.5 text-sky-400 animate-pulse" />
+            <span>Local Weather</span>
+          </div>
+
+          <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
+            <div className="flex items-center space-x-2">
+              <Sun className="w-7 h-7 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]" />
+              <div>
+                <div className="text-2xl font-black font-mono leading-none">-10.4°C</div>
+                <div className="text-[10px] text-slate-400 mt-0.5">Clear Sky</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-2.5 space-y-1.5 text-[11px] font-mono text-slate-300">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400 flex items-center space-x-1">
+                <Wind className="w-3 h-3 text-slate-400" />
+                <span>Wind</span>
+              </span>
+              <span className="font-bold">16.2 m/s (NE)</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400 flex items-center space-x-1">
+                <Droplets className="w-3 h-3 text-slate-400" />
+                <span>Humidity</span>
+              </span>
+              <span className="font-bold">62%</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400 flex items-center space-x-1">
+                <Eye className="w-3 h-3 text-slate-400" />
+                <span>Visibility</span>
+              </span>
+              <span className="font-bold">18 km</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 3D North Compass Rose Indicator */}
+        <div className="relative w-12 h-12 rounded-full bg-slate-900/80 backdrop-blur-md border border-slate-700/80 shadow-lg flex items-center justify-center text-white">
+          <span className="absolute top-1 text-[9px] font-black text-sky-400 font-mono">N</span>
+          <div 
+            className="w-6 h-6 transition-transform duration-75"
+            style={{ transform: `rotate(${-compassAngle}deg)` }}
+          >
+            <svg viewBox="0 0 24 24" className="w-full h-full drop-shadow-[0_0_6px_rgba(56,189,248,0.8)]">
+              <polygon points="12,2 16,14 12,11" fill="#38bdf8" />
+              <polygon points="12,2 8,14 12,11" fill="#0284c7" />
+              <polygon points="12,22 16,13 12,14" fill="#64748b" />
+              <polygon points="12,22 8,13 12,14" fill="#475569" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      {/* ── 4. BOTTOM FLOATING CONTROLS PILL ── */}
+      <div className="absolute bottom-5 inset-x-0 z-20 flex justify-center pointer-events-none">
+        <div className="backdrop-blur-xl bg-slate-950/75 border border-slate-700/70 rounded-full px-6 py-2.5 shadow-2xl text-xs font-medium text-slate-300 flex items-center space-x-6">
+          <div className="flex items-center space-x-1.5">
+            <span>👆</span>
+            <span>Click on a building to view details</span>
+          </div>
+          <span className="text-slate-600">•</span>
+          <div className="flex items-center space-x-1.5">
+            <span>🔄</span>
+            <span>Hold and drag to rotate</span>
+          </div>
+          <span className="text-slate-600">•</span>
+          <div className="flex items-center space-x-1.5">
+            <span>🔍</span>
+            <span>Scroll to zoom</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── 5. BUILDING DETAILS INSPECTION MODAL ── */}
+      {selectedHotspot && (
+        <div className="absolute top-20 right-6 z-40 w-96 backdrop-blur-2xl bg-slate-950/90 border border-cyan-500/50 rounded-2xl p-5 text-white shadow-[0_10px_50px_rgba(0,0,0,0.9)] animate-in fade-in slide-in-from-right-4 font-sans">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div className="flex items-center space-x-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+              <h3 className="font-extrabold text-sm text-white uppercase tracking-wide">
+                {selectedHotspot.label}
+              </h3>
+            </div>
+            <button 
+              onClick={() => setSelectedHotspot(null)}
+              className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="mt-3 space-y-3 text-xs">
+            <div className="flex items-center justify-between text-[11px] font-mono">
+              <span className="text-slate-400">CATEGORY</span>
+              <span className="px-2 py-0.5 rounded bg-sky-950/80 text-sky-300 border border-sky-800 font-bold">
+                {selectedHotspot.category}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between text-[11px] font-mono">
+              <span className="text-slate-400">OPERATIONAL STATUS</span>
+              <span className="text-emerald-400 font-bold">{selectedHotspot.status}</span>
+            </div>
+
+            <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800/80 text-slate-300 leading-relaxed text-xs">
+              {selectedHotspot.description}
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-center font-mono">
+              <div className="p-2 rounded-xl bg-slate-900 border border-slate-800">
+                <div className="text-[10px] text-slate-500">OPERATING TEMP</div>
+                <div className="text-base font-bold text-cyan-400 mt-0.5">{selectedHotspot.temp}</div>
+              </div>
+              <div className="p-2 rounded-xl bg-slate-900 border border-slate-800">
+                <div className="text-[10px] text-slate-500">POWER / TELEMETRY</div>
+                <div className="text-base font-bold text-amber-400 mt-0.5">{selectedHotspot.power}</div>
+              </div>
+            </div>
+
+            <div>
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                ACTIVE SUBSYSTEMS & ASSETS
+              </div>
+              <div className="space-y-1">
+                {selectedHotspot.equipment.map((item, idx) => (
+                  <div key={idx} className="flex items-center space-x-2 text-[11px] text-slate-300 font-mono py-0.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* ── 3D CANVAS ── */}
-      <Canvas shadows camera={{ position: [0, 22, 30], fov: 45 }}>
-        <color attach="background" args={[canvasBg]} />
-        {isBlizzard && <fog attach="fog" args={['#b0c8e0', 15, 60]} />}
+      {/* ── 6. REAL INTERACTIVE THREE.JS 3D CANVAS ── */}
+      <Canvas
+        shadows
+        camera={{ position: [20, 22, 32], fov: 42 }}
+        className="w-full h-full cursor-grab active:cursor-grabbing"
+      >
+        <OrbitControls
+          maxPolarAngle={Math.PI / 2.05}
+          minDistance={10}
+          maxDistance={70}
+          target={[0, 3, 0]}
+        />
 
-        <ambientLight intensity={isBlackout ? 0.05 : isThermalIR ? 0.25 : 0.85} />
+        <CompassAzimuthTracker onAngleChange={setCompassAngle} />
+
+        {/* Polar Arctic Lighting Setup */}
+        <color attach="background" args={['#091321']} />
+        <fog attach="fog" args={['#0e1d32', 30, 95]} />
+
+        {/* Ambient illumination */}
+        <ambientLight intensity={0.9} color="#cbd5e1" />
+
+        {/* Main Polar Sunlight casting dramatic shadows */}
         <directionalLight
-          position={[20, 30, 25]}
-          intensity={isBlackout ? 0.1 : isThermalIR ? 0.4 : 1.3}
+          position={[35, 24, 40]}
+          intensity={2.2}
+          color="#fff1e6"
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
+          shadow-camera-left={-30}
+          shadow-camera-right={30}
+          shadow-camera-top={30}
+          shadow-camera-bottom={-30}
+          shadow-bias={-0.0002}
         />
-        <pointLight position={[-15, 10, -15]} intensity={isThermalIR || isBlackout ? 0 : 0.3} color="#93c5fd" />
-        {isBlackout && <pointLight position={[0, 5, 0]} intensity={1.5} color="#ff2200" distance={20} />}
-        {isFire && <pointLight position={[-8, 3, -3]} intensity={4} color="#ff4400" distance={15} />}
 
-        <SnowParticles windSpeed={windSpeed} active={snowActive && !isThermalIR} />
+        {/* Secondary ocean reflection fill */}
+        <directionalLight
+          position={[-30, 18, -25]}
+          intensity={0.65}
+          color="#7dd3fc"
+        />
 
-        <Drone3D active={droneActive} stationId="bharati" />
+        {/* Larsemann Hills & Prydz Bay Ocean Backdrop */}
+        <LarsemannHillsTerrain />
 
-        <PowerFlowLine from={[-11, 1, -1]} to={[-6, 0.8, 8]} color="#10b981" active={powerActive} />
-        <PowerFlowLine from={[-6, 0.8, 8]}  to={[0, 2.5, 0]} color="#3b82f6" active={powerActive} />
-        <PowerFlowLine from={[0, 2.5, 0]}    to={[-9, 2.1, -6]} color="#6366f1" active={powerActive} />
+        {/* Station Ground Snow Plane */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.05, 0]} receiveShadow>
+          <planeGeometry args={[130, 130]} />
+          <meshStandardMaterial color="#e2e8f0" roughness={0.7} metalness={0.1} />
+        </mesh>
 
-        <ExhaustSmoke position={[-11.2, 1.6, -1]} loadPercent={(energy?.generators?.[0] as any)?.loadPercent || 75} isThermalIR={isThermalIR} />
-        <ExhaustSmoke position={[-11.2, 1.6, 2.5]} loadPercent={(energy?.generators?.[1] as any)?.loadPercent || 65} isThermalIR={isThermalIR} />
+        {/* Station Compacted Snow & Rock Promenade */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} receiveShadow>
+          <planeGeometry args={[65, 50]} />
+          <meshStandardMaterial color="#94a3b8" roughness={0.85} metalness={0.1} />
+        </mesh>
 
-        <FuelLevelMesh position={[-12, 0.8, 7]}   fuelPercent={fuelPercent} radius={0.8} />
-        <FuelLevelMesh position={[-12, 0.8, 9.5]} fuelPercent={Math.max(fuelPercent-6,0)} radius={0.9} />
+        {/* ── BHARATI STATION 3D MESHES ── */}
 
-        <FireEffect position={[-11, 0, 0]} active={isFire} />
-
-        {/* BHARATI 3D SCENE */}
-        <group>
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
-            <planeGeometry args={[140, 140]} />
-            <meshStandardMaterial color={isThermalIR ? '#050a14' : '#8b7355'} roughness={0.97} metalness={0.0} />
-          </mesh>
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]} receiveShadow>
-            <planeGeometry args={[60, 50]} />
-            <meshStandardMaterial color={isThermalIR ? '#080f20' : '#7a6548'} roughness={0.98} metalness={0.0} />
-          </mesh>
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.1, 40]}>
-            <planeGeometry args={[140, 40]} />
-            <meshStandardMaterial color={isThermalIR ? '#030810' : '#0c4a6e'} roughness={0.05} metalness={0.3} opacity={isThermalIR ? 1 : 0.88} transparent />
-          </mesh>
-          <mesh position={[0, 0.2, 26]}>
-            <boxGeometry args={[80, 0.4, 6]} />
-            <meshStandardMaterial color={isThermalIR ? '#050a14' : '#bfdbfe'} roughness={0.2} metalness={0.0} opacity={isThermalIR ? 1 : 0.8} transparent />
-          </mesh>
-          {[-25, -12, 5, 18, 30].map((x, i) => (
-            <IceChunk key={i} position={[x, 0.1, 32 + (i % 2) * 2]} size={[3 + (i % 3), 0.4, 2 + (i % 2)]} />
-          ))}
+        {/* 1. ICONIC MAIN STATION COMPLEX (STILTED 3-STORY AERODYNAMIC BLOCK) */}
+        <group position={[0, 0, 0]}>
+          {/* Structural Steel Pilings / Stilts raising building 2.2m off ground */}
           {[
-            [-18, 0.3, -10], [-22, 0.4, 3], [-16, 0.5, 10], [17, 0.4, -9], [20, 0.5, 6],
-            [16, 0.6, 12], [-8, 0.5, -17], [5, 0.4, -18], [12, 0.5, -15],
-            [-11, 0.3, 16], [8, 0.4, 17], [-24, 0.5, -6], [23, 0.4, -4],
-          ].map((p, i) => <RockyBoulder key={i} position={[p[0], p[1], p[2]]} size={0.4 + (i % 4) * 0.25} />)}
-          <StaticBox position={[-23, 0.8, 7]} size={[3, 1.6, 2]} color="#6b5d4f" roughness={0.98} metalness={0.0} />
-          <StaticBox position={[22, 1.0, 8]} size={[2.5, 2.0, 3]} color="#5c4f43" roughness={0.98} metalness={0.0} />
+            [-6.5, -4.5], [-3.5, -4.5], [0, -4.5], [3.5, -4.5], [6.5, -4.5],
+            [-6.5, -1.5], [-3.5, -1.5], [0, -1.5], [3.5, -1.5], [6.5, -1.5],
+            [-6.5,  1.5], [-3.5,  1.5], [0,  1.5], [3.5,  1.5], [6.5,  1.5],
+            [-6.5,  4.5], [-3.5,  4.5], [0,  4.5], [3.5,  4.5], [6.5,  4.5]
+          ].map(([x, z], i) => (
+            <group key={i} position={[x, 0, z]}>
+              {/* Heavy concrete footing foundation */}
+              <mesh position={[0, 0.2, 0]} castShadow receiveShadow>
+                <boxGeometry args={[0.7, 0.4, 0.7]} />
+                <meshStandardMaterial color="#334155" roughness={0.9} />
+              </mesh>
+              {/* Vertical steel column */}
+              <mesh position={[0, 1.3, 0]} castShadow>
+                <cylinderGeometry args={[0.12, 0.14, 2.2, 8]} />
+                <meshStandardMaterial color="#1e293b" metalness={0.8} roughness={0.3} />
+              </mesh>
+              {/* Top load-bearing cap */}
+              <mesh position={[0, 2.3, 0]} castShadow>
+                <boxGeometry args={[0.5, 0.15, 0.5]} />
+                <meshStandardMaterial color="#0f172a" metalness={0.9} />
+              </mesh>
+            </group>
+          ))}
 
-          {/* MAIN STATION */}
-          {[[-3.5, -1.4], [-3.5, 1.4], [3.5, -1.4], [3.5, 1.4]].map(([x, z], i) => (
-            <mesh key={i} position={[x, 1, z]} castShadow>
-              <cylinderGeometry args={[0.18, 0.22, 2, 10]} />
-              <meshStandardMaterial color="#78716c" metalness={0.8} roughness={0.3} />
+          {/* Diagonal Aerodynamic Wind Deflector Braces */}
+          {[-5, 0, 5].map((x, i) => (
+            <group key={i} position={[x, 1.2, 0]}>
+              <mesh rotation={[0, 0, 0.4]} position={[-0.7, 0, 0]}>
+                <cylinderGeometry args={[0.07, 0.07, 2.4, 6]} />
+                <meshStandardMaterial color="#1e293b" metalness={0.7} />
+              </mesh>
+              <mesh rotation={[0, 0, -0.4]} position={[0.7, 0, 0]}>
+                <cylinderGeometry args={[0.07, 0.07, 2.4, 6]} />
+                <meshStandardMaterial color="#1e293b" metalness={0.7} />
+              </mesh>
+            </group>
+          ))}
+
+          {/* Main Elevated Monolithic Hull (2nd & 3rd Floor Living & Research Quarters) */}
+          <mesh position={[0, 4.2, 0]} castShadow receiveShadow>
+            <boxGeometry args={[15, 3.6, 10.5]} />
+            <meshStandardMaterial
+              map={bharatiFacadeTexture}
+              roughness={0.35}
+              metalness={0.25}
+            />
+          </mesh>
+
+          {/* Aerodynamic Chamfered Edge Profiles (Bharati's wind-tunnel tested silhouette) */}
+          {/* Front aerodynamic bevel */}
+          <mesh position={[0, 4.2, 5.35]} rotation={[0.2, 0, 0]} castShadow>
+            <boxGeometry args={[14.8, 3.4, 0.3]} />
+            <meshStandardMaterial color="#cbd5e1" roughness={0.3} metalness={0.3} />
+          </mesh>
+          {/* Rear aerodynamic bevel */}
+          <mesh position={[0, 4.2, -5.35]} rotation={[-0.2, 0, 0]} castShadow>
+            <boxGeometry args={[14.8, 3.4, 0.3]} />
+            <meshStandardMaterial color="#cbd5e1" roughness={0.3} metalness={0.3} />
+          </mesh>
+
+          {/* Top Floor Observation Lounge & Command Cupola */}
+          <mesh position={[0, 6.3, 0]} castShadow receiveShadow>
+            <boxGeometry args={[11, 1.2, 7]} />
+            <meshStandardMaterial color="#0f172a" roughness={0.2} metalness={0.8} />
+          </mesh>
+          {/* Observation panoramic glass ribbon */}
+          <mesh position={[0, 6.3, 3.52]}>
+            <boxGeometry args={[10.6, 0.8, 0.08]} />
+            <meshStandardMaterial color="#38bdf8" roughness={0.1} metalness={0.9} transparent opacity={0.85} />
+          </mesh>
+          <mesh position={[0, 6.3, -3.52]}>
+            <boxGeometry args={[10.6, 0.8, 0.08]} />
+            <meshStandardMaterial color="#38bdf8" roughness={0.1} metalness={0.9} transparent opacity={0.85} />
+          </mesh>
+
+          {/* Rooftop Solar PV Arrays */}
+          {[-3.5, 0, 3.5].map((x, i) => (
+            <mesh key={i} position={[x, 7.0, 0]} rotation={[0.2, 0, 0]} castShadow>
+              <boxGeometry args={[2.8, 0.1, 4.5]} />
+              <meshStandardMaterial color="#1e3a8a" roughness={0.2} metalness={0.7} />
             </mesh>
           ))}
-          <Interactive3DBuilding
-            assetId="main-b1"
-            position={[0, 2.5, 0]}
-            size={[9, 2.2, 4]}
-            color="#0284c7"
-            status="HEALTHY"
-            label="BHARATI MAIN"
-            isThermalIR={isThermalIR}
-            isSelected={selectedAssetId === 'main-b1'}
-            isCutawayMode={isCutawayMode}
-            showSensors={showSensors}
-            inspectionData={selectedAssetId === 'main-b1' ? inspectionData : null}
-            selectedComponentId={selectedComponent?.id || null}
-            onSelectComponent={handleSelectComponent}
-            selectedSensorId={selectedSensor?.id || null}
-            onSelectSensor={setSelectedSensor}
-            onClick={() => handleSelectAsset('main-b1', [0, 2.5, 0])}
-          />
 
-          {/* RESEARCH LABORATORY */}
-          {[[-12.5, 1], [-5.5, 1]].map(([x, z], i) => (
-            <mesh key={i} position={[x, 0.6, z - 6]} castShadow>
-              <cylinderGeometry args={[0.14, 0.18, 1.2, 8]} />
-              <meshStandardMaterial color="#78716c" metalness={0.7} />
+          {/* Access Gantry & Staircase Ramp to Snow Surface */}
+          <group position={[7.8, 1.2, 2]}>
+            <mesh position={[0, 0.8, 0]} rotation={[0, 0, -0.4]} castShadow>
+              <boxGeometry args={[3.8, 0.15, 1.4]} />
+              <meshStandardMaterial color="#334155" metalness={0.7} />
             </mesh>
-          ))}
-          <Interactive3DBuilding
-            assetId="research-b1"
-            position={[-9, 2.1, -6]}
-            size={[7, 2.2, 3.5]}
-            color="#0369a1"
-            status="HEALTHY"
-            label="RESEARCH LAB"
-            isThermalIR={isThermalIR}
-            isSelected={selectedAssetId === 'research-b1'}
-            isCutawayMode={isCutawayMode}
-            showSensors={showSensors}
-            inspectionData={selectedAssetId === 'research-b1' ? inspectionData : null}
-            selectedComponentId={selectedComponent?.id || null}
-            onSelectComponent={handleSelectComponent}
-            selectedSensorId={selectedSensor?.id || null}
-            onSelectSensor={setSelectedSensor}
-            onClick={() => handleSelectAsset('research-b1', [-9, 2.1, -6])}
-          />
-
-          {/* CHP GENERATORS */}
-          <GeneratorUnit
-            assetId="gen-b1"
-            position={[-11, 0.5, -1]}
-            label={`CHP #1 (${(gen1 as any)?.loadPercent || 75}%)`}
-            status={gen1?.status || 'HEALTHY'}
-            isThermalIR={isThermalIR}
-            isSelected={selectedAssetId === 'gen-b1'}
-            isCutawayMode={isCutawayMode}
-            showSensors={showSensors}
-            inspectionData={selectedAssetId === 'gen-b1' ? inspectionData : null}
-            selectedComponentId={selectedComponent?.id || null}
-            onSelectComponent={handleSelectComponent}
-            selectedSensorId={selectedSensor?.id || null}
-            onSelectSensor={setSelectedSensor}
-            onClick={() => handleSelectAsset('gen-b1', [-11, 0.5, -1])}
-          />
-          <GeneratorUnit
-            assetId="gen-b2"
-            position={[-11, 0.5, 2.5]}
-            label={`CHP #2 (${gen2?.temperature || 65}°C)`}
-            status={gen2?.status || 'HEALTHY'}
-            isThermalIR={isThermalIR}
-            isSelected={selectedAssetId === 'gen-b2'}
-            isCutawayMode={isCutawayMode}
-            showSensors={showSensors}
-            inspectionData={selectedAssetId === 'gen-b2' ? inspectionData : null}
-            selectedComponentId={selectedComponent?.id || null}
-            onSelectComponent={handleSelectComponent}
-            selectedSensorId={selectedSensor?.id || null}
-            onSelectSensor={setSelectedSensor}
-            onClick={() => handleSelectAsset('gen-b2', [-11, 0.5, 2.5])}
-          />
-          <StaticBox position={[-11, 0.1, 0.75]} size={[2.6, 0.14, 5.5]} color="#374151" roughness={0.6} metalness={0.5} />
-
-          {/* BATTERY STORAGE */}
-          <BatteryBank
-            position={[-6, 0, 8]}
-            isThermalIR={isThermalIR}
-            status={battery?.status || 'HEALTHY'}
-            isSelected={selectedAssetId === 'battery-b1'}
-            isCutawayMode={isCutawayMode}
-            showSensors={showSensors}
-            inspectionData={selectedAssetId === 'battery-b1' ? inspectionData : null}
-            onSelectComponent={handleSelectComponent}
-            onSelectSensor={setSelectedSensor}
-            onClick={() => handleSelectAsset('battery-b1', [-6, 0, 8])}
-          />
-
-          {/* SOLAR PANELS */}
-          <SolarArray position={[0, 0.1, -14]} count={8} onClick={() => handleSelectAsset('solar-b1', [0, 0.1, -14])} />
-          <SolarArray position={[0, 0.1, -15.8]} count={8} onClick={() => handleSelectAsset('solar-b1', [0, 0.1, -15.8])} />
-          <SolarArray position={[0, 0.1, -17.6]} count={8} onClick={() => handleSelectAsset('solar-b1', [0, 0.1, -17.6])} />
-
-          {/* WIND TURBINES */}
-          <WindTurbine3D
-            position={[15, 0, -7]}
-            speed={windSpeed}
-            scale={1.2}
-            isSelected={selectedAssetId === 'wind-b1'}
-            isCutawayMode={isCutawayMode}
-            showSensors={showSensors}
-            inspectionData={selectedAssetId === 'wind-b1' ? inspectionData : null}
-            onSelectComponent={handleSelectComponent}
-            onSelectSensor={setSelectedSensor}
-            onClick={() => handleSelectAsset('wind-b1', [15, 0, -7])}
-          />
-          <WindTurbine3D position={[18, 0, -4]} speed={windSpeed} scale={1.1} onClick={() => handleSelectAsset('wind-b1', [18, 0, -4])} />
-          <WindTurbine3D position={[15, 0, -1]} speed={windSpeed} scale={1.2} onClick={() => handleSelectAsset('wind-b1', [15, 0, -1])} />
-
-          {/* FUEL STORAGE */}
-          <FuelTank
-            position={[-12, 0.8, 7]}
-            radius={0.8}
-            color="#92400e"
-            isSelected={selectedAssetId === 'fuel-b1'}
-            isCutawayMode={isCutawayMode}
-            showSensors={showSensors}
-            inspectionData={selectedAssetId === 'fuel-b1' ? inspectionData : null}
-            onSelectComponent={handleSelectComponent}
-            onSelectSensor={setSelectedSensor}
-            onClick={() => handleSelectAsset('fuel-b1', [-12, 0.8, 7])}
-          />
-          <FuelTank position={[-12, 0.8, 9.5]} radius={0.9} color="#b45309" onClick={() => handleSelectAsset('fuel-b1', [-12, 0.8, 9.5])} />
-
-          {/* WATER SYSTEM */}
-          <WaterTank
-            position={[9, 0, -6]}
-            label="WATER SYSTEM"
-            isSelected={selectedAssetId === 'water-b1'}
-            isCutawayMode={isCutawayMode}
-            showSensors={showSensors}
-            inspectionData={selectedAssetId === 'water-b1' ? inspectionData : null}
-            onSelectComponent={handleSelectComponent}
-            onSelectSensor={setSelectedSensor}
-            onClick={() => handleSelectAsset('water-b1', [9, 0, -6])}
-          />
-          <StaticBox position={[9, 0.4, -3.5]} size={[2, 0.8, 1.2]} color="#0369a1" roughness={0.5} metalness={0.4} />
-
-          {/* COMMS TOWER */}
-          <CommsTower
-            position={[11, 0, 9]}
-            height={10}
-            isSelected={selectedAssetId === 'comms-b1'}
-            isCutawayMode={isCutawayMode}
-            showSensors={showSensors}
-            inspectionData={selectedAssetId === 'comms-b1' ? inspectionData : null}
-            onSelectComponent={handleSelectComponent}
-            onSelectSensor={setSelectedSensor}
-            onClick={() => handleSelectAsset('comms-b1', [11, 0, 9])}
-          />
-
-          {/* LOGISTICS STORE */}
-          <Interactive3DBuilding
-            assetId="warehouse-b1"
-            position={[9, 0.9, 4]}
-            size={[4.5, 1.8, 3.5]}
-            color="#334155"
-            status="HEALTHY"
-            label="LOGISTICS STORE"
-            isThermalIR={isThermalIR}
-            hasRoof
-            roofColor="#475569"
-            isSelected={selectedAssetId === 'warehouse-b1'}
-            isCutawayMode={isCutawayMode}
-            showSensors={showSensors}
-            inspectionData={selectedAssetId === 'warehouse-b1' ? inspectionData : null}
-            selectedComponentId={selectedComponent?.id || null}
-            onSelectComponent={handleSelectComponent}
-            selectedSensorId={selectedSensor?.id || null}
-            onSelectSensor={setSelectedSensor}
-            onClick={() => handleSelectAsset('warehouse-b1', [9, 0.9, 4])}
-          />
-
-          {/* HELICOPTER LANDING ZONE */}
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 15]}>
-            <circleGeometry args={[5, 32]} />
-            <meshStandardMaterial color={isThermalIR ? '#0a1628' : '#374151'} roughness={0.85} />
-          </mesh>
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 15]}>
-            <ringGeometry args={[4.2, 4.8, 32]} />
-            <meshStandardMaterial color="#22d3ee" roughness={0.3} />
-          </mesh>
-          <Html position={[0, 0.3, 15]} center distanceFactor={22} zIndexRange={[0, 5]} style={{ pointerEvents: 'none' }}>
-            <div className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-cyan-900 text-cyan-100 shadow whitespace-nowrap">🚁 LOGISTICS LANDING ZONE</div>
-          </Html>
-          <SnowVehicle position={[6, 0.22, 13]} rotation={0.5} color="#0891b2" />
-          <SnowVehicle position={[-5, 0.22, 14]} rotation={-0.3} color="#0369a1" />
-
-          {/* PATHWAYS */}
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.06, 6]}>
-            <planeGeometry args={[2, 10]} />
-            <meshStandardMaterial color={isThermalIR ? '#080e1c' : '#6b7280'} roughness={0.9} />
-          </mesh>
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-5.5, 0.06, -2.5]}>
-            <planeGeometry args={[9, 1.5]} />
-            <meshStandardMaterial color={isThermalIR ? '#080e1c' : '#6b7280'} roughness={0.9} />
-          </mesh>
+            {/* Handrails */}
+            {[-0.65, 0.65].map((z, i) => (
+              <mesh key={i} position={[0, 1.2, z]} rotation={[0, 0, -0.4]}>
+                <boxGeometry args={[3.8, 0.05, 0.05]} />
+                <meshStandardMaterial color="#e2e8f0" />
+              </mesh>
+            ))}
+          </group>
         </group>
 
-        <CameraController preset={cameraPreset} controlsRef={controlsRef} onDone={() => setCameraPreset(null)} />
-        <OrbitControls ref={controlsRef} makeDefault minDistance={4} maxDistance={55} autoRotate={autoRotate} autoRotateSpeed={1.2} />
+        {/* 2. ISRO SATELLITE EARTH STATION (IMGEOS RADOME & TRACKING DISH) */}
+        <ISROGroundStation position={[-14, 0, -6]} />
+
+        {/* 3. CIRCULAR HELIPAD & RESCUE HELICOPTER */}
+        <group position={[16, 0, 8]}>
+          {/* Raised asphalt deck */}
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.06, 0]} receiveShadow>
+            <circleGeometry args={[6.2, 32]} />
+            <meshStandardMaterial map={helipadTexture} roughness={0.8} />
+          </mesh>
+          {/* Green perimeter guidance lights */}
+          {[0, 45, 90, 135, 180, 225, 270, 315].map((deg, i) => {
+            const rad = (deg * Math.PI) / 180;
+            const x = Math.cos(rad) * 6.0;
+            const z = Math.sin(rad) * 6.0;
+            return (
+              <mesh key={i} position={[x, 0.15, z]}>
+                <cylinderGeometry args={[0.07, 0.07, 0.22, 8]} />
+                <meshStandardMaterial color="#10b981" emissive="#10b981" emissiveIntensity={1.8} />
+              </mesh>
+            );
+          })}
+          {/* Parked Antarctic Helicopter */}
+          <AntarcticHelicopter position={[0, 0.1, 0]} rotation={-0.5} />
+        </group>
+
+        {/* 4. POWER GENERATION PLANT (CHP CO-GEN UNITS) */}
+        <group position={[-12, 0, 8]}>
+          {/* Heavy insulated generator house */}
+          <mesh position={[0, 1.8, 0]} castShadow receiveShadow>
+            <boxGeometry args={[6.8, 3.6, 4.8]} />
+            <meshStandardMaterial color="#1e293b" roughness={0.5} metalness={0.6} />
+          </mesh>
+          {/* 3x Scania Co-gen Exhaust Stacks */}
+          {[-1.5, 0, 1.5].map((x, i) => (
+            <group key={i} position={[x, 4.3, -1]}>
+              <mesh castShadow>
+                <cylinderGeometry args={[0.12, 0.12, 1.8, 8]} />
+                <meshStandardMaterial color="#475569" metalness={0.9} roughness={0.2} />
+              </mesh>
+              {/* Rain caps */}
+              <mesh position={[0, 0.95, 0]}>
+                <coneGeometry args={[0.22, 0.15, 8]} />
+                <meshStandardMaterial color="#334155" metalness={0.8} />
+              </mesh>
+            </group>
+          ))}
+        </group>
+
+        {/* 5. BULK FUEL STORAGE FARM (4x ATF-50 TANKS) */}
+        <BharatiFuelStorage position={[-14, 0, 16]} />
+
+        {/* 6. SYNOPTIC METEOROLOGICAL MAST */}
+        <group position={[18, 0, -12]}>
+          <mesh position={[0, 4.5, 0]} castShadow>
+            <cylinderGeometry args={[0.07, 0.12, 9, 8]} />
+            <meshStandardMaterial color="#94a3b8" metalness={0.8} />
+          </mesh>
+          <mesh position={[0, 9.2, 0]}>
+            <sphereGeometry args={[0.18, 8, 8]} />
+            <meshStandardMaterial color="#f59e0b" emissive="#f59e0b" emissiveIntensity={1.2} />
+          </mesh>
+          <pointLight position={[0, 9.2, 0]} color="#f59e0b" intensity={1.5} distance={10} />
+        </group>
+
+        {/* 7. PARKED POLAR EXPEDITION SNOWCATS */}
+        <PolarSnowcat position={[5, 0, 7]} rotation={0.4} color="#0284c7" />
+        <PolarSnowcat position={[-3, 0, 8]} rotation={-0.2} color="#dc2626" />
+        <PolarSnowcat position={[9, 0, -8]} rotation={1.2} color="#f97316" />
+
+        {/* ── 3D FLOATING HOTSPOT BADGES ── */}
+        {BHARATI_HOTSPOTS.map((hotspot) => (
+          <Html
+            key={hotspot.id}
+            position={hotspot.pos}
+            center
+            distanceFactor={28}
+            zIndexRange={[15, 0]}
+          >
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedHotspot(hotspot);
+              }}
+              className={`group flex items-center space-x-1.5 px-3 py-1 rounded-full backdrop-blur-md text-white font-sans text-xs font-semibold shadow-2xl transition-all transform hover:scale-105 active:scale-95 cursor-pointer whitespace-nowrap ${
+                selectedHotspot?.id === hotspot.id
+                  ? 'bg-blue-600 border-2 border-blue-300 ring-4 ring-blue-500/40'
+                  : 'bg-slate-950/85 border border-cyan-500/50 hover:border-cyan-400'
+              }`}
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse shrink-0" />
+              <span className="drop-shadow-sm">{hotspot.label}</span>
+            </button>
+          </Html>
+        ))}
       </Canvas>
     </div>
   );
 };
+
+export default Bharati3DCanvas;

@@ -582,21 +582,47 @@ export const Maitri3DCanvas: React.FC = () => {
           )}
         </div>
 
-        {/* Center: Main Navigation Tabs */}
-        <nav className="hidden lg:flex items-center space-x-7 text-xs font-semibold tracking-wider">
-          <button className="text-white border-b-2 border-cyan-400 pb-0.5 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]">
-            Stations
-          </button>
-          <button className="text-slate-400 hover:text-white transition">
-            Data
-          </button>
-          <button className="text-slate-400 hover:text-white transition">
-            Simulation
-          </button>
-          <button className="text-slate-400 hover:text-white transition">
-            Resources
-          </button>
-        </nav>
+        {/* Center: Main Navigation Tabs & Station Switcher */}
+        <div className="hidden lg:flex items-center space-x-6">
+          {/* Station Switcher Pill */}
+          <div className="flex items-center p-1 rounded-xl bg-slate-900/90 border border-slate-700/80 shadow-inner">
+            <button
+              onClick={() => setActiveStationId('maitri')}
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 ${
+                activeStationId === 'maitri'
+                  ? 'bg-blue-600 text-white shadow-[0_0_12px_rgba(37,99,235,0.6)]'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <span>Maitri 3D</span>
+            </button>
+            <button
+              onClick={() => setActiveStationId('bharati')}
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 ${
+                activeStationId === 'bharati'
+                  ? 'bg-cyan-500 text-slate-950 shadow-[0_0_12px_rgba(6,182,212,0.6)] font-black'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <span>Bharati 3D</span>
+            </button>
+          </div>
+
+          <nav className="flex items-center space-x-6 text-xs font-semibold tracking-wider">
+            <button className="text-white border-b-2 border-cyan-400 pb-0.5 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]">
+              Stations
+            </button>
+            <button className="text-slate-400 hover:text-white transition">
+              Data
+            </button>
+            <button className="text-slate-400 hover:text-white transition">
+              Simulation
+            </button>
+            <button className="text-slate-400 hover:text-white transition">
+              Resources
+            </button>
+          </nav>
+        </div>
 
         {/* Right Section: Weather, Clock, Role, Profile */}
         <div className="flex items-center space-x-4">
