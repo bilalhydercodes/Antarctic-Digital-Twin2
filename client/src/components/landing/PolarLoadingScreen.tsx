@@ -152,6 +152,13 @@ export const PolarLoadingScreen: React.FC<PolarLoadingScreenProps> = ({
           </div>
         </div>
 
+        {/* EMPEROR PENGUIN COMPANION BADGE */}
+        <div className="flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-slate-900/80 border border-cyan-500/40 text-xs text-cyan-300 shadow-lg">
+          <span className="text-lg animate-bounce">🐧</span>
+          <span className="font-bold tracking-wide">Emperor Penguin Polar Companion</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+        </div>
+
         {/* INSPIRING ANTARCTICA QUOTE CARD */}
         <div className="relative max-w-xl mx-auto px-6 py-5 rounded-2xl bg-slate-900/60 border border-cyan-500/30 backdrop-blur-md shadow-2xl space-y-2.5">
           <Quote className="w-6 h-6 text-cyan-400/60 mx-auto" />

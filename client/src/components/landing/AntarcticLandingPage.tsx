@@ -27,7 +27,8 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
   initialRole = 'COMMANDER' 
 }) => {
   const [selectedRole, setSelectedRole] = useState<RBACRole>(initialRole);
-  const [dropdownOpen, setDropdownOpen] = useState(true); // Open by default matching the screenshot mockup!
+  const [dropdownOpen, setDropdownOpen] = useState(false); // Closed by default so page fits screen and showcases the penguin!
+  const [showPenguinFact, setShowPenguinFact] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>('ICE');
   const [isEntering, setIsEntering] = useState(false);
   const [pendingTab, setPendingTab] = useState<NavTab | undefined>(undefined);
@@ -102,16 +103,16 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
 
   return (
     <div className="relative w-full min-h-screen bg-slate-950 text-white font-sans overflow-x-hidden select-none flex flex-col justify-between">
-      {/* 1. CINEMATIC BACKGROUND IMAGE WITH POLAR OVERLAYS */}
+      {/* 1. CINEMATIC BACKGROUND IMAGE WITH POLAR OVERLAYS - Anchored to left_bottom to showcase Emperor Penguin */}
       <div 
-        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-all duration-1000 transform scale-100"
+        className="fixed inset-0 z-0 bg-cover bg-[position:left_bottom] bg-no-repeat transition-all duration-1000 transform scale-100"
         style={{
           backgroundImage: `url('/antarctic-landing-bg.jpg')`,
         }}
       >
-        {/* Soft gradient vignette matching the cinematic atmosphere */}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/40 to-slate-950/70 pointer-events-none" />
-        <div className="absolute inset-0 bg-radial-at-c from-transparent via-slate-950/30 to-slate-950/80 pointer-events-none" />
+        {/* Soft atmospheric gradient vignette preserving the penguin on left and station on right */}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-slate-950/50 pointer-events-none" />
+        <div className="absolute inset-0 bg-radial-at-c from-slate-950/20 via-transparent to-slate-950/40 pointer-events-none" />
       </div>
 
       {/* 2. TOP NAVIGATION BAR */}
@@ -196,16 +197,16 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
       {/* 3. MAIN HERO & FLOATING HUD ELEMENTS */}
       <main className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-8 py-2 flex flex-col items-center justify-center my-auto">
         
-        {/* LEFT HUD: HOLOGRAPHIC 3D RADAR GLOBE & COORDINATES */}
-        <div className="hidden lg:block absolute left-4 top-1/2 -translate-y-1/2 font-mono">
-          <div className="relative w-44 h-44 flex items-center justify-center">
+        {/* LEFT HUD: HOLOGRAPHIC 3D RADAR GLOBE & COORDINATES (Positioned gracefully in upper left) */}
+        <div className="hidden lg:block absolute left-4 top-[34%] -translate-y-1/2 font-mono z-20">
+          <div className="relative w-40 h-40 flex items-center justify-center">
             {/* Outer Compass Dashed Radar Ring */}
             <div className="absolute inset-0 rounded-full border border-cyan-500/30 border-dashed animate-[spin_40s_linear_infinite]" />
             <div className="absolute inset-2 rounded-full border border-cyan-400/20" />
             <div className="absolute inset-5 rounded-full border border-sky-400/10" />
 
             {/* Glowing Holographic Antarctica Continent Contour */}
-            <div className="relative w-28 h-28 flex items-center justify-center">
+            <div className="relative w-24 h-24 flex items-center justify-center">
               <svg viewBox="0 0 100 100" className="w-full h-full text-cyan-400 drop-shadow-[0_0_12px_rgba(6,182,212,0.8)] opacity-85">
                 {/* Polar Coordinates Grid Lines */}
                 <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(56,189,248,0.2)" strokeWidth="0.8" />
@@ -247,11 +248,44 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
           </div>
 
           {/* Real data highlights */}
-          <div className="mt-6 text-[10px] tracking-widest uppercase space-y-1 text-slate-400 pl-2">
-            <div className="w-5 h-[1px] bg-cyan-400 mb-2" />
+          <div className="mt-4 text-[10px] tracking-widest uppercase space-y-1 text-slate-400 pl-2">
+            <div className="w-5 h-[1px] bg-cyan-400 mb-1" />
             <div className="text-slate-300 font-bold">REAL DATA</div>
             <div>REAL INSIGHTS</div>
-            <div className="text-cyan-300">A BRIGHTER TOMORROW</div>
+          </div>
+        </div>
+
+        {/* EMPEROR PENGUIN SPOTLIGHT CALLOUT & INTERACTIVE BADGE */}
+        <div 
+          onClick={() => {
+            audioService.playClick();
+            setShowPenguinFact(!showPenguinFact);
+          }}
+          className="hidden md:flex flex-col absolute left-6 sm:left-10 bottom-24 sm:bottom-28 z-30 cursor-pointer group select-none"
+        >
+          {showPenguinFact && (
+            <div className="mb-2.5 p-3.5 rounded-2xl bg-slate-900/95 border border-cyan-400/60 backdrop-blur-xl shadow-2xl max-w-xs text-xs text-slate-100 animate-in fade-in slide-in-from-bottom-2">
+              <div className="flex items-center space-x-1.5 text-cyan-300 font-bold mb-1">
+                <span className="text-base">🐧</span>
+                <span>Emperor Penguin (Aptenodytes forsteri)</span>
+              </div>
+              <p className="text-[11px] text-slate-300 leading-relaxed">
+                Native to the Antarctic coastline near Maitri and Bharati stations. They thrive in temperatures down to -50°C and 200 km/h blizzards by huddling together in thousands!
+              </p>
+            </div>
+          )}
+
+          <div className="px-3.5 py-1.5 rounded-full bg-slate-900/85 hover:bg-slate-900 border border-cyan-400/50 hover:border-cyan-300 backdrop-blur-md text-xs text-white shadow-[0_0_15px_rgba(34,211,238,0.3)] flex items-center space-x-2 transition transform group-hover:scale-105">
+            <span className="text-lg animate-bounce">🐧</span>
+            <div className="text-left">
+              <div className="font-extrabold text-cyan-300 text-[11px] flex items-center gap-1.5 leading-tight">
+                <span>EMPEROR PENGUIN</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              </div>
+              <div className="text-[9px] text-slate-400 font-mono">
+                Click for Polar Fact
+              </div>
+            </div>
           </div>
         </div>
 
