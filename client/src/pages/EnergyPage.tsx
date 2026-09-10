@@ -1,6 +1,7 @@
 import React from 'react';
 import { useSimulation } from '../context/SimulationContext';
 import { Zap, Battery, Fuel, Activity, AlertTriangle, ShieldCheck, RefreshCw } from 'lucide-react';
+import { PageExplainer } from '../components/common/PageExplainer';
 
 export const EnergyPage: React.FC = () => {
   const { activeStationId, energy, dispatchSupply } = useSimulation();
@@ -10,6 +11,9 @@ export const EnergyPage: React.FC = () => {
 
   return (
     <div className="space-y-6 font-sans">
+      {/* Plain English Guide Explainer */}
+      <PageExplainer pageId="energy" defaultOpen={false} />
+
       {/* Header */}
       <div className="bg-white border border-[#e5e3dc] p-6 rounded-2xl shadow-polar flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>

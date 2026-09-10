@@ -20,6 +20,7 @@ import {
   RefreshCw,
   Play
 } from 'lucide-react';
+import { PageExplainer } from '../components/common/PageExplainer';
 
 export const ScenarioLabPage: React.FC = () => {
   const { triggerScenario, runWhatIf, simulationState, activeStationId, userRole } = useSimulation();
@@ -163,6 +164,9 @@ export const ScenarioLabPage: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12 font-sans text-stone-800">
+      {/* Plain English Guide Explainer */}
+      <PageExplainer pageId="scenarios" defaultOpen={false} />
+
       {/* Page Header */}
       <div className="bg-white rounded-2xl p-6 border border-[#e5e3dc] shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>

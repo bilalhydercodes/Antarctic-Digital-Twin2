@@ -7,9 +7,11 @@ import { GreenAntarcticWidget } from '../components/environmental/GreenAntarctic
 import { MaitriStationDashboard } from '../components/dashboards/MaitriStationDashboard';
 import { BharatiStationDashboard } from '../components/dashboards/BharatiStationDashboard';
 import { IncidentReportModal } from '../components/incidents/IncidentReportModal';
+import { PageExplainer } from '../components/common/PageExplainer';
 import { 
   Zap, Thermometer, Droplets, Radio, AlertTriangle, CheckCircle2, Clock, ArrowRight,
-  TrendingUp, Compass, Plus, Minus, Navigation, Flame, FileText, Activity, Microscope
+  TrendingUp, Compass, Plus, Minus, Navigation, Flame, FileText, Activity, Microscope,
+  Sparkles, Bot, GitCompare, CloudSnow
 } from 'lucide-react';
 import { IncidentRecord } from '../types';
 
@@ -51,8 +53,84 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
       {/* ========================================================= */}
       {/* MAIN LEFT/CENTER CONTENT COLUMN (8/12) */}
       {/* ========================================================= */}
-      <div className="lg:col-span-8 space-y-6">
+      <div className="lg:col-span-8 space-y-5">
         
+        {/* Plain English Guide Explainer */}
+        <PageExplainer pageId="dashboard" defaultOpen={true} />
+
+        {/* VISITOR QUICK ACTIONS BAR */}
+        <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 rounded-2xl p-4 text-white shadow-md">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+            <div className="flex items-center space-x-2">
+              <Sparkles className="w-4 h-4 text-cyan-300" />
+              <span className="text-xs font-mono font-bold tracking-wider uppercase text-cyan-300">
+                Visitor Quick Explorer • Things to try right now:
+              </span>
+            </div>
+            <span className="text-[11px] text-slate-300">
+              Interactive 1-click shortcuts for evaluators & visitors
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <button
+              onClick={() => setActiveSubTab('3D')}
+              className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-left transition flex flex-col justify-between group"
+            >
+              <div className="flex items-center justify-between">
+                <Navigation className="w-4 h-4 text-cyan-300 group-hover:scale-110 transition-transform" />
+                <ArrowRight className="w-3 h-3 text-slate-400 group-hover:text-white" />
+              </div>
+              <div className="mt-2">
+                <div className="text-xs font-bold text-white">Inspect 3D Base</div>
+                <div className="text-[10px] text-slate-300 font-normal">Rotate containers & solar</div>
+              </div>
+            </button>
+
+            <button
+              onClick={() => onNavigate('scenarios')}
+              className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-left transition flex flex-col justify-between group"
+            >
+              <div className="flex items-center justify-between">
+                <CloudSnow className="w-4 h-4 text-rose-300 group-hover:scale-110 transition-transform" />
+                <ArrowRight className="w-3 h-3 text-slate-400 group-hover:text-white" />
+              </div>
+              <div className="mt-2">
+                <div className="text-xs font-bold text-white">Blizzard Test</div>
+                <div className="text-[10px] text-slate-300 font-normal">Simulate emergency storm</div>
+              </div>
+            </button>
+
+            <button
+              onClick={() => onNavigate('compare')}
+              className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-left transition flex flex-col justify-between group"
+            >
+              <div className="flex items-center justify-between">
+                <GitCompare className="w-4 h-4 text-emerald-300 group-hover:scale-110 transition-transform" />
+                <ArrowRight className="w-3 h-3 text-slate-400 group-hover:text-white" />
+              </div>
+              <div className="mt-2">
+                <div className="text-xs font-bold text-white">Maitri vs Bharati</div>
+                <div className="text-[10px] text-slate-300 font-normal">Compare 1988 vs 2012 tech</div>
+              </div>
+            </button>
+
+            <button
+              onClick={() => onNavigate('assistant')}
+              className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-left transition flex flex-col justify-between group"
+            >
+              <div className="flex items-center justify-between">
+                <Bot className="w-4 h-4 text-cyan-300 group-hover:scale-110 transition-transform" />
+                <ArrowRight className="w-3 h-3 text-slate-400 group-hover:text-white" />
+              </div>
+              <div className="mt-2">
+                <div className="text-xs font-bold text-white">Ask FrostByte AI</div>
+                <div className="text-[10px] text-slate-300 font-normal">Chat in plain English</div>
+              </div>
+            </button>
+          </div>
+        </div>
+
         {/* View Mode Switcher (3D Twin View vs Detailed Telemetry Dashboard) */}
         <div className="bg-white border border-[#e5e3dc] rounded-2xl p-2 flex items-center justify-between shadow-polar">
           <div className="flex items-center gap-2">
@@ -142,14 +220,17 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white border border-[#e5e3dc] rounded-2xl p-5 shadow-polar hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-stone-500">
-                Hybrid Power Demand
-              </span>
-              <div className="p-2 rounded-xl bg-amber-50 text-amber-600 border border-amber-200">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-stone-500">
+                  Hybrid Power Demand
+                </span>
+                <p className="text-[10px] text-stone-400 font-medium">Electricity for heating, lighting & labs</p>
+              </div>
+              <div className="p-2 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 shrink-0">
                 <Zap className="w-5 h-5" />
               </div>
             </div>
-            <div className="mt-3 flex items-baseline justify-between">
+            <div className="mt-2 flex items-baseline justify-between">
               <div className="text-2xl font-black text-stone-900 font-mono">
                 {energy?.powerGrid.consumptionKw || 265} <span className="text-sm font-semibold text-stone-500">kW</span>
               </div>
@@ -168,14 +249,17 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
           <div className="bg-white border border-[#e5e3dc] rounded-2xl p-5 shadow-polar hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-stone-500">
-                Ambient Environment
-              </span>
-              <div className="p-2 rounded-xl bg-sky-50 text-sky-600 border border-sky-200">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-stone-500">
+                  Ambient Environment
+                </span>
+                <p className="text-[10px] text-stone-400 font-medium">Outside sub-zero polar weather</p>
+              </div>
+              <div className="p-2 rounded-xl bg-sky-50 text-sky-600 border border-sky-200 shrink-0">
                 <Thermometer className="w-5 h-5" />
               </div>
             </div>
-            <div className="mt-3 flex items-baseline justify-between">
+            <div className="mt-2 flex items-baseline justify-between">
               <div className="text-2xl font-black text-stone-900 font-mono">
                 {environment?.temperature ?? -32.4}°C
               </div>
@@ -191,14 +275,17 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
           <div className="bg-white border border-[#e5e3dc] rounded-2xl p-5 shadow-polar hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-stone-500">
-                Fuel Reserves Autonomy
-              </span>
-              <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-stone-500">
+                  Fuel Reserves Autonomy
+                </span>
+                <p className="text-[10px] text-stone-400 font-medium">Safe days before next resupply</p>
+              </div>
+              <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 shrink-0">
                 <Droplets className="w-5 h-5" />
               </div>
             </div>
-            <div className="mt-3 flex items-baseline justify-between">
+            <div className="mt-2 flex items-baseline justify-between">
               <div className="text-2xl font-black text-stone-900 font-mono">
                 {energy?.fuelStorage.estimatedDaysRemaining || 46.6} <span className="text-sm font-semibold text-stone-500">Days</span>
               </div>

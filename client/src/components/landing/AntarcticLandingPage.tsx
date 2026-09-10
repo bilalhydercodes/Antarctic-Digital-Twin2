@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { RBACRole, NavTab } from '../../types';
+import { PolarLoadingScreen } from './PolarLoadingScreen';
+import { audioService } from '../../services/AudioService';
 import { 
   Shield, 
   Crown, 
@@ -27,17 +29,54 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
   const [selectedRole, setSelectedRole] = useState<RBACRole>(initialRole);
   const [dropdownOpen, setDropdownOpen] = useState(true); // Open by default matching the screenshot mockup!
   const [activeCategory, setActiveCategory] = useState<string>('ICE');
+  const [isEntering, setIsEntering] = useState(false);
+  const [pendingTab, setPendingTab] = useState<NavTab | undefined>(undefined);
 
-  const rolesList: { id: RBACRole; label: string; icon: React.ReactNode }[] = [
-    { id: 'ADMIN', label: 'ADMIN', icon: <Crown className="w-4 h-4 text-amber-300" /> },
-    { id: 'COMMANDER', label: 'COMMANDER', icon: <Shield className="w-4 h-4 text-sky-400" /> },
-    { id: 'OPERATOR', label: 'OPERATOR', icon: <SettingsIcon className="w-4 h-4 text-blue-300" /> },
-    { id: 'SCIENTIST', label: 'SCIENTIST', icon: <FlaskConical className="w-4 h-4 text-emerald-400" /> },
-    { id: 'VIEWER', label: 'VIEWER', icon: <Eye className="w-4 h-4 text-stone-300" /> },
+  const rolesList: { id: RBACRole; label: string; sublabel: string; icon: React.ReactNode; isRecommended?: boolean }[] = [
+    { 
+      id: 'COMMANDER', 
+      label: 'COMMANDER / EXPLORER', 
+      sublabel: 'Full access to all modules, 3D twin, simulations (Recommended for visitors)', 
+      icon: <Shield className="w-4 h-4 text-sky-400" />,
+      isRecommended: true
+    },
+    { 
+      id: 'SCIENTIST', 
+      label: 'SCIENTIST', 
+      sublabel: 'Focus on weather, glaciers, climate trends & research dossier', 
+      icon: <FlaskConical className="w-4 h-4 text-emerald-400" /> 
+    },
+    { 
+      id: 'OPERATOR', 
+      label: 'STATION OPERATOR', 
+      sublabel: 'Focus on power grid, diesel generators & fuel reserves', 
+      icon: <SettingsIcon className="w-4 h-4 text-blue-300" /> 
+    },
+    { 
+      id: 'ADMIN', 
+      label: 'SYSTEM ADMINISTRATOR', 
+      sublabel: 'Full system architecture, edge gateways & stress testing', 
+      icon: <Crown className="w-4 h-4 text-amber-300" /> 
+    },
+    { 
+      id: 'VIEWER', 
+      label: 'READ-ONLY VIEWER', 
+      sublabel: 'Live stream telemetry monitoring without operational controls', 
+      icon: <Eye className="w-4 h-4 text-stone-300" /> 
+    },
   ];
 
-  const handleEnter = (tab?: NavTab) => {
-    onEnter(selectedRole, tab);
+  const handleEnter = (tab?: NavTab, launchTour: boolean = false) => {
+    if (launchTour) {
+      sessionStorage.setItem('auto_start_tour', 'true');
+    }
+    setPendingTab(tab);
+    audioService.playClick();
+    setIsEntering(true);
+  };
+
+  const handleLoadingComplete = () => {
+    onEnter(selectedRole, pendingTab);
   };
 
   const getSelectedRoleIcon = () => {
@@ -50,6 +89,16 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
       default: return <Shield className="w-4 h-4 text-sky-400" />;
     }
   };
+
+  if (isEntering) {
+    return (
+      <PolarLoadingScreen
+        role={selectedRole}
+        targetTab={pendingTab}
+        onComplete={handleLoadingComplete}
+      />
+    );
+  }
 
   return (
     <div className="relative w-full min-h-screen bg-slate-950 text-white font-sans overflow-x-hidden select-none flex flex-col justify-between">
@@ -252,35 +301,56 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
 
           <p className="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto pt-2 font-normal leading-relaxed drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">
             Explore. Simulate. Understand Antarctica.<br />
-            An interactive digital representation of the Antarctic environment.
+            Interactive 3D digital replica of India’s <span className="text-cyan-300 font-bold">Maitri (1988)</span> and <span className="text-cyan-300 font-bold">Bharati (2012)</span> polar research bases.
           </p>
         </div>
 
-        {/* 4. DEMO ACCESS CARD (EXACT COPY OF SCREENSHOT) */}
-        <div className="relative w-full max-w-md mx-auto backdrop-blur-xl bg-slate-950/70 border border-cyan-500/40 rounded-3xl p-6 sm:p-7 shadow-[0_10px_50px_rgba(0,0,0,0.85),0_0_30px_rgba(6,182,212,0.15)]">
+        {/* 4. DEMO ACCESS CARD */}
+        <div className="relative w-full max-w-lg mx-auto backdrop-blur-xl bg-slate-950/75 border border-cyan-500/40 rounded-3xl p-6 sm:p-7 shadow-[0_10px_50px_rgba(0,0,0,0.85),0_0_30px_rgba(6,182,212,0.15)] space-y-4">
+          
+          {/* RECOMMENDED VISITOR QUICK START */}
+          <div className="p-3.5 rounded-2xl bg-gradient-to-r from-blue-900/60 via-indigo-900/50 to-slate-900/60 border border-cyan-400/40 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-inner">
+            <div className="text-left">
+              <div className="flex items-center space-x-1.5 text-cyan-300 font-extrabold text-xs">
+                <Sparkles className="w-3.5 h-3.5 text-cyan-300" />
+                <span>NEW VISITOR? START HERE</span>
+              </div>
+              <p className="text-[11px] text-slate-300">
+                Interactive 2-min guided walkthrough with everything unlocked.
+              </p>
+            </div>
+            <button
+              onClick={() => handleEnter('dashboard', true)}
+              className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs tracking-wider uppercase transition shadow-[0_0_15px_rgba(34,211,238,0.4)] flex items-center justify-center space-x-1.5 shrink-0"
+            >
+              <span>QUICK TOUR</span>
+              <ArrowRight className="w-3.5 h-3.5 text-slate-950" />
+            </button>
+          </div>
+
           {/* Card Header */}
-          <div className="text-center space-y-1 mb-5">
-            <div className="flex items-center justify-center space-x-2 text-cyan-400">
-              <Users className="w-5 h-5 text-cyan-300" />
-              <span className="text-xs font-mono font-extrabold tracking-[0.2em] text-cyan-300 uppercase">
-                DEMO ACCESS
+          <div className="text-center space-y-1">
+            <div className="flex items-center justify-center space-x-2 text-slate-300">
+              <Users className="w-4 h-4 text-cyan-300" />
+              <span className="text-xs font-mono font-bold tracking-[0.15em] text-slate-300 uppercase">
+                OR CHOOSE OPERATIONAL PROFILE
               </span>
             </div>
-            <p className="text-xs text-slate-300">
-              Select a role to enter (No authentication required)
-            </p>
           </div>
 
           {/* Role Dropdown Selector */}
-          <div className="relative mb-5">
+          <div className="relative">
             {/* Trigger Button */}
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="w-full bg-slate-900/80 hover:bg-slate-850 border border-cyan-500/50 rounded-xl px-4 py-3 flex items-center justify-between text-white font-bold text-xs shadow-inner transition focus:outline-none"
+              className="w-full bg-slate-900/90 hover:bg-slate-850 border border-cyan-500/50 rounded-xl px-4 py-3 flex items-center justify-between text-white font-bold text-xs shadow-inner transition focus:outline-none"
             >
               <div className="flex items-center space-x-3">
                 {getSelectedRoleIcon()}
-                <span className="tracking-wider uppercase">{selectedRole}</span>
+                <span className="tracking-wider uppercase font-bold">{selectedRole}</span>
+                <span className="text-[10px] text-slate-400 font-normal hidden sm:inline">
+                  ({rolesList.find(r => r.id === selectedRole)?.sublabel})
+                </span>
               </div>
               <ChevronDown className={`w-4 h-4 text-cyan-400 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
             </button>
@@ -295,15 +365,28 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
                       key={role.id}
                       onClick={() => {
                         setSelectedRole(role.id);
+                        setDropdownOpen(false);
                       }}
-                      className={`w-full flex items-center space-x-3 px-4 py-3 text-xs text-left transition ${
+                      className={`w-full flex items-start space-x-3 px-4 py-3 text-xs text-left transition ${
                         isSelected
-                          ? 'bg-blue-600 text-white font-black shadow-md'
-                          : 'text-slate-300 hover:bg-slate-900/80 hover:text-white font-medium'
+                          ? 'bg-blue-900/60 text-white font-black border-l-4 border-cyan-400'
+                          : 'text-slate-300 hover:bg-slate-900/80 hover:text-white'
                       }`}
                     >
-                      <span>{role.icon}</span>
-                      <span className="tracking-wider uppercase">{role.label}</span>
+                      <span className="mt-0.5 shrink-0">{role.icon}</span>
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2">
+                          <span className="tracking-wider uppercase font-bold text-white">{role.label}</span>
+                          {role.isRecommended && (
+                            <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-400/40">
+                              RECOMMENDED
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-slate-400 font-normal mt-0.5 leading-snug">
+                          {role.sublabel}
+                        </p>
+                      </div>
                     </button>
                   );
                 })}
@@ -314,16 +397,45 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
           {/* ENTER DIGITAL TWIN CTA BUTTON */}
           <button
             onClick={() => handleEnter()}
-            className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-blue-600 via-sky-600 to-blue-600 hover:from-blue-500 hover:to-sky-500 text-white font-black text-xs tracking-[0.2em] uppercase transition-all duration-300 transform hover:scale-[1.02] shadow-[0_0_25px_rgba(2,132,199,0.55)] border border-sky-400/50 flex items-center justify-center space-x-2"
+            className="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-blue-700 via-sky-700 to-blue-700 hover:from-blue-600 hover:to-sky-600 text-white font-black text-xs tracking-[0.2em] uppercase transition-all duration-300 transform hover:scale-[1.01] shadow-[0_0_20px_rgba(2,132,199,0.4)] border border-sky-400/40 flex items-center justify-center space-x-2"
           >
-            <span>ENTER DIGITAL TWIN</span>
+            <span>ENTER AS {selectedRole}</span>
             <ArrowRight className="w-4 h-4 text-white" />
           </button>
 
+          {/* Direct module shortcuts */}
+          <div className="pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-center gap-2 text-[10px] text-slate-300">
+            <span className="text-slate-400">Direct Jump:</span>
+            <button 
+              onClick={() => handleEnter('twin')}
+              className="px-2 py-1 rounded bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-slate-700 transition"
+            >
+              🎮 3D Base
+            </button>
+            <button 
+              onClick={() => handleEnter('energy')}
+              className="px-2 py-1 rounded bg-slate-900 hover:bg-slate-800 text-amber-300 border border-slate-700 transition"
+            >
+              ⚡ Power & Fuel
+            </button>
+            <button 
+              onClick={() => handleEnter('scenarios')}
+              className="px-2 py-1 rounded bg-slate-900 hover:bg-slate-800 text-rose-300 border border-slate-700 transition"
+            >
+              ❄️ Blizzard Test
+            </button>
+            <button 
+              onClick={() => handleEnter('assistant')}
+              className="px-2 py-1 rounded bg-slate-900 hover:bg-slate-800 text-emerald-300 border border-slate-700 transition"
+            >
+              🤖 Ask AI
+            </button>
+          </div>
+
           {/* Card Footer Disclaimer */}
-          <div className="mt-4 text-center">
+          <div className="text-center pt-1">
             <span className="text-[9px] font-mono tracking-wider text-slate-400 uppercase">
-              DEMO MODE • FOR EDUCATIONAL AND EXPLORATION PURPOSES
+              DEMO MODE • OPEN ACCESS FOR EVALUATORS & VISITORS
             </span>
           </div>
         </div>

@@ -1,12 +1,16 @@
 import React from 'react';
 import { useSimulation } from '../context/SimulationContext';
 import { Thermometer, Wind, Eye, Gauge, Sun, Snowflake, ShieldCheck, Radio } from 'lucide-react';
+import { PageExplainer } from '../components/common/PageExplainer';
 
 export const EnvironmentPage: React.FC = () => {
   const { activeStationId, environment, useRealWeatherMode, setUseRealWeatherMode } = useSimulation();
 
   return (
     <div className="space-y-6 font-sans">
+      {/* Plain English Guide Explainer */}
+      <PageExplainer pageId="environment" defaultOpen={false} />
+
       {/* Header */}
       <div className="bg-white p-6 rounded-2xl border border-[#e5e3dc] shadow-polar flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>

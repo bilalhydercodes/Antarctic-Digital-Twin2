@@ -19,15 +19,18 @@ import {
   ShieldCheck,
   Square,
   AlertOctagon,
-  Sparkles
+  Sparkles,
+  HelpCircle
 } from 'lucide-react';
 import { RBACRole } from '../../types';
 
 interface HeaderProps {
   onOpenLanding?: () => void;
+  onOpenTour?: () => void;
+  onOpenHelp?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onOpenLanding }) => {
+export const Header: React.FC<HeaderProps> = ({ onOpenLanding, onOpenTour, onOpenHelp }) => {
   const [isMutedState, setIsMutedState] = useState(false);
   const [alarmState, setAlarmState] = useState<AudioAlarmState>(audioService.getAlarmState());
 
@@ -81,6 +84,28 @@ export const Header: React.FC<HeaderProps> = ({ onOpenLanding }) => {
           </button>
         )}
 
+        {onOpenTour && (
+          <button
+            onClick={onOpenTour}
+            title="Start interactive 2-minute tour for anyone"
+            className="hidden sm:flex items-center space-x-1.5 ml-1 px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 text-white font-bold text-xs shadow-sm transition"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-cyan-300" />
+            <span>2-MIN TOUR</span>
+          </button>
+        )}
+
+        {onOpenHelp && (
+          <button
+            onClick={onOpenHelp}
+            title="Open Plain-English Help Center & Glossary"
+            className="hidden sm:flex items-center space-x-1.5 ml-1 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 font-bold text-xs shadow-sm transition"
+          >
+            <HelpCircle className="w-3.5 h-3.5 text-amber-600" />
+            <span>HELP & GLOSSARY</span>
+          </button>
+        )}
+
         <a
           href="/presentation.html"
           target="_blank"
@@ -97,32 +122,48 @@ export const Header: React.FC<HeaderProps> = ({ onOpenLanding }) => {
       <div className="flex items-center bg-[#f4f3f0] p-1 rounded-2xl border border-[#e5e3dc]">
         <button
           onClick={() => setActiveStationId('maitri')}
-          className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm ${
+          title="Switch to Maitri Station: India's 2nd base, est. 1988 in rocky Schirmacher Oasis"
+          className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition shadow-sm ${
             activeStationId === 'maitri'
               ? 'bg-blue-700 text-white shadow-md'
               : 'text-stone-600 hover:text-stone-900 hover:bg-[#edebe4]'
           }`}
         >
           <span className="text-sm">🏔️</span>
-          <span>MAITRI (70.76°S)</span>
-          <span className={`px-1.5 py-0.5 rounded text-[10px] ${activeStationId === 'maitri' ? 'bg-blue-800 text-blue-100' : 'bg-stone-200 text-stone-700'}`}>
-            1988
-          </span>
+          <div className="text-left leading-tight">
+            <div className="flex items-center space-x-1">
+              <span>MAITRI</span>
+              <span className={`px-1 py-0.2 rounded text-[9px] ${activeStationId === 'maitri' ? 'bg-blue-800 text-blue-100' : 'bg-stone-200 text-stone-700'}`}>
+                1988
+              </span>
+            </div>
+            <div className={`text-[9px] font-normal ${activeStationId === 'maitri' ? 'text-blue-100' : 'text-stone-400'}`}>
+              Inland Oasis • 70.76°S
+            </div>
+          </div>
         </button>
 
         <button
           onClick={() => setActiveStationId('bharati')}
-          className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm ${
+          title="Switch to Bharati Station: India's 3rd base, est. 2012 on Larsemann Hills Coast"
+          className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition shadow-sm ${
             activeStationId === 'bharati'
               ? 'bg-sky-600 text-white shadow-md'
               : 'text-stone-600 hover:text-stone-900 hover:bg-[#edebe4]'
           }`}
         >
           <span className="text-sm">🏔️</span>
-          <span>BHARATI (69.40°S)</span>
-          <span className={`px-1.5 py-0.5 rounded text-[10px] ${activeStationId === 'bharati' ? 'bg-sky-700 text-sky-100' : 'bg-stone-200 text-stone-700'}`}>
-            2012
-          </span>
+          <div className="text-left leading-tight">
+            <div className="flex items-center space-x-1">
+              <span>BHARATI</span>
+              <span className={`px-1 py-0.2 rounded text-[9px] ${activeStationId === 'bharati' ? 'bg-sky-700 text-sky-100' : 'bg-stone-200 text-stone-700'}`}>
+                2012
+              </span>
+            </div>
+            <div className={`text-[9px] font-normal ${activeStationId === 'bharati' ? 'text-sky-100' : 'text-stone-400'}`}>
+              Coastal Modern • 69.40°S
+            </div>
+          </div>
         </button>
       </div>
 
@@ -131,7 +172,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenLanding }) => {
         {/* Real Antarctic Satellite Weather Toggle */}
         <button
           onClick={() => setUseRealWeatherMode(!useRealWeatherMode)}
-          title="Toggle Real Weather Satellite Data"
+          title={useRealWeatherMode ? 'Using live Antarctic satellite weather feeds. Click to switch to simulation.' : 'Using simulated weather model. Click to switch to real satellite feeds.'}
           className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition ${
             useRealWeatherMode
               ? 'bg-sky-50 text-sky-700 border-sky-300 shadow-sm'
@@ -139,7 +180,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenLanding }) => {
           }`}
         >
           <Radio className={`w-3.5 h-3.5 ${useRealWeatherMode ? 'text-sky-600 animate-pulse' : 'text-stone-400'}`} />
-          <span>{useRealWeatherMode ? 'REAL MET LIVE' : 'SIM MET'}</span>
+          <span>{useRealWeatherMode ? 'REAL SATELLITE MET' : 'SIMULATED MET'}</span>
         </button>
 
         {/* Live Link Badge */}

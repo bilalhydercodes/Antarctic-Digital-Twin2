@@ -31,13 +31,19 @@ import { AssistantPage } from './pages/AssistantPage';
 import { ResearchPage } from './pages/ResearchPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { AntarcticLandingPage } from './components/landing/AntarcticLandingPage';
+import { GuidedTourModal } from './components/guide/GuidedTourModal';
+import { HelpCenterModal } from './components/guide/HelpCenterModal';
 import { RBACRole } from './types';
 
 export const MainContent: React.FC = () => {
-  const { userRole, setUserRole } = useSimulation();
+  const { userRole, setUserRole, setActiveStationId } = useSimulation();
   const [showLanding, setShowLanding] = useState<boolean>(() => {
     return sessionStorage.getItem('entered_twin') !== 'true';
   });
+  const [showTour, setShowTour] = useState<boolean>(() => {
+    return sessionStorage.getItem('auto_start_tour') === 'true';
+  });
+  const [showHelp, setShowHelp] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<NavTab>(() => {
     return ROLE_METADATA[userRole]?.defaultTab || 'dashboard';
   });
@@ -49,6 +55,10 @@ export const MainContent: React.FC = () => {
     } else {
       const defaultTab = ROLE_METADATA[role]?.defaultTab || 'dashboard';
       setActiveTab(defaultTab);
+    }
+    if (sessionStorage.getItem('auto_start_tour') === 'true') {
+      setShowTour(true);
+      sessionStorage.removeItem('auto_start_tour');
     }
     sessionStorage.setItem('entered_twin', 'true');
     setShowLanding(false);
@@ -84,14 +94,23 @@ export const MainContent: React.FC = () => {
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-[#f4f3f0] font-sans">
       {/* Header & Satellite Bandwidth & Demo Stepper Banners */}
-      <Header onOpenLanding={handleOpenLanding} />
+      <Header 
+        onOpenLanding={handleOpenLanding} 
+        onOpenTour={() => setShowTour(true)}
+        onOpenHelp={() => setShowHelp(true)}
+      />
       <CriticalVoiceAlarmBanner />
       <SatelliteBandwidthBanner />
       <DemoModeBanner />
 
       {/* Main Workspace with Sidebar & Dynamic Views */}
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+        <Sidebar 
+          activeTab={activeTab} 
+          setActiveTab={setActiveTab} 
+          onOpenTour={() => setShowTour(true)}
+          onOpenHelp={() => setShowHelp(true)}
+        />
 
         <main className="flex-1 p-6 overflow-y-auto bg-[#f4f3f0]">
           {!isTabPermitted ? (
@@ -141,6 +160,33 @@ export const MainContent: React.FC = () => {
           )}
         </main>
       </div>
+
+      {/* Interactive Onboarding Tour Modal */}
+      <GuidedTourModal 
+        isOpen={showTour} 
+        onClose={() => setShowTour(false)} 
+        onNavigateTab={(tab) => {
+          setActiveTab(tab);
+          setShowTour(false);
+        }}
+        onSwitchStation={(stationId) => {
+          setActiveStationId(stationId);
+        }}
+      />
+
+      {/* Global Plain-English Help Center & Glossary Modal */}
+      <HelpCenterModal 
+        isOpen={showHelp} 
+        onClose={() => setShowHelp(false)} 
+        onNavigateTab={(tab) => {
+          setActiveTab(tab);
+          setShowHelp(false);
+        }}
+        onOpenTour={() => {
+          setShowHelp(false);
+          setShowTour(true);
+        }}
+      />
     </div>
   );
 };
