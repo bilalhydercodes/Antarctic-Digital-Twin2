@@ -693,7 +693,7 @@ export const Bharati3DCanvas: React.FC<Bharati3DCanvasProps> = ({ onNavigate }) 
                         )}
                       </div>
                       <div className="text-[10px] text-slate-400 font-mono mt-0.5">
-                        70°45&apos;S, 11°44&apos;E • Schirmacher Oasis • 1989
+                        70°45&apos;S, 11°44&apos;E • Schirmacher Oasis • Est. 1988
                       </div>
                     </div>
                   </button>

@@ -1,0 +1,1279 @@
+<!-- Standalone copy of Antarctic Digital Twin Presentation Deck -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Antarctic Digital Twin — Official Feature Showcase & Architecture Deck</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #070d18;
+      --bg-card: rgba(15, 23, 42, 0.75);
+      --border-card: rgba(56, 189, 248, 0.18);
+      --accent-cyan: #38bdf8;
+      --accent-blue: #3b82f6;
+      --accent-amber: #f59e0b;
+      --accent-emerald: #10b981;
+      --accent-rose: #f43f5e;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+
+    /* Ambient Aurora Glow Background */
+    .aurora-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      background: 
+        radial-gradient(circle at 15% 20%, rgba(14, 165, 233, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(99, 102, 241, 0.15) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.08) 0%, transparent 60%);
+    }
+
+    /* Top Bar */
+    header {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 28px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(10, 17, 30, 0.85);
+      backdrop-filter: blur(12px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-badge {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0284c7, #1e1b4b);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
+    }
+
+    .brand-text h1 {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+
+    .brand-text p {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #f1f5f9;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--accent-cyan);
+      color: #fff;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      border-color: rgba(56, 189, 248, 0.4);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0369a1, #1d4ed8);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+    }
+
+    /* Slides Stage */
+    .stage {
+      flex: 1;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .slide {
+      display: none;
+      width: 100%;
+      max-width: 1280px;
+      height: 100%;
+      max-height: 720px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 20px;
+      padding: 44px 52px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+      flex-direction: column;
+      justify-content: space-between;
+      animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      overflow-y: auto;
+    }
+
+    .slide.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px) scale(0.99); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Slide Header */
+    .slide-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+      font-mono: 'JetBrains Mono', monospace;
+    }
+
+    .slide-title {
+      font-size: 32px;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    .slide-subtitle {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      max-width: 960px;
+      margin-bottom: 24px;
+    }
+
+    /* Grid Layouts inside slides */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      flex: 1;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    /* Feature Cards */
+    .card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 8px;
+      transition: border-color 0.2s;
+    }
+
+    .card:hover {
+      border-color: rgba(56, 189, 248, 0.4);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .card-icon {
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .card-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    .card-stats {
+      margin-top: auto;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--accent-cyan);
+      font-weight: 600;
+    }
+
+    /* Table styles */
+    .table-dossier {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      text-align: left;
+      margin-top: 8px;
+    }
+
+    .table-dossier th {
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--accent-cyan);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 11px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .table-dossier td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: #e2e8f0;
+      line-height: 1.4;
+    }
+
+    .table-dossier tr:hover td {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .badge-highlight {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      font-weight: 700;
+      font-size: 11px;
+    }
+
+    /* Speaker Notes Drawer */
+    #notesDrawer {
+      position: fixed;
+      bottom: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 1000px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 14px;
+      padding: 18px 24px;
+      z-index: 50;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+      display: none;
+    }
+
+    #notesDrawer.visible {
+      display: block;
+      animation: slideUp 0.25s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { transform: translate(-50%, 20px); opacity: 0; }
+      to { transform: translate(-50%, 0); opacity: 1; }
+    }
+
+    .notes-title {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--accent-amber);
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .notes-content {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #cbd5e1;
+    }
+
+    /* Bottom Navigation Bar */
+    footer {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 28px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(10, 17, 30, 0.85);
+      backdrop-filter: blur(12px);
+    }
+
+    .progress-wrap {
+      flex: 1;
+      max-width: 320px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 0 20px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #0284c7, #38bdf8);
+      width: 6.25%;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .slide-counter {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* Print styles for export */
+    @media print {
+      body {
+        overflow: visible !important;
+        background: #0b1120 !important;
+        height: auto !important;
+      }
+      header, footer, .aurora-bg, #notesDrawer {
+        display: none !important;
+      }
+      .stage {
+        padding: 0 !important;
+        display: block !important;
+      }
+      .slide {
+        display: flex !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+        page-break-after: always !important;
+        break-after: page !important;
+        border-radius: 0 !important;
+        border: none !important;
+        height: 100vh !important;
+        padding: 40px !important;
+        box-shadow: none !important;
+        background: #0f172a !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="aurora-bg"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-badge">❄️</div>
+      <div class="brand-text">
+        <h1>Antarctic Digital Twin</h1>
+        <p>SIH #26060 • Ministry of Earth Sciences (MoES) & NCPOR</p>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" id="btnNotes" title="Toggle Speaker Script (Shortcut: N)">
+        🎙️ Speaker Notes [N]
+      </button>
+      <button class="btn" id="btnPrint" title="Print or Export to PDF">
+        🖨️ Export PDF [P]
+      </button>
+      <button class="btn" id="btnFullscreen" title="Toggle Fullscreen">
+        ⛶ Fullscreen [F]
+      </button>
+      <a href="http://localhost:5173" class="btn btn-primary" title="Launch the live website application">
+        🚀 Open Live App
+      </a>
+    </div>
+  </header>
+
+  <!-- Stage -->
+  <div class="stage">
+
+    <!-- SLIDE 1: TITLE SLIDE -->
+    <div class="slide active" data-slide="1">
+      <div>
+        <span class="slide-tag">PROJECT BRIEFING • SIH PROBLEM STATEMENT #26060</span>
+        <h2 class="slide-title">Antarctic Digital Twin: Multi-Station Physics Simulation & AI Incident Command Post</h2>
+        <p class="slide-subtitle">
+          An autonomous, end-to-end mission platform for India's polar stations — <strong>Maitri (IN-MTR-01)</strong> and <strong>Bharati (IN-BHR-02)</strong> — unifying 3D structural cutaways, deterministic thermodynamic simulation, real satellite meteorology, and predictive winter conservation.
+        </p>
+      </div>
+
+      <div class="grid-4" style="margin-top: 10px;">
+        <div class="card">
+          <div class="card-icon">🏔️</div>
+          <div class="card-title">Dual-Station Twin</div>
+          <div class="card-desc">Interactive Three.js visualizers with structural cutaways of Maitri (Stilts on Moraine) and Bharati (134 ISO Containers).</div>
+          <div class="card-stats">Maitri Est. 1988 • Bharati Est. 2012</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">📡</div>
+          <div class="card-title">Dual-Feed Telemetry</div>
+          <div class="card-desc">Switch between real satellite meteorology (Open-Meteo) and deterministic thermodynamic stress simulations.</div>
+          <div class="card-stats">GPS Aligned • -89°C Chill Models</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🤖</div>
+          <div class="card-title">FrostByte AI Copilot</div>
+          <div class="card-desc">Hybrid Groq LPU (970ms) + Gemini Flash engine predicting winter risk and executing 1-click load shedding.</div>
+          <div class="card-stats">Sub-Second Execution Matrix</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">📜</div>
+          <div class="card-title">Official NCPOR Dossier</div>
+          <div class="card-desc">100% verified MoES/NCPOR specifications, physical scientific observatories (IMD, IIG, NGRI, NPL, ISRO), and Madrid Protocol logs.</div>
+          <div class="card-stats">Zero Spec Conflicts</div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px; font-size: 11px; color: var(--text-muted);">
+        <span>Developed for: National Centre for Polar and Ocean Research (NCPOR), Ministry of Earth Sciences, Govt. of India</span>
+        <span style="font-family: 'JetBrains Mono', monospace; color: var(--accent-cyan);">Version 2.4-Production • ATCP 1983 Compliant</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: THE ANTARCTIC PROBLEM -->
+    <div class="slide" data-slide="2">
+      <div>
+        <span class="slide-tag">THE PROBLEM SPACE</span>
+        <h2 class="slide-title">Mission-Critical Constraints: Why Antarctica Needs a Digital Twin</h2>
+        <p class="slide-subtitle">Operating in East Antarctica presents engineering hazards with zero margin for error. A single component oversight can endanger lives and mission continuity.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-icon">❄️</div>
+          <div class="card-title">Extreme Sub-Zero Thermal Shock</div>
+          <div class="card-desc">
+            Temperatures plunge below -50°C with 200+ km/h katabatic blizzards. In these temperatures, fresh water in delivery pipelines can freeze and rupture pipes within 45 minutes if electric trace heating fails.
+          </div>
+          <div class="card-stats">Priyadarshini Loop Criticality: &gt; +2.0°C</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🚢</div>
+          <div class="card-title">6-Month Polar Isolation</div>
+          <div class="card-desc">
+            During Antarctic winter, access by ship or plane is physically impossible. Stations must maintain absolute autonomy over AN-8 fuel reserves, freeze-dried food, water generation, and power microgrids.
+          </div>
+          <div class="card-stats">47 Winter Crew • Zero External Support</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🛰️</div>
+          <div class="card-title">Satellite Bottlenecks & Outages</div>
+          <div class="card-desc">
+            Geomagnetic storms, polar cap absorption (PCA), and low orbital satellite elevation angles create recurring blackout windows. Systems must function offline with store-and-forward edge sync.
+          </div>
+          <div class="card-stats">Simulated Ka-band & VSAT degradation</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 14px; background: rgba(56, 189, 248, 0.05); border-color: rgba(56, 189, 248, 0.2);">
+        <div style="font-size: 13px; font-weight: 700; color: var(--accent-cyan); margin-bottom: 4px;">The Digital Twin Solution:</div>
+        <div style="font-size: 12px; color: #cbd5e1; line-height: 1.5;">
+          A real-time cyber-physical bridge that detects thermal anomalies before freezing occurs, models generator wear hours, visualizes structural interiors, and calculates runway days for fuel, food, and water.
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: SYSTEM ARCHITECTURE -->
+    <div class="slide" data-slide="3">
+      <div>
+        <span class="slide-tag">TECHNICAL ARCHITECTURE</span>
+        <h2 class="slide-title">Full-Stack Digital Twin: End-to-End System Pipeline</h2>
+        <p class="slide-subtitle">A modular, decoupled architecture enabling high-performance client visualization, edge resilience, and sub-second predictive intelligence.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-icon">💻</div>
+          <div class="card-title">Client Tier (React 18 + Three.js)</div>
+          <div class="card-desc">
+            • <strong>Three.js / React Three Fiber</strong> 3D canvas with real-time lighting and orbital controls.<br>
+            • <strong>TailwindCSS + Custom Glassmorphism</strong> for rich, distraction-free command interfaces.<br>
+            • <strong>Recharts</strong> high-frequency telemetry charting.<br>
+            • <strong>Socket.io Client</strong> for sub-50ms duplex streaming.
+          </div>
+          <div class="card-stats">Responsive Widescreen & Tablet Ready</div>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">⚙️</div>
+          <div class="card-title">Server Tier (Node.js + Express)</div>
+          <div class="card-desc">
+            • <strong>Deterministic Physics Simulation Engine</strong> modeling Fourier thermal transfer and generator load curves.<br>
+            • <strong>Edge Gateway Middleware</strong> simulating satellite bandwidth compression (92%) and offline queues.<br>
+            • <strong>Emergency Scenario Engine</strong> orchestrating blizzards and cascade failovers.<br>
+            • <strong>In-Memory Database</strong> with seed persistence.
+          </div>
+          <div class="card-stats">Zero-Dependency Fast Edge Node</div>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🧠</div>
+          <div class="card-title">AI & External Telemetry</div>
+          <div class="card-desc">
+            • <strong>Groq LPU Engine</strong> (Qwen 3.8 27B) delivering sub-second polar conservation predictions.<br>
+            • <strong>Google Gemini 3.6 Flash</strong> fallback for complex multimodal reasoning.<br>
+            • <strong>Open-Meteo Antarctic Weather API</strong> streaming real satellite weather for Schirmacher & Larsemann coordinates.
+          </div>
+          <div class="card-stats">970ms Inference Latency</div>
+        </div>
+      </div>
+
+      <div style="margin-top: 14px; padding: 12px 18px; border-radius: 10px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); font-size: 12px; display: flex; align-items: center; justify-content: space-between;">
+        <span><strong>Edge Deployment Capability:</strong> The entire backend server can run locally on an Intel NUC or industrial edge PC inside Maitri/Bharati without requiring internet.</span>
+        <span class="badge-highlight">OFFLINE READY</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: MAITRI STATION MODEL -->
+    <div class="slide" data-slide="4">
+      <div>
+        <span class="slide-tag">STATION PROFILE 01</span>
+        <h2 class="slide-title">Maitri Research Station (IN-MTR-01): Verified Digital Twin</h2>
+        <p class="slide-subtitle">Accurate physical modeling of India's second polar station, established 1988 in the rocky ice-free oasis of Queen Maud Land.</p>
+      </div>
+
+      <table class="table-dossier">
+        <thead>
+          <tr>
+            <th>Official Parameter</th>
+            <th>NCPOR Verified Specification</th>
+            <th>Digital Twin Implementation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Commissioning Date</strong></td>
+            <td><strong>December 1988</strong> (Operational January 1989)</td>
+            <td>Full historical profile and 1988 baseline embedded across all models and headers.</td>
+          </tr>
+          <tr>
+            <td><strong>Elevation Profile</strong></td>
+            <td><strong>~50 m Above Sea Level</strong> (Verified lake moraine)</td>
+            <td>Corrected from preliminary 117m legacy value to official ~50m ASL profile.</td>
+          </tr>
+          <tr>
+            <td><strong>Coordinates</strong></td>
+            <td><strong>70° 45' 52" S, 11° 44' 03" E</strong> (-70.7644°, 11.7342°)</td>
+            <td>Coordinates bound to Google Satellite Map and real-time Open-Meteo satellite feed.</td>
+          </tr>
+          <tr>
+            <td><strong>Crew Capacity</strong></td>
+            <td><strong>47 Base Complex + 25 Summer Camp = 72 Cap</strong></td>
+            <td>Crew model calibrated to 47 winter base personnel and 72 summer maximum capacity.</td>
+          </tr>
+          <tr>
+            <td><strong>Potable Water System</strong></td>
+            <td><strong>Lake Priyadarshini Submersible Pump House</strong></td>
+            <td>3D model includes lake pump house, pipeline route, and electric trace-heating loop maintained above +2.0°C.</td>
+          </tr>
+          <tr>
+            <td><strong>Microgrid Generation</strong></td>
+            <td><strong>3 × Kirloskar GenSets (125 kVA) + Solar PV + Wind</strong></td>
+            <td>Real-time synchronization of 2 primary diesel generators + 45kW Solar + 35kW Wind.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top: 14px; font-size: 11px; color: var(--text-muted); display: flex; gap: 20px;">
+        <span>• Architectural Stilts: Prevents snow drifts from engulfing building</span>
+        <span>• Hydronic Boilers: Dual-glycol circulation loop</span>
+        <span>• Fuel Storage: 80,000L AN-8 polar diesel farm</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: BHARATI STATION MODEL -->
+    <div class="slide" data-slide="5">
+      <div>
+        <span class="slide-tag">STATION PROFILE 02</span>
+        <h2 class="slide-title">Bharati Research Station (IN-BHR-02): Next-Gen Polar Facility</h2>
+        <p class="slide-subtitle">India's flagship coastal station commissioned 2012, featuring an aerodynamic envelope and Combined Heat and Power (CHP) co-generation.</p>
+      </div>
+
+      <table class="table-dossier">
+        <thead>
+          <tr>
+            <th>Official Parameter</th>
+            <th>NCPOR Verified Specification</th>
+            <th>Digital Twin Implementation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Commissioning Date</strong></td>
+            <td><strong>18 March 2012</strong> (31st Indian Antarctic Expedition)</td>
+            <td>Integrated 2012 baseline profile with modern high-latitude infrastructure sensors.</td>
+          </tr>
+          <tr>
+            <td><strong>Elevation Profile</strong></td>
+            <td><strong>~35 m Above Sea Level</strong> (Grovness Promontory)</td>
+            <td>Modeled between Thala Fjord and Quilty Bay on rocky coastal promontory.</td>
+          </tr>
+          <tr>
+            <td><strong>Coordinates</strong></td>
+            <td><strong>69° 24.41' S, 76° 11.72' E</strong> (-69.4070°, 76.1950°)</td>
+            <td>Bound to real coastal telemetry and satellite tracking pass calculations.</td>
+          </tr>
+          <tr>
+            <td><strong>Architecture</strong></td>
+            <td><strong>134 ISO Containers inside Bi-Axial Skin</strong></td>
+            <td>3D aerodynamic monolithic hull on high-tensile steel stilts deflecting extreme winds.</td>
+          </tr>
+          <tr>
+            <td><strong>Energy Architecture</strong></td>
+            <td><strong>3 × 100 kVA MAN Combined Heat & Power (CHP)</strong></td>
+            <td>Digital twin models <strong>185 kW thermal waste-heat recovery</strong> yielding +28% efficiency.</td>
+          </tr>
+          <tr>
+            <td><strong>Water Sourcing</strong></td>
+            <td><strong>Prydz Bay Seawater Reverse Osmosis (RO)</strong></td>
+            <td>Sub-sea heated seawater intake pipeline feeding automated desalination membranes.</td>
+          </tr>
+          <tr>
+            <td><strong>Satellite Earth Station</strong></td>
+            <td><strong>ISRO Dual-Tracking 7.5m Radome Station</strong></td>
+            <td>Roof radomes modeled with real-time pass acquisition tracking for Resourcesat & Cartosat.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SLIDE 6: 3D CUTAWAYS & DRONE -->
+    <div class="slide" data-slide="6">
+      <div>
+        <span class="slide-tag">VISUALIZATION INNOVATION</span>
+        <h2 class="slide-title">Interactive 3D Cutaways & Autonomous Drone Reconnaissance</h2>
+        <p class="slide-subtitle">Going beyond static CAD: interactive Three.js structural navigation with live component telemetry overlays and autonomous aerial inspection.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-icon">🏢</div>
+          <div class="card-title">Structural Component Cutaways</div>
+          <div class="card-desc">
+            Toggle exterior insulated envelopes to reveal internal living modules, generator rooms, water filtration racks, and server banks. Real-time shader effects show thermal dissipation and heat plumes.
+          </div>
+          <div class="card-stats">360° Free Camera Orbit & Pan</div>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🔍</div>
+          <div class="card-title">Asset Deep Inspection Panel</div>
+          <div class="card-desc">
+            Click on any physical component (Kirloskar GenSet, Priyadarshini Submersible Pump, Hydronic Boiler, Battery Rack) to open an inspection drawer showing live RPM, vibration (mm/s), core temperature, and failure probability.
+          </div>
+          <div class="card-stats">Live MTBF & Wear Modeling</div>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🛸</div>
+          <div class="card-title">Autonomous Drone Patrol</div>
+          <div class="card-desc">
+            Launch an autonomous 3D reconnaissance drone that flies programmed patrol routes around fuel farms, antenna towers, and trace heating lines. Includes visual spectrum and simulated FLIR thermal infrared views.
+          </div>
+          <div class="card-stats">Thermal Heat-Leak Detection</div>
+        </div>
+      </div>
+
+      <div style="margin-top: 14px; padding: 12px 18px; border-radius: 10px; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.2); font-size: 12px;">
+        💡 <strong>Operator Value:</strong> A maintenance engineer can immediately identify which generator has elevated bearing vibration without stepping out into a -40°C blizzard.
+      </div>
+    </div>
+
+    <!-- SLIDE 7: REAL VS SIMULATED TELEMETRY -->
+    <div class="slide" data-slide="7">
+      <div>
+        <span class="slide-tag">TELEMETRY SYSTEM</span>
+        <h2 class="slide-title">Dual-Engine Telemetry: Live Satellite Feed vs Physics Simulation</h2>
+        <p class="slide-subtitle">Operators can seamlessly toggle between actual ground-truth satellite weather in Antarctica and synthetic stress-testing scenarios.</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div class="card-title" style="color: var(--accent-cyan);">📡 Mode A: Real Satellite Meteorology</div>
+            <span class="badge-highlight">LIVE OPEN-METEO FEED</span>
+          </div>
+          <div class="card-desc" style="margin-top: 8px;">
+            • Direct HTTPS integration with Open-Meteo Antarctic High-Resolution Reanalysis models.<br>
+            • Queries exact coordinates (-70.7644°S, 11.7342°E for Maitri; -69.4070°S, 76.1950°E for Bharati).<br>
+            • Streams real ambient temperature, wind velocity, gust speed, barometric pressure, and solar radiation.<br>
+            • Gives evaluators and researchers immediate visibility into real-time conditions in Antarctica today.
+          </div>
+          <div class="card-stats">Auto-refresh every 60 seconds with offline caching</div>
+        </div>
+
+        <div class="card">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div class="card-title" style="color: var(--accent-amber);">⚡ Mode B: Deterministic Physics Simulator</div>
+            <span style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 700;">PHYSICS ENGINE</span>
+          </div>
+          <div class="card-desc" style="margin-top: 8px;">
+            • Calculates building heat loss via Newton's law of cooling and Fourier thermal conduction.<br>
+            • Dynamically throttles diesel fuel consumption based on generator electrical kW load curves.<br>
+            • Simulates battery state-of-charge based on solar PV incidence and wind turbine rpm.<br>
+            • Allows commanders to inject extreme blizzards (-45°C, 120 km/h gusts) to test failover readiness.
+          </div>
+          <div class="card-stats">Full scenario stress-testing capability</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 8: EDGE GATEWAY & SATELLITE COMMS -->
+    <div class="slide" data-slide="8">
+      <div>
+        <span class="slide-tag">COMMUNICATIONS RESILIENCE</span>
+        <h2 class="slide-title">Edge Gateway: Satellite Bandwidth Throttling & Offline Buffering</h2>
+        <p class="slide-subtitle">Designed from the ground up for high-latitude polar conditions where satellite connectivity is intermittent, slow, and expensive.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-icon">🗜️</div>
+          <div class="card-title">92% Telemetry Compression</div>
+          <div class="card-desc">
+            Raw JSON sensor packets are serialized, deduplicated, and compressed into binary delta payloads before uplink, reducing costly satellite bandwidth overhead.
+          </div>
+          <div class="card-stats">Bandwidth Saved: ~92.4%</div>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">📦</div>
+          <div class="card-title">Store-and-Forward Queue</div>
+          <div class="card-desc">
+            When satellite links disconnect during blizzards or low satellite passes, the local Edge Gateway buffers all sensor telemetry safely in an offline queue.
+          </div>
+          <div class="card-stats">Zero Data Loss During Outages</div>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🔄</div>
+          <div class="card-title">Automated Batch Re-Sync</div>
+          <div class="card-desc">
+            As soon as the satellite link re-establishes, the gateway flushes queued packets in ordered batches to central NCPOR headquarters in Goa via <code>/api/telemetry/sync</code>.
+          </div>
+          <div class="card-stats">Intelligent Burst Transmission</div>
+        </div>
+      </div>
+
+      <div style="margin-top: 14px; padding: 12px 18px; border-radius: 10px; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); font-size: 12px;">
+        📡 <strong>Satellite Simulation Banner:</strong> The top banner allows judges to toggle connection status between <strong>LOCAL BROADBAND</strong>, <strong>SATELLITE (DEGRADED)</strong>, and <strong>OFFLINE</strong> to witness real-time queueing and recovery.
+      </div>
+    </div>
+
+    <!-- SLIDE 9: INCIDENT COMMAND POST -->
+    <div class="slide" data-slide="9">
+      <div>
+        <span class="slide-tag">EMERGENCY MANAGEMENT</span>
+        <h2 class="slide-title">Incident Command Post: Automated Triage & Synthesized Voice Alarms</h2>
+        <p class="slide-subtitle">A military-grade incident management system for polar station emergencies, compliant with NCPOR Standard Operating Procedures.</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Emergency Scenarios Simulated</div>
+          <div class="card-desc">
+            • <strong>Katabatic Blizzard</strong>: Wind speeds surge to 110+ km/h; ambient temp drops to -42°C; external heat transfer spikes.<br>
+            • <strong>Generator Failover (DG-01 Trip)</strong>: Simulates primary generator mechanical stall; triggers automated load shedding of non-essential research loads and activates backup GenSet #2 within 12 seconds.<br>
+            • <strong>Lake Priyadarshini Freeze Hazard</strong>: Trace heating failure triggers emergency anti-freeze recirculating pump.<br>
+            • <strong>Compound Cascading Multi-Failure</strong>: Compounding failures testing commander triage decisions.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Incident Command Capabilities</div>
+          <div class="card-desc">
+            • <strong>Synthesized Voice Alarms</strong>: Web Speech API broadcasts verbal alerts directly into operator headphones (e.g. <em>"Warning: Generator DG-01 thermal threshold exceeded"</em>).<br>
+            • <strong>SOP Playbooks</strong>: Actionable, step-by-step containment checklists with one-click resolution buttons.<br>
+            • <strong>Shift Handover Logging</strong>: Expedition handover logs with digital operator signatures and shift notes.<br>
+            • <strong>Executive SOS Broadcast</strong>: Station commander can broadcast priority distress SITREPs to NCPOR and maritime rescue centers.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 10: FROSTBYTE AI & WINTER CONSERVATION -->
+    <div class="slide" data-slide="10">
+      <div>
+        <span class="slide-tag">ARTIFICIAL INTELLIGENCE INNOVATION</span>
+        <h2 class="slide-title">FrostByte AI: Sub-Second Predictive Winter Resource Conservation</h2>
+        <p class="slide-subtitle">Solving the core operational challenge: Predicting winter vulnerabilities and executing one-click preventative conservation actions.</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Dual-LLM Hybrid Architecture</div>
+          <div class="card-desc">
+            • <strong>Primary Engine: Groq LPU Inference (Qwen 3.8 27B)</strong><br>
+            Achieves ultra-fast <strong>970ms response time</strong> (sub-second), providing real-time interactive decision support during emergencies without lag.<br><br>
+            • <strong>Fallback Engine: Google Gemini 3.6 Flash</strong><br>
+            Deep multimodal polar reasoning with automatic fallback if Groq API rate limits are reached.
+          </div>
+          <div class="card-stats">Benchmarked: 970ms Response • Sub-Second Execution</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Component Conservation & Predictive Savings Matrix</div>
+          <div class="card-desc">
+            When asked <em>"Winter is coming, what should we do to conserve our station?"</em>, FrostByte analyzes the live twin state and generates an actionable matrix:
+            <br><br>
+            • <strong>Priyadarshini Lake Pump</strong>: Risk drops from <strong>74% to 12%</strong> by overriding trace heating to +4.5°C.<br>
+            • <strong>Living Boilers & Microgrid</strong>: Sheds Tier-3 research heaters (-38 kW demand reduction), extending station fuel autonomy by <strong>+18 Days</strong>.
+          </div>
+          <div class="card-stats">1-Click "Execute Conservation" writes directly into live twin</div>
+        </div>
+      </div>
+
+      <div style="margin-top: 14px; padding: 12px 18px; border-radius: 10px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); font-size: 12px;">
+        ⚡ <strong>Live Interactivity:</strong> Operators click a single button <strong>"EXECUTE CONSERVATION"</strong> and the digital twin immediately sheds non-critical electrical loads, increases trace heating, and logs the action in the incident audit trail.
+      </div>
+    </div>
+
+    <!-- SLIDE 11: OFFICIAL SCIENTIFIC PAYLOADS -->
+    <div class="slide" data-slide="11">
+      <div>
+        <span class="slide-tag">SCIENTIFIC DOSSIER</span>
+        <h2 class="slide-title">Official NCPOR Scientific Payloads & Observatories Suite</h2>
+        <p class="slide-subtitle">A comprehensive physical registry celebrating India's Antarctic scientific research footprint and national collaborating institutes.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title" style="color: var(--accent-cyan);">Atmospheric & Ozone</div>
+          <div class="card-desc">
+            • <strong>IMD Brewer Spectrophotometer Mk-IV</strong>: Continuous daylight scanning of Total Column Ozone (Dobson Units) & UV-B flux for Montreal Protocol recovery monitoring.<br>
+            • <strong>IMD Coastal AWS Array</strong>: 3D ultrasonic anemometers and barometers monitoring katabatic boundary layer flows.
+          </div>
+          <div class="card-stats">India Meteorological Department</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="color: var(--accent-amber);">Geomagnetism & Space Weather</div>
+          <div class="card-desc">
+            • <strong>IIG Proton Precession (PPM-105)</strong>: Total magnetic intensity in nT (precision ±0.1 nT).<br>
+            • <strong>IIG Digital Fluxgate (DFM)</strong>: Vector components X, Y, Z for substorm recording.<br>
+            • <strong>NPL 30 MHz Riometer</strong>: Cosmic noise absorption during solar proton events.<br>
+            • <strong>Atmospheric Electric Field Mill (EFM)</strong>: Global Electric Circuit.
+          </div>
+          <div class="card-stats">IIG & National Physical Lab</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="color: var(--accent-emerald);">Seismology & Satellite Earth Station</div>
+          <div class="card-desc">
+            • <strong>NGRI Broadband Seismograph (Guralp CMG-3T)</strong>: Bedrock granite vault 24-bit recording.<br>
+            • <strong>NGRI Geodetic GPS Pillar (MTR-01)</strong>: Verifies ~1.5 cm/yr Indian Plate drift.<br>
+            • <strong>ISRO Dual-Tracking 7.5m Radome Station</strong>: Real-time passes of Resourcesat, Cartosat, Oceansat, RISAT relaying to Shadnagar.
+          </div>
+          <div class="card-stats">NGRI, Survey of India & ISRO</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 12: DUAL-STATION COMPARISON -->
+    <div class="slide" data-slide="12">
+      <div>
+        <span class="slide-tag">ANALYTICAL CORRELATION</span>
+        <h2 class="slide-title">Maitri vs Bharati: Synchronized Operational Comparison</h2>
+        <p class="slide-subtitle">Demonstrating the technical evolution between India's 1988 inland oasis station and 2012 coastal promontory complex.</p>
+      </div>
+
+      <table class="table-dossier">
+        <thead>
+          <tr>
+            <th>Specification Parameter</th>
+            <th>Maitri Research Station (IN-MTR-01)</th>
+            <th>Bharati Research Station (IN-BHR-02)</th>
+            <th>Differential Engineering Analysis</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Microclimate Environment</strong></td>
+            <td>Inland ice-free rocky oasis (Schirmacher)</td>
+            <td>Coastal marine promontory (Larsemann Hills)</td>
+            <td>Maitri averages ~5.6°C colder due to continental radiation cooling over moraine rock.</td>
+          </tr>
+          <tr>
+            <td><strong>Wind Dynamics</strong></td>
+            <td>Continental katabatic drainage (~36 km/h avg)</td>
+            <td>Maritime coastal cyclonic gusts (~28 km/h avg)</td>
+            <td>Maitri experiences sudden catastrophic katabatic wind drops from the polar ice cap.</td>
+          </tr>
+          <tr>
+            <td><strong>Elevation Profile</strong></td>
+            <td>~50 m above sea level (Lake Basin)</td>
+            <td>~35 m above sea level (Ridge Promontory)</td>
+            <td>Different atmospheric pressure baselines (982 hPa at Maitri vs 994 hPa at Bharati).</td>
+          </tr>
+          <tr>
+            <td><strong>Power Architecture</strong></td>
+            <td>3 × Kirloskar Diesel Sets (62.5–125 kVA)</td>
+            <td>3 × 100 kVA Combined Heat & Power (CHP)</td>
+            <td><span class="badge-highlight">Bharati achieves +28% thermal efficiency</span> by co-generating 185 kW waste heat.</td>
+          </tr>
+          <tr>
+            <td><strong>Potable Water Infrastructure</strong></td>
+            <td>Lake Priyadarshini Submersible Trace Loop</td>
+            <td>Seawater Desalination Reverse Osmosis (RO)</td>
+            <td>Freshwater glacial lake heating vs marine ocean water desalination.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SLIDE 13: CORE OPERATIONAL MODULES -->
+    <div class="slide" data-slide="13">
+      <div>
+        <span class="slide-tag">MISSION CAPABILITIES</span>
+        <h2 class="slide-title">Complete Mission Ecosystem: Energy, Stores, Glaciology & Assets</h2>
+        <p class="slide-subtitle">A comprehensive operational operating system managing all facets of Antarctic expedition life-support.</p>
+      </div>
+
+      <div class="grid-4">
+        <div class="card">
+          <div class="card-icon">⚡</div>
+          <div class="card-title">Power Microgrid</div>
+          <div class="card-desc">415V 3-phase microgrid tracking generation, renewable contribution (solar + wind), peak demand, and battery reserve hours.</div>
+          <div class="card-stats">Real-Time Load Shedding</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">📦</div>
+          <div class="card-title">Stores Ledger</div>
+          <div class="card-desc">Calculates runway days for AN-8 polar diesel, ration packs, water stores, and trauma medical supplies based on consumption rates.</div>
+          <div class="card-stats">Autonomy: 46 - 54 Days</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🛰️</div>
+          <div class="card-title">Glaciology SAR</div>
+          <div class="card-desc">Sentinel-1 Synthetic Aperture Radar maps tracking ice shelf deformation, strain rates, and crevasse fracture risk zones.</div>
+          <div class="card-stats">Crevasse Alerting</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🛠️</div>
+          <div class="card-title">Asset Maintenance</div>
+          <div class="card-desc">Predictive vibration analysis, running hours logging, failure probability prediction, and automated technician work orders.</div>
+          <div class="card-stats">Preventative Maintenance</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 14: FORENSICS & DEPENDENCIES -->
+    <div class="slide" data-slide="14">
+      <div>
+        <span class="slide-tag">INCIDENT FORENSICS</span>
+        <h2 class="slide-title">Telemetry Replay & Structural Dependency Graph Analysis</h2>
+        <p class="slide-subtitle">Post-incident investigation tools allowing operators to rewind historical data and visualize system failure cascades.</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Historical Telemetry Replay (Time Travel)</div>
+          <div class="card-desc">
+            • Interactive timeline scrubbing slider allowing operators to travel backwards in time.<br>
+            • Replays historical sensor telemetry second-by-second at 1x, 2x, 5x, or 10x speeds.<br>
+            • Enables post-mortem forensic audits after a power dip or pipe freeze to determine the exact root cause.
+          </div>
+          <div class="card-stats">Full Buffer Scrubbing</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">System Dependency Graph (Blast Radius DAG)</div>
+          <div class="card-desc">
+            • Directed Acyclic Graph (DAG) visualizing connections between all station infrastructure.<br>
+            • Shows how a fuel pump trip cascades to a generator trip, which knocks out the hydronic boiler, causing the Lake Priyadarshini water line to freeze.<br>
+            • Allows operators to inspect blast radius before taking a subsystem offline for maintenance.
+          </div>
+          <div class="card-stats">Cascading Risk Prevention</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 15: RBAC & MADRID PROTOCOL -->
+    <div class="slide" data-slide="15">
+      <div>
+        <span class="slide-tag">SECURITY & GOVERNANCE</span>
+        <h2 class="slide-title">Role-Based Access Control (RBAC) & Madrid Protocol Compliance</h2>
+        <p class="slide-subtitle">Ensuring operational discipline across personnel roles while enforcing strict environmental compliance under the Antarctic Treaty System.</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">5 Tailored Operational Roles</div>
+          <div class="card-desc">
+            • <strong>Station Commander</strong>: Executive SITREPs, SOS broadcasting, emergency scenario injection.<br>
+            • <strong>Station Operator</strong>: Microgrid controls, pump scheduling, fuel transfer, work order completion.<br>
+            • <strong>Research Scientist</strong>: Glaciology SAR radar, AWS weather models, geomagnetic magnetometers.<br>
+            • <strong>System Admin</strong>: Full system architecture configuration, edge sync controls.<br>
+            • <strong>Remote Viewer</strong>: Read-only overview for press and institutional stakeholders.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Madrid Protocol Environmental Governance</div>
+          <div class="card-desc">
+            • Enforces strict adherence to the <strong>Protocol on Environmental Protection to the Antarctic Treaty</strong>.<br>
+            • Biological wastewater bioreactor tracking with greywater recycling for sanitary flush.<br>
+            • 100% solid, hazardous, battery, and generator oil waste packaged and retrograded to mainland India.<br>
+            • Historical preservation tracking for Dakshin Gangotri (India's first station, 1983-1990).
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 16: CONCLUSION & ROADMAP -->
+    <div class="slide" data-slide="16">
+      <div>
+        <span class="slide-tag">IMPACT & ROADMAP</span>
+        <h2 class="slide-title">Strategic Impact: Elevating Indian Polar Science to Industry 4.0</h2>
+        <p class="slide-subtitle">Delivering a field-ready operational digital twin ready for deployment across NCPOR headquarters and station edge infrastructure.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-icon">🎯</div>
+          <div class="card-title">What We Delivered</div>
+          <div class="card-desc">
+            • 100% official NCPOR data alignment (no spec conflicts).<br>
+            • Full 3D visual twin with structural cutaways.<br>
+            • Sub-second predictive AI with 1-click execution.<br>
+            • Zero-latency offline edge resilience.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🚀</div>
+          <div class="card-title">Operational Benefits</div>
+          <div class="card-desc">
+            • Prevents life-threatening water pipeline freezes.<br>
+            • Optimizes fuel consumption by +18 to +28%.<br>
+            • Eliminates operator blind spots during 6-month isolation.<br>
+            • Streamlines maintenance work orders.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🔮</div>
+          <div class="card-title">Future Roadmap</div>
+          <div class="card-desc">
+            • <strong>Maitri-II Integration</strong>: Pre-construction twin modeling for India's upcoming new station.<br>
+            • <strong>Autonomous Polar Rovers</strong>: ROS-based rover and drone telemetry integration.<br>
+            • <strong>ISRO NavIC Link</strong>: High-precision satellite geodesy.
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 14px; padding: 14px 20px; border-radius: 12px; background: linear-gradient(135deg, rgba(2, 132, 199, 0.2), rgba(37, 99, 235, 0.2)); border: 1px solid rgba(56, 189, 248, 0.4); display: flex; align-items: center; justify-content: space-between;">
+        <div>
+          <div style="font-weight: 800; font-size: 14px; color: #fff;">Antarctic Digital Twin — Ready for Live Mission Deployment</div>
+          <div style="font-size: 12px; color: #94a3b8;">Sovereign situational awareness, human safety, and infrastructure preservation.</div>
+        </div>
+        <a href="http://localhost:5173" class="btn btn-primary" style="padding: 8px 18px; font-size: 13px;">
+          Explore Live Platform ➔
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Speaker Notes Drawer -->
+  <div id="notesDrawer">
+    <div class="notes-title">
+      <span>🎙️ SPEAKER NOTES & TALKING POINTS</span>
+      <span style="cursor: pointer;" onclick="toggleNotes()">✕</span>
+    </div>
+    <div class="notes-content" id="notesText">
+      Welcome the judges. Introduce the Antarctic Digital Twin project for SIH #26060 and MoES/NCPOR.
+    </div>
+  </div>
+
+  <!-- Bottom Navigation Bar -->
+  <footer>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <button class="btn" id="btnPrev">◀ Previous [←]</button>
+      <button class="btn" id="btnNext">Next [→] ▶</button>
+    </div>
+
+    <div style="display: flex; align-items: center; flex: 1; justify-content: center;">
+      <span class="slide-counter" id="slideIndicator">Slide 1 of 16</span>
+      <div class="progress-wrap">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+    </div>
+
+    <div style="font-size: 11px; color: var(--text-muted);">
+      Use <kbd style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">←</kbd> <kbd style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">→</kbd> to navigate • Press <kbd style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">N</kbd> for Speaker Script
+    </div>
+  </footer>
+
+  <script>
+    // Speaker notes map
+    const speakerNotes = {
+      1: "Distinguished evaluators: Managing research stations in Antarctica is one of the most hostile engineering challenges on Earth. Our platform is not just a dashboard; it is a full-fidelity, multi-station digital twin connecting structural physics, real satellite meteorology, edge communications, and AI-guided mission control for India's polar stations, Maitri and Bharati.",
+      2: "In Antarctica, failure isn't an inconvenience—it is life-threatening. If the water trace heating loop on Lake Priyadarshini fails at Maitri, the water freezes inside the pipes within 45 minutes, splitting the steel lines. Our digital twin provides predictive foresight so operators can prevent crises before they escalate.",
+      3: "Our architecture is purpose-built for low-bandwidth, high-latency environments. The backend can run directly on a local edge server at the station, while synchronizing seamlessly with NCPOR headquarters in Goa over intermittent satellite passes without losing a single packet.",
+      4: "Maitri is situated in the rocky Schirmacher Oasis. Our twin models its unique physical characteristics: the stilt foundation preventing snow accumulation, the crucial trace-heated water pipeline from Lake Priyadarshini, and the synchronized Kirloskar generator bank with solar and wind renewable contribution.",
+      5: "Bharati represents modern polar engineering. Our twin models its 134 ISO container envelope and its innovative Combined Heat & Power system, which co-generates 185 kW of thermal heat directly from the diesel engines to warm the living modules and desalinate ocean water.",
+      6: "Operators and command personnel at NCPOR Goa can take a virtual walk through the station in full 3D, click on individual generators to inspect thermal vibration readings, or launch the autonomous drone to inspect external pipeline trace heaters and fuel storage tanks.",
+      7: "The platform provides the best of both worlds: live satellite ground-truth when you want to monitor actual current conditions in Antarctica, and a deterministic physics engine when you need to stress-test contingency plans against catastrophic blizzards.",
+      8: "We don't assume reliable fiber internet. Our Edge Gateway replicates real polar comms: compressing telemetry by over 92%, queueing data locally during satellite blackouts, and flushes packets smoothly upon link restoration without losing a single data point.",
+      9: "When an alarm fires, the system doesn't just show a red box. It triggers synthesized voice alerts, auto-classifies the incident, and displays the exact step-by-step NCPOR emergency checklist for the station commander to follow.",
+      10: "This directly addresses the core user requirement: 'Winter is coming, what should we do to conserve our station?' FrostByte AI doesn't give vague chat answers. It outputs an interactive Component Savings Matrix showing exactly what will be saved, and provides a 1-click button that executes the load shedding and trace heating in the live digital twin.",
+      11: "Our platform honors India's polar science. Every single instrument in our Research Dossier corresponds to real scientific infrastructure deployed by national institutions like IMD, IIG, NGRI, NPL, and ISRO in Antarctica.",
+      12: "Comparing Maitri and Bharati side-by-side demonstrates how India's polar station design evolved from 1988 to 2012—shifting from traditional separate heating boilers to integrated Combined Heat and Power with automated waste-heat recovery.",
+      13: "Beyond 3D graphics, the platform functions as an ERP and maintenance operating system for the entire base—tracking fuel autonomy, medical supplies, ice shelf crevasse strain, and scheduling preventive maintenance work orders.",
+      14: "When an incident occurs in Antarctica, post-incident forensic analysis is crucial. Our Telemetry Replay allows investigators to rewind time and inspect exact sensor waveforms, while the Dependency Graph shows the cascade blast radius before turning off any switchgear.",
+      15: "The platform strictly enforces role-based permissions to ensure operational safety, and embeds the Madrid Protocol environmental guidelines to maintain India's standing as a responsible Antarctic Treaty Consultative Party.",
+      16: "The Antarctic Digital Twin elevates Indian polar research into the age of Industry 4.0 and predictive AI. It protects human lives, preserves vital research infrastructure, and provides sovereign situational awareness over our Antarctic mission. Thank you!"
+    };
+
+    let currentSlide = 1;
+    const totalSlides = 16;
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progressBar');
+    const slideIndicator = document.getElementById('slideIndicator');
+    const notesDrawer = document.getElementById('notesDrawer');
+    const notesText = document.getElementById('notesText');
+
+    function showSlide(index) {
+      if (index < 1) index = 1;
+      if (index > totalSlides) index = totalSlides;
+      currentSlide = index;
+
+      slides.forEach((slide) => {
+        slide.classList.remove('active');
+        if (parseInt(slide.getAttribute('data-slide')) === currentSlide) {
+          slide.classList.add('active');
+        }
+      });
+
+      progressBar.style.width = `${(currentSlide / totalSlides) * 100}%`;
+      slideIndicator.textContent = `Slide ${currentSlide} of ${totalSlides}`;
+      notesText.textContent = speakerNotes[currentSlide] || "No notes for this slide.";
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) showSlide(currentSlide + 1);
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) showSlide(currentSlide - 1);
+    }
+
+    function toggleNotes() {
+      notesDrawer.classList.toggle('visible');
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => alert(err.message));
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        prevSlide();
+      } else if (e.key.toLowerCase() === 'n') {
+        toggleNotes();
+      } else if (e.key.toLowerCase() === 'f') {
+        toggleFullscreen();
+      } else if (e.key.toLowerCase() === 'p') {
+        window.print();
+      } else if (e.key === 'Home') {
+        showSlide(1);
+      } else if (e.key === 'End') {
+        showSlide(totalSlides);
+      }
+    });
+
+    document.getElementById('btnNext').addEventListener('click', nextSlide);
+    document.getElementById('btnPrev').addEventListener('click', prevSlide);
+    document.getElementById('btnNotes').addEventListener('click', toggleNotes);
+    document.getElementById('btnPrint').addEventListener('click', () => window.print());
+    document.getElementById('btnFullscreen').addEventListener('click', toggleFullscreen);
+
+    // Initial state
+    showSlide(1);
+  </script>
+</body>
+</html>

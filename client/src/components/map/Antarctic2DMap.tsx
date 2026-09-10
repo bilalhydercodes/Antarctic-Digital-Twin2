@@ -132,7 +132,7 @@ export const Antarctic2DMap: React.FC<Antarctic2DMapProps> = ({ onOpenDigitalTwi
                     <span>MAITRI STATION</span>
                     <ExternalLink className="w-3 h-3 text-blue-600" />
                   </div>
-                  <div className="text-[11px] text-stone-500 font-medium">70°45'S, 11°44'E • 117m</div>
+                  <div className="text-[11px] text-stone-500 font-medium">70°45'S, 11°44'E • ~50m</div>
                 </div>
               </button>
             </div>

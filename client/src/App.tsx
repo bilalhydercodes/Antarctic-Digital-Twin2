@@ -28,6 +28,7 @@ import { StationComparisonPage } from './pages/StationComparisonPage';
 import { ScenarioLabPage } from './pages/ScenarioLabPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { AssistantPage } from './pages/AssistantPage';
+import { ResearchPage } from './pages/ResearchPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { AntarcticLandingPage } from './components/landing/AntarcticLandingPage';
 import { RBACRole } from './types';
@@ -134,6 +135,7 @@ export const MainContent: React.FC = () => {
               {activeTab === 'analytics' && <AnalyticsPage />}
               {activeTab === 'scenarios' && <ScenarioLabPage />}
               {activeTab === 'assistant' && <AssistantPage />}
+              {activeTab === 'research' && <ResearchPage />}
               {activeTab === 'settings' && <SettingsPage />}
             </>
           )}

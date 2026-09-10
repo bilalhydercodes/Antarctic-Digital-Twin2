@@ -1,7 +1,7 @@
 # ❄️ Antarctic Digital Twin & Station Simulation Platform
 ### Ministry of Earth Sciences (MoES) & NCPOR • Problem Statement: 26060
 
-Comprehensive, high-fidelity **Digital Twin & Mission Operations Platform** for India's Antarctic Research Stations: **Maitri** (Est. 1989) and **Bharati** (Est. 2012).
+Comprehensive, high-fidelity **Digital Twin & Mission Operations Platform** for India's Antarctic Research Stations: **Maitri** (Est. 1988) and **Bharati** (Est. 2012).
 
 ---
 

@@ -645,7 +645,7 @@ export const Maitri3DCanvas: React.FC<Maitri3DCanvasProps> = ({ onNavigate }) =>
                         )}
                       </div>
                       <div className="text-[10px] text-slate-400 font-mono mt-0.5">
-                        70°45&apos;S, 11°44&apos;E • Schirmacher Oasis • 1989
+                        70°45&apos;S, 11°44&apos;E • Schirmacher Oasis • Est. 1988
                       </div>
                     </div>
                   </button>
@@ -792,7 +792,7 @@ export const Maitri3DCanvas: React.FC<Maitri3DCanvasProps> = ({ onNavigate }) =>
         <div className="flex items-center space-x-2 text-xs text-slate-300 font-mono">
           <span>70°45&apos;S, 11°44&apos;E</span>
           <span>•</span>
-          <span>Elevation: 117 m</span>
+          <span>Elevation: ~50 m (NCPOR Profile)</span>
         </div>
 
         <div className="pt-1 flex items-center space-x-3">

@@ -48,7 +48,7 @@ export const MaitriStationDashboard: React.FC = () => {
             <h1 className="text-xl font-black text-slate-900">MAITRI RESEARCH STATION DIGITAL TWIN</h1>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Schirmacher Oasis, Queen Maud Land (70°45'S 11°44'E) • Est. 1989 • Crew: 25 Personnel
+            Schirmacher Oasis, Queen Maud Land (70°45'S 11°44'E) • Est. 1988 • Elevation: ~50m • Crew: 47 Wintering (+25 Summer Camp = 72 Cap)
           </p>
         </div>
 

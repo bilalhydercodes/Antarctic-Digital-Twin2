@@ -11,6 +11,7 @@ export type SystemEventType =
   | 'ALERT_CREATED'
   | 'GROQ_ANALYSIS_COMPLETED'
   | 'EMERGENCY_SCENARIO_EXECUTED'
+  | 'CONSERVATION_ACTION_EXECUTED'
   | 'TELEMETRY_INGESTED';
 
 export interface SystemLogEntry {
@@ -53,6 +54,7 @@ class SystemLogger {
       ALERT_CREATED: '🔔',
       GROQ_ANALYSIS_COMPLETED: '🤖',
       EMERGENCY_SCENARIO_EXECUTED: '🚨',
+      CONSERVATION_ACTION_EXECUTED: '🛡️',
       TELEMETRY_INGESTED: '📡'
     };
 

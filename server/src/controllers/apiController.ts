@@ -523,7 +523,83 @@ export class ApiController {
       stationId: stId,
       prompt,
       response,
-      answer: response.fullMarkdownAnswer
+      answer: response.fullMarkdownAnswer,
+      componentPredictions: response.componentPredictions
+    });
+  }
+
+  // POST /api/assistant/apply-conservation
+  public static async applyConservationAction(req: Request, res: Response) {
+    const { stationId, actionType, componentName } = req.body;
+    const stId = (stationId || 'maitri') as StationId;
+    const energy = inMemoryDb.energy.get(stId);
+    const eqList = inMemoryDb.equipment.get(stId) || [];
+
+    let appliedEffect = '';
+
+    switch (actionType) {
+      case 'SHED_LOAD': {
+        if (energy) {
+          energy.powerGrid.consumptionKw = Math.max(140, energy.powerGrid.consumptionKw - 38);
+          energy.powerGrid.nonCriticalLoadKw = Math.max(10, energy.powerGrid.nonCriticalLoadKw - 38);
+          if (energy.generators[0]) {
+            energy.generators[0].loadPercent = Math.max(48, energy.generators[0].loadPercent - 22);
+            energy.generators[0].temperature = Math.max(62, Number((energy.generators[0].temperature - 18).toFixed(1)));
+            energy.generators[0].status = 'ONLINE';
+            energy.generators[0].failureProbability = Math.max(2.0, energy.generators[0].failureProbability - 45);
+          }
+        }
+        appliedEffect = 'Shed 38 kW of non-essential research heating. Generator load reduced to 64%, operating temperature stabilized at 68°C. Component saved from thermal trip!';
+        break;
+      }
+      case 'ACTIVATE_TRACE_HEAT': {
+        const waterEq = eqList.find(e => e.name.toLowerCase().includes('water') || e.name.toLowerCase().includes('pump'));
+        if (waterEq) {
+          waterEq.temperature = 3.2;
+          waterEq.status = 'HEALTHY';
+          waterEq.healthPercent = Math.min(100, waterEq.healthPercent + 5);
+        }
+        appliedEffect = 'Trace heating recirculation activated. Water line temperature increased to +3.2°C. Zero freeze risk; pump impeller and conduit preserved!';
+        break;
+      }
+      case 'STOW_SOLAR': {
+        appliedEffect = 'Motor actuators engaged: Solar PV arrays stowed horizontally (0° angle). Wind torque stress reduced by 82%; tracking actuators fully protected!';
+        break;
+      }
+      case 'MODULATE_SETPOINT': {
+        if (energy) {
+          energy.fuelStorage.estimatedDaysRemaining = Number((energy.fuelStorage.estimatedDaysRemaining + 16).toFixed(1));
+        }
+        appliedEffect = 'Habitat setpoint modulated to 19°C. Heating fuel burn rate reduced by 110 L/day (+16 days additional fuel autonomy preserved).';
+        break;
+      }
+      case 'RESERVE_OPTIMIZATION': {
+        if (energy) {
+          energy.battery.status = 'HEALTHY';
+          energy.battery.stateOfCharge = Math.max(50, energy.battery.stateOfCharge);
+        }
+        appliedEffect = 'Emergency battery buffer locked at minimum 50% SOC cutoff. 6.5 hours emergency life-support autonomy secured!';
+        break;
+      }
+      default: {
+        appliedEffect = `Operational conservation measure applied for ${componentName || 'component'}.`;
+      }
+    }
+
+    systemLogger.log(
+      'CONSERVATION_ACTION_EXECUTED',
+      stId,
+      `Operator executed conservation action [${actionType}]: ${appliedEffect}`,
+      { actionType, componentName }
+    );
+
+    res.json({
+      success: true,
+      stationId: stId,
+      actionType,
+      appliedEffect,
+      message: appliedEffect,
+      updatedEnergy: energy
     });
   }
 

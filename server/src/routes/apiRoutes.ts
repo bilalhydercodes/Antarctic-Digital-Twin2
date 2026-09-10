@@ -63,6 +63,7 @@ router.get('/logs', ApiController.getSystemLogs);
 
 // RAG AI Assistant & What-If Engine
 router.post('/assistant/query', ApiController.queryAssistant);
+router.post('/assistant/apply-conservation', ApiController.applyConservationAction);
 router.post('/whatif', ApiController.calculateWhatIf);
 router.post('/inventory/dispatch', ApiController.dispatchSupply);
 

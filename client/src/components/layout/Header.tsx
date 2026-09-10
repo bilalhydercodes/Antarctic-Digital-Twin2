@@ -80,6 +80,17 @@ export const Header: React.FC<HeaderProps> = ({ onOpenLanding }) => {
             <span>PORTAL</span>
           </button>
         )}
+
+        <a
+          href="/presentation.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Open Official Feature Showcase Presentation Deck"
+          className="hidden sm:flex items-center space-x-1.5 ml-1 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 font-bold text-xs shadow-sm transition"
+        >
+          <span>📽️</span>
+          <span>DECK PPT</span>
+        </a>
       </div>
 
       {/* 2. PROMINENT MAITRI & BHARATI STATION SWITCHER */}
@@ -95,7 +106,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenLanding }) => {
           <span className="text-sm">🏔️</span>
           <span>MAITRI (70.76°S)</span>
           <span className={`px-1.5 py-0.5 rounded text-[10px] ${activeStationId === 'maitri' ? 'bg-blue-800 text-blue-100' : 'bg-stone-200 text-stone-700'}`}>
-            1989
+            1988
           </span>
         </button>
 

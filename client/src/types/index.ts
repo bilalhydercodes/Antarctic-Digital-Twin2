@@ -45,6 +45,7 @@ export type NavTab =
   | 'analytics'
   | 'scenarios'
   | 'assistant'
+  | 'research'
   | 'settings';
 
 export const ROLE_ALLOWED_TABS: Record<RBACRole, NavTab[]> = {
@@ -69,6 +70,7 @@ export const ROLE_ALLOWED_TABS: Record<RBACRole, NavTab[]> = {
     'analytics',
     'scenarios',
     'assistant',
+    'research',
     'settings'
   ],
   COMMANDER: [
@@ -78,6 +80,7 @@ export const ROLE_ALLOWED_TABS: Record<RBACRole, NavTab[]> = {
     'twin',
     'dependencies',
     'compare',
+    'research',
     'alerts',
     'replay',
     'scenarios',
@@ -93,9 +96,11 @@ export const ROLE_ALLOWED_TABS: Record<RBACRole, NavTab[]> = {
     'sensors',
     'alerts',
     'edge',
-    'analytics'
+    'analytics',
+    'research'
   ],
   SCIENTIST: [
+    'research',
     'glaciology',
     'environment',
     'map',
@@ -107,6 +112,7 @@ export const ROLE_ALLOWED_TABS: Record<RBACRole, NavTab[]> = {
   ],
   VIEWER: [
     'dashboard',
+    'research',
     'twin',
     'map',
     'environment',
@@ -174,11 +180,24 @@ export interface StationMeta {
   name: string;
   code: string;
   established: number;
+  commissionedDate?: string;
   locationName: string;
   coordinates: { lat: number; lng: number };
+  coordinatesDMS?: string;
   elevationMeters: number;
+  elevationDescription?: string;
   crewCount: number;
+  winterCrewCount?: number;
+  summerCapacity?: number;
   status: 'OPERATIONAL' | 'WARNING' | 'CRITICAL';
+  architecture?: string;
+  powerPlantSpecs?: string;
+  waterSupplySpecs?: string;
+  satelliteCommsSpecs?: string;
+  wasteManagementSpecs?: string;
+  scientificDisciplines?: string[];
+  partnerInstitutes?: string[];
+  ncporProfileUrl?: string;
 }
 
 export interface EnvironmentData {
@@ -661,4 +680,16 @@ export interface ShiftHandoverReport {
   scientificInstrumentsSummary: string;
   pendingMaintenanceTasks: string[];
   operationalNotes: string[];
+}
+
+export interface ComponentPrediction {
+  componentName: string;
+  componentId?: string;
+  currentRisk: string;
+  conservationAction: string;
+  predictedSavedBenefit: string;
+  savingsMetric: string;
+  urgency: 'HIGH' | 'MEDIUM' | 'CRITICAL';
+  actionType: 'SHED_LOAD' | 'ACTIVATE_TRACE_HEAT' | 'STOW_SOLAR' | 'MODULATE_SETPOINT' | 'BALANCED_GENERATOR' | 'RESERVE_OPTIMIZATION';
+  applied?: boolean;
 }

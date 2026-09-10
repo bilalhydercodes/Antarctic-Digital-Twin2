@@ -9,7 +9,7 @@ import { BharatiStationDashboard } from '../components/dashboards/BharatiStation
 import { IncidentReportModal } from '../components/incidents/IncidentReportModal';
 import { 
   Zap, Thermometer, Droplets, Radio, AlertTriangle, CheckCircle2, Clock, ArrowRight,
-  TrendingUp, Compass, Plus, Minus, Navigation, Flame, FileText, Activity
+  TrendingUp, Compass, Plus, Minus, Navigation, Flame, FileText, Activity, Microscope
 } from 'lucide-react';
 import { IncidentRecord } from '../types';
 
@@ -31,8 +31,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
   const [activeSubTab, setActiveSubTab] = useState<'3D' | 'telemetry'>('3D');
   const [selectedIncident, setSelectedIncident] = useState<IncidentRecord | null>(null);
 
-  const stationTitle = activeStationId === 'maitri' ? '🏔️ Maitri Research Station (Est. 1989)' : '🏔️ Bharati Research Station (Est. 2012)';
-  const stationRegion = activeStationId === 'maitri' ? 'Schirmacher Oasis, Queen Maud Land (70°45\'S 11°44\'E) • Elevation: 117m • Crew: 25' : 'Larsemann Hills, Prydz Bay (69°24\'S 76°11\'E) • Elevation: 35m • Crew: 30';
+  const stationTitle = activeStationId === 'maitri' ? '🏔️ Maitri Research Station (Est. 1988)' : '🏔️ Bharati Research Station (Est. 2012)';
+  const stationRegion = activeStationId === 'maitri' 
+    ? 'Schirmacher Oasis, Queen Maud Land (70°45\'52"S 11°44\'03"E) • Elevation: ~50m ASL • Crew: 47 Base / 72 Summer Cap' 
+    : 'Larsemann Hills, Prydz Bay (69°24\'41"S 76°11\'72"E) • Elevation: ~35m ASL • Crew: 47 Main / 72 Summer Cap (134 ISO Containers)';
 
   const powerLoadPercent = Math.round((energy?.powerGrid.consumptionKw || 195) / (energy?.powerGrid.generationKw || 310) * 100);
   const gen2 = energy?.generators[1];
@@ -76,6 +78,14 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             >
               <Activity className="w-3.5 h-3.5" />
               STATION TELEMETRY & SCIENTIFIC SUITE
+            </button>
+
+            <button
+              onClick={() => onNavigate('research')}
+              className="px-4 py-2 rounded-xl font-bold text-xs transition-all flex items-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200"
+            >
+              <Microscope className="w-3.5 h-3.5 text-indigo-600" />
+              OFFICIAL NCPOR DOSSIER
             </button>
           </div>
 

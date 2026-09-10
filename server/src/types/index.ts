@@ -46,11 +46,24 @@ export interface StationMeta {
   name: string;
   code: string;
   established: number;
+  commissionedDate?: string;
   locationName: string;
   coordinates: { lat: number; lng: number };
+  coordinatesDMS?: string;
   elevationMeters: number;
+  elevationDescription?: string;
   crewCount: number;
+  winterCrewCount?: number;
+  summerCapacity?: number;
   status: 'OPERATIONAL' | 'WARNING' | 'CRITICAL';
+  architecture?: string;
+  powerPlantSpecs?: string;
+  waterSupplySpecs?: string;
+  satelliteCommsSpecs?: string;
+  wasteManagementSpecs?: string;
+  scientificDisciplines?: string[];
+  partnerInstitutes?: string[];
+  ncporProfileUrl?: string;
 }
 
 // -------------------------------------------------------------
@@ -554,4 +567,16 @@ export interface DemoStepInfo {
   description?: string;
   actionHighlight?: string;
   aiPrompt?: string;
+}
+
+export interface ComponentPrediction {
+  componentName: string;
+  componentId?: string;
+  currentRisk: string;
+  conservationAction: string;
+  predictedSavedBenefit: string;
+  savingsMetric: string;
+  urgency: 'HIGH' | 'MEDIUM' | 'CRITICAL';
+  actionType: 'SHED_LOAD' | 'ACTIVATE_TRACE_HEAT' | 'STOW_SOLAR' | 'MODULATE_SETPOINT' | 'BALANCED_GENERATOR' | 'RESERVE_OPTIMIZATION';
+  applied?: boolean;
 }

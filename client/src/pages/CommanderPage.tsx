@@ -38,7 +38,7 @@ export const CommanderPage: React.FC = () => {
 
   const isMaitri = activeStationId === 'maitri';
   const stationName = isMaitri ? 'MAITRI STATION (Schirmacher Oasis)' : 'BHARATI STATION (Larsemann Hills)';
-  const crewCount = isMaitri ? 25 : 22;
+  const crewCount = 47;
 
   // Equipment breakdown
   const totalEquip = equipment.length || 1;
@@ -94,7 +94,7 @@ export const CommanderPage: React.FC = () => {
             <div className="flex items-center space-x-4 text-xs text-stone-500 mt-1 font-medium">
               <span className="flex items-center space-x-1">
                 <Users className="w-3.5 h-3.5 text-stone-400" />
-                <span>Station Crew: <strong>{crewCount} Personnel</strong></span>
+                <span>Station Crew: <strong>{crewCount} Personnel</strong> {isMaitri ? '(Wintering Base, +25 Summer Camp = 72 Cap)' : '(Main Complex 47, +25 Summer = 72 Cap)'}</span>
               </span>
               <span className="flex items-center space-x-1">
                 <Clock className="w-3.5 h-3.5 text-stone-400" />

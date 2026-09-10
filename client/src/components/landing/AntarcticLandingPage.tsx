@@ -118,6 +118,15 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
           >
             PROTECT
           </button>
+          <a 
+            href="/presentation.html" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-amber-300 hover:text-amber-200 hover:drop-shadow-[0_0_8px_rgba(245,158,11,0.8)] font-bold transition flex items-center gap-1"
+          >
+            <span>📽️</span>
+            <span>DECK PPT</span>
+          </a>
         </nav>
 
         {/* Right Seismograph / Pulse & Slogan */}

@@ -36,7 +36,7 @@ export const BharatiStationDashboard: React.FC = () => {
             <h1 className="text-xl font-black text-slate-900">BHARATI RESEARCH STATION DIGITAL TWIN</h1>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Larsemann Hills, Prydz Bay (69°24'S 76°11'E) • Est. 2012 • Crew: 30 Personnel • CHP Architecture
+            Larsemann Hills, Prydz Bay (69°24'41"S 76°11'72"E) • Est. 2012 • Elevation: ~35m ASL • Crew: 47 Main Complex / 72 Summer Cap • CHP 185kW Thermal Co-Gen
           </p>
         </div>
 

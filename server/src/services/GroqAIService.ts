@@ -13,6 +13,9 @@ export interface GroqAIAnalysisResponse {
 }
 
 export class GroqAIService {
+  private static readonly PRIMARY_MODEL = 'qwen/qwen3.8-27b';
+  private static readonly FALLBACK_MODEL = 'openai/gpt-oss-120b';
+
   public static async queryRAGModel(
     stationId: StationId, 
     userQuery: string, 
@@ -24,42 +27,54 @@ export class GroqAIService {
       return null;
     }
 
-    try {
-      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          messages: [
-            {
-              role: 'system',
-              content: `You are the NCPOR Remote Antarctic Operations AI Copilot. You MUST answer the user question using ONLY the provided live telemetry and SOP knowledge base. Respond ONLY in valid JSON matching this schema:
+    const modelsToTry = [this.PRIMARY_MODEL, this.FALLBACK_MODEL];
+
+    for (const model of modelsToTry) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              {
+                role: 'system',
+                content: `You are the NCPOR Remote Antarctic Operations AI Copilot. Answer the user question using the live telemetry and SOP knowledge base.
+If the operator asks about winter, severe cold, resource conservation, or saving components, make sure to detail which equipment is at risk, what action to take, and what benefit saves the component.
+Respond ONLY in valid JSON matching this schema:
 {
   "currentSensorData": "Summary of active physical sensor values relevant to the question",
   "documentedProcedure": "Official NCPOR SOP steps applicable to this scenario",
-  "systemRecommendation": "Actionable operational recommendations based on physical constraints",
+  "systemRecommendation": "Actionable operational recommendations based on physical constraints and conservation actions",
   "unknownOrInsufficientData": "Any missing data points or unverified details (or null if fully known)"
 }`
-            },
-            {
-              role: 'user',
-              content: `Station: ${stationId.toUpperCase()}\nUser Query: ${userQuery}\n\nLIVE TELEMETRY CONTEXT:\n${liveTelemetrySummary}\n\nDOCUMENTED SOP KNOWLEDGE BASE:\n${relevantSop}`
-            }
-          ],
-          temperature: 0.2,
-          response_format: { type: 'json_object' }
-        })
-      });
+              },
+              {
+                role: 'user',
+                content: `Station: ${stationId.toUpperCase()}\nUser Query: ${userQuery}\n\nLIVE TELEMETRY CONTEXT:\n${liveTelemetrySummary}\n\nDOCUMENTED SOP KNOWLEDGE BASE:\n${relevantSop}`
+              }
+            ],
+            temperature: 0.2,
+            response_format: { type: 'json_object' }
+          }),
+          signal: controller.signal
+        });
 
-      if (response.ok) {
-        const data: any = await response.json();
-        const parsed = JSON.parse(data.choices[0].message.content);
+        clearTimeout(timeoutId);
 
-        const stationName = stationId === 'maitri' ? 'Maitri Research Station' : 'Bharati Research Station';
-        const fullMarkdownAnswer = `### 🛰️ Antarctic Operational AI Copilot Analysis (${stationName})
+        if (response.ok) {
+          const data: any = await response.json();
+          const parsed = JSON.parse(data.choices[0].message.content);
+
+          const stationName = stationId === 'maitri' ? 'Maitri Research Station' : 'Bharati Research Station';
+          const fullMarkdownAnswer = `### 🛰️ Antarctic Operational AI Copilot Analysis (${stationName})
+*Powered by Groq High-Speed Polar Engine (${model})*
 
 #### 📊 CURRENT SENSOR DATA
 ${parsed.currentSensorData}
@@ -67,25 +82,26 @@ ${parsed.currentSensorData}
 #### 📜 DOCUMENTED PROCEDURE
 ${parsed.documentedProcedure}
 
-#### 💡 SYSTEM RECOMMENDATION
+#### 💡 SYSTEM RECOMMENDATION & CONSERVATION PROTOCOL
 ${parsed.systemRecommendation}
 
 ${parsed.unknownOrInsufficientData ? `\n#### ⚠️ UNKNOWN / INSUFFICIENT DATA\n${parsed.unknownOrInsufficientData}` : ''}
 `;
 
-        return {
-          stationId,
-          prompt: userQuery,
-          currentSensorData: parsed.currentSensorData,
-          documentedProcedure: parsed.documentedProcedure,
-          systemRecommendation: parsed.systemRecommendation,
-          unknownOrInsufficientData: parsed.unknownOrInsufficientData || undefined,
-          fullMarkdownAnswer,
-          source: 'GROQ_RAG_AI'
-        };
+          return {
+            stationId,
+            prompt: userQuery,
+            currentSensorData: parsed.currentSensorData,
+            documentedProcedure: parsed.documentedProcedure,
+            systemRecommendation: parsed.systemRecommendation,
+            unknownOrInsufficientData: parsed.unknownOrInsufficientData || undefined,
+            fullMarkdownAnswer,
+            source: 'GROQ_RAG_AI'
+          };
+        }
+      } catch (err: any) {
+        console.log(`🟡 Groq API query with model [${model}] failed:`, err.message);
       }
-    } catch (err: any) {
-      console.log('🟡 Groq API query failed, falling back to deterministic RAG engine:', err.message);
     }
 
     return null;
@@ -126,19 +142,24 @@ ${parsed.unknownOrInsufficientData ? `\n#### ⚠️ UNKNOWN / INSUFFICIENT DATA\
     const apiKey = process.env.GROQ_API_KEY;
 
     if (apiKey && apiKey !== 'gsk_demo_key_placeholder' && apiKey.startsWith('gsk_')) {
-      try {
-        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            model: 'llama-3.3-70b-versatile',
-            messages: [
-              {
-                role: 'system',
-                content: `You are the NCPOR Remote Antarctic Operations AI Engine. Respond ONLY in valid JSON matching:
+      const modelsToTry = [this.PRIMARY_MODEL, this.FALLBACK_MODEL];
+      for (const model of modelsToTry) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+          const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${apiKey}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              model,
+              messages: [
+                {
+                  role: 'system',
+                  content: `You are the NCPOR Remote Antarctic Operations AI Engine. Respond ONLY in valid JSON matching:
 {
   "summary": "High-level summary of station operational state",
   "severity": "INFO" | "WARNING" | "CRITICAL" | "EMERGENCY",
@@ -146,25 +167,29 @@ ${parsed.unknownOrInsufficientData ? `\n#### ⚠️ UNKNOWN / INSUFFICIENT DATA\
   "recommendedActions": ["Action item 1"],
   "reasoning": "Technical explanation"
 }`
-              },
-              {
-                role: 'user',
-                content: `Current ${stationName} Telemetry Context: ${JSON.stringify(telemetryContext)}. Query: ${userQuery || 'Analyze risks.'}`
-              }
-            ],
-            temperature: 0.2,
-            response_format: { type: 'json_object' }
-          })
-        });
+                },
+                {
+                  role: 'user',
+                  content: `Current ${stationName} Telemetry Context: ${JSON.stringify(telemetryContext)}. Query: ${userQuery || 'Analyze risks.'}`
+                }
+              ],
+              temperature: 0.2,
+              response_format: { type: 'json_object' }
+            }),
+            signal: controller.signal
+          });
 
-        if (response.ok) {
-          const data: any = await response.json();
-          const parsed: GroqAIAnalysisResponse = JSON.parse(data.choices[0].message.content);
-          parsed.source = 'GROQ_AI';
-          return parsed;
+          clearTimeout(timeoutId);
+
+          if (response.ok) {
+            const data: any = await response.json();
+            const parsed: GroqAIAnalysisResponse = JSON.parse(data.choices[0].message.content);
+            parsed.source = 'GROQ_AI';
+            return parsed;
+          }
+        } catch (err: any) {
+          console.log(`🟡 Groq API query with model [${model}] failed:`, err.message);
         }
-      } catch (err: any) {
-        console.log('🟡 Groq API query failed:', err.message);
       }
     }
 
@@ -210,3 +235,4 @@ ${parsed.unknownOrInsufficientData ? `\n#### ⚠️ UNKNOWN / INSUFFICIENT DATA\
     };
   }
 }
+

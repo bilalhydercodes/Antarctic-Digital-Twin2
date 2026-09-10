@@ -26,7 +26,8 @@ import {
   GitFork,
   Clock,
   GitCompare,
-  ShieldCheck
+  ShieldCheck,
+  Microscope
 } from 'lucide-react';
 
 export type { NavTab };
@@ -52,6 +53,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
       badge: activeIncidentsCount > 0 ? activeIncidentsCount : undefined
     },
     { id: 'twin', label: '3D Digital Twin', icon: <Box className="w-4 h-4 text-blue-600" /> },
+    { id: 'research', label: 'Official Research Dossier', icon: <Microscope className="w-4 h-4 text-indigo-600" /> },
     { id: 'sensors', label: 'Sensor Health Matrix', icon: <Activity className="w-4 h-4 text-emerald-600" /> },
     { id: 'edge', label: 'Edge Gateway & Comms', icon: <Radio className="w-4 h-4 text-sky-600" /> },
     { id: 'dependencies', label: 'Dependency Graph', icon: <GitFork className="w-4 h-4 text-purple-600" /> },
