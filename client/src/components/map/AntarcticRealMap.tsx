@@ -242,8 +242,14 @@ export const AntarcticRealMap: React.FC<AntarcticRealMapProps> = ({
       setCursorCoords({ lat, lng });
     });
 
+    // Ensure Leaflet calculates viewport dimensions immediately after React layout
+    const timer1 = setTimeout(() => map.invalidateSize(), 100);
+    const timer2 = setTimeout(() => map.invalidateSize(), 400);
+
     // Clean up on unmount
     return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
       map.remove();
       mapInstanceRef.current = null;
     };
