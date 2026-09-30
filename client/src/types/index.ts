@@ -141,7 +141,7 @@ export const ROLE_METADATA: Record<RBACRole, RoleMetadata> = {
     badge: 'STATION COMMANDER',
     description: 'Executive mission authority, SITREP briefings, incident command & failovers',
     color: 'amber',
-    defaultTab: 'commander'
+    defaultTab: 'dashboard'
   },
   OPERATOR: {
     label: 'OPERATOR',
@@ -155,7 +155,7 @@ export const ROLE_METADATA: Record<RBACRole, RoleMetadata> = {
     badge: 'POLAR RESEARCHER',
     description: 'Glaciology radar, meteorological sensor suites & environmental trends',
     color: 'emerald',
-    defaultTab: 'glaciology'
+    defaultTab: 'dashboard'
   },
   VIEWER: {
     label: 'VIEWER',

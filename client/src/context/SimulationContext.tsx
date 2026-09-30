@@ -100,7 +100,7 @@ const SimulationContext = createContext<SimulationContextType | undefined>(undef
 
 export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [activeStationId, setActiveStationId] = useState<StationId>('maitri');
-  const [userRole, setUserRoleState] = useState<RBACRole>('COMMANDER');
+  const [userRole, setUserRoleState] = useState<RBACRole>('ADMIN');
   const [stationBundles, setStationBundles] = useState<Record<StationId, StationBundle>>(initialStationBundles);
   const [alerts, setAlerts] = useState<StationAlert[]>(initialAlerts);
   const [automatedLogs, setAutomatedLogs] = useState<AutomatedResponseLog[]>([]);

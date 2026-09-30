@@ -50,9 +50,20 @@ export const MainContent: React.FC = () => {
     return sessionStorage.getItem('auto_start_tour') === 'true';
   });
   const [showHelp, setShowHelp] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<NavTab>(() => {
-    return ROLE_METADATA[userRole]?.defaultTab || 'dashboard';
+  const [activeTab, setActiveTabState] = useState<NavTab>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('ant_active_tab') as NavTab;
+      if (stored) return stored;
+    }
+    return 'dashboard';
   });
+
+  const setActiveTab = (tab: NavTab) => {
+    setActiveTabState(tab);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('ant_active_tab', tab);
+    }
+  };
 
   const handleEnterFromLanding = async (role: RBACRole, targetTab?: NavTab) => {
     await setUserRole(role);
