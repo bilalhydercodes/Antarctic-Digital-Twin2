@@ -37,9 +37,16 @@ import { RBACRole } from './types';
 
 export const MainContent: React.FC = () => {
   const { userRole, setUserRole, setActiveStationId } = useSimulation();
+  
+  // Dashboard opens directly by default (unless user specifically navigates to ?portal=true)
   const [showLanding, setShowLanding] = useState<boolean>(() => {
-    return sessionStorage.getItem('entered_twin') !== 'true';
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('portal') === 'true';
+    }
+    return false;
   });
+
   const [showTour, setShowTour] = useState<boolean>(() => {
     return sessionStorage.getItem('auto_start_tour') === 'true';
   });
@@ -65,7 +72,6 @@ export const MainContent: React.FC = () => {
   };
 
   const handleOpenLanding = () => {
-    sessionStorage.removeItem('entered_twin');
     setShowLanding(true);
   };
 

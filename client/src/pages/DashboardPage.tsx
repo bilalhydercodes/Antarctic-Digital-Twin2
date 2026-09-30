@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSimulation } from '../context/SimulationContext';
 import { NavTab } from '../components/layout/Sidebar';
-import { Station3DCanvas } from '../components/digitaltwin/Station3DCanvas';
+import { Dashboard3DViewer } from '../components/digitaltwin/Dashboard3DViewer';
 import { Antarctic2DMap } from '../components/map/Antarctic2DMap';
 import { audioService } from '../services/AudioService';
 import { 
@@ -36,7 +36,9 @@ import {
   Package,
   PlusCircle,
   MinusCircle,
-  ExternalLink
+  ExternalLink,
+  Box,
+  Map
 } from 'lucide-react';
 
 interface DashboardPageProps {
@@ -69,29 +71,28 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
   const pressure = environment?.pressure?.toFixed(1) || '981.7';
 
   return (
-    <div className="space-y-4 font-sans select-none text-slate-800">
+    <div className="space-y-3.5 font-sans select-none text-slate-800">
       
       {/* ========================================================================= */}
       {/* 1. TOP ROW: DUAL STATION SUMMARY CARDS + ANTARCTIC WEATHER (3-COLUMN GRID) */}
       {/* ========================================================================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
         
         {/* Card 1: MAITRI STATION (Schirmacher Oasis) */}
         <div 
           onClick={() => setActiveStationId('maitri')}
-          className={`lg:col-span-4 bg-white rounded-xl border p-3.5 shadow-xs transition cursor-pointer relative overflow-hidden ${
+          className={`lg:col-span-4 bg-white rounded-xl border p-3 shadow-xs transition cursor-pointer relative overflow-hidden ${
             activeStationId === 'maitri' ? 'border-blue-600 ring-2 ring-blue-500/20' : 'border-slate-200 hover:border-slate-300'
           }`}
         >
-          <div className="flex items-start justify-between gap-2 mb-2.5">
+          <div className="flex items-start justify-between gap-2 mb-2">
             <div className="flex items-center space-x-2.5">
-              <div className="w-14 h-12 rounded-lg overflow-hidden border border-slate-200 shrink-0 bg-slate-100">
+              <div className="w-14 h-11 rounded-lg overflow-hidden border border-slate-200 shrink-0 bg-slate-100">
                 <img 
                   src="/maitri-3d-station-view.jpg" 
                   alt="Maitri Station" 
                   className="w-full h-full object-cover"
                   onError={(e) => {
-                    // Fallback gradient if image not loaded
                     (e.target as HTMLElement).style.display = 'none';
                   }}
                 />
@@ -113,29 +114,29 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           </div>
 
           {/* 4 Stats Grid */}
-          <div className="grid grid-cols-4 gap-1.5 pt-2 border-t border-slate-100 text-center">
-            <div className="p-1.5 rounded-lg bg-slate-50">
+          <div className="grid grid-cols-4 gap-1 pt-2 border-t border-slate-100 text-center">
+            <div className="p-1 rounded-lg bg-slate-50">
               <div className="flex items-center justify-center text-blue-600 mb-0.5">
                 <Users className="w-3.5 h-3.5" />
               </div>
               <div className="text-[9px] text-slate-500 font-medium">Crew</div>
               <div className="text-xs font-black text-slate-800">47</div>
             </div>
-            <div className="p-1.5 rounded-lg bg-slate-50">
+            <div className="p-1 rounded-lg bg-slate-50">
               <div className="flex items-center justify-center text-amber-500 mb-0.5">
                 <Zap className="w-3.5 h-3.5" />
               </div>
               <div className="text-[9px] text-slate-500 font-medium">Power Load</div>
               <div className="text-xs font-black text-slate-800">{maitriPower} kW</div>
             </div>
-            <div className="p-1.5 rounded-lg bg-slate-50">
+            <div className="p-1 rounded-lg bg-slate-50">
               <div className="flex items-center justify-center text-orange-600 mb-0.5">
                 <Fuel className="w-3.5 h-3.5" />
               </div>
               <div className="text-[9px] text-slate-500 font-medium">Fuel Reserve</div>
               <div className="text-xs font-black text-slate-800">48.6 Days</div>
             </div>
-            <div className="p-1.5 rounded-lg bg-slate-50">
+            <div className="p-1 rounded-lg bg-slate-50">
               <div className="flex items-center justify-center text-emerald-600 mb-0.5">
                 <BatteryCharging className="w-3.5 h-3.5" />
               </div>
@@ -148,13 +149,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         {/* Card 2: BHARATI STATION (Coastal Modern) */}
         <div 
           onClick={() => setActiveStationId('bharati')}
-          className={`lg:col-span-4 bg-white rounded-xl border p-3.5 shadow-xs transition cursor-pointer relative overflow-hidden ${
+          className={`lg:col-span-4 bg-white rounded-xl border p-3 shadow-xs transition cursor-pointer relative overflow-hidden ${
             activeStationId === 'bharati' ? 'border-sky-600 ring-2 ring-sky-500/20' : 'border-slate-200 hover:border-slate-300'
           }`}
         >
-          <div className="flex items-start justify-between gap-2 mb-2.5">
+          <div className="flex items-start justify-between gap-2 mb-2">
             <div className="flex items-center space-x-2.5">
-              <div className="w-14 h-12 rounded-lg overflow-hidden border border-slate-200 shrink-0 bg-slate-100">
+              <div className="w-14 h-11 rounded-lg overflow-hidden border border-slate-200 shrink-0 bg-slate-100">
                 <img 
                   src="/bharati-station-view.jpg" 
                   alt="Bharati Station" 
@@ -178,29 +179,29 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           </div>
 
           {/* 4 Stats Grid */}
-          <div className="grid grid-cols-4 gap-1.5 pt-2 border-t border-slate-100 text-center">
-            <div className="p-1.5 rounded-lg bg-slate-50">
+          <div className="grid grid-cols-4 gap-1 pt-2 border-t border-slate-100 text-center">
+            <div className="p-1 rounded-lg bg-slate-50">
               <div className="flex items-center justify-center text-blue-600 mb-0.5">
                 <Users className="w-3.5 h-3.5" />
               </div>
               <div className="text-[9px] text-slate-500 font-medium">Crew</div>
               <div className="text-xs font-black text-slate-800">35</div>
             </div>
-            <div className="p-1.5 rounded-lg bg-slate-50">
+            <div className="p-1 rounded-lg bg-slate-50">
               <div className="flex items-center justify-center text-amber-500 mb-0.5">
                 <Zap className="w-3.5 h-3.5" />
               </div>
               <div className="text-[9px] text-slate-500 font-medium">Power Load</div>
               <div className="text-xs font-black text-slate-800">{bharatiPower} kW</div>
             </div>
-            <div className="p-1.5 rounded-lg bg-slate-50">
+            <div className="p-1 rounded-lg bg-slate-50">
               <div className="flex items-center justify-center text-orange-600 mb-0.5">
                 <Fuel className="w-3.5 h-3.5" />
               </div>
               <div className="text-[9px] text-slate-500 font-medium">Fuel Reserve</div>
               <div className="text-xs font-black text-slate-800">62.3 Days</div>
             </div>
-            <div className="p-1.5 rounded-lg bg-slate-50">
+            <div className="p-1 rounded-lg bg-slate-50">
               <div className="flex items-center justify-center text-emerald-600 mb-0.5">
                 <BatteryCharging className="w-3.5 h-3.5" />
               </div>
@@ -211,7 +212,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         </div>
 
         {/* Card 3: ANTARCTIC WEATHER (MAITRI / BHARATI) */}
-        <div className="lg:col-span-4 bg-white rounded-xl border border-slate-200 p-3.5 shadow-xs flex flex-col justify-between">
+        <div className="lg:col-span-4 bg-white rounded-xl border border-slate-200 p-3 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-black uppercase tracking-tight text-slate-900">
               ANTARCTIC WEATHER ({activeStationId.toUpperCase()})
@@ -225,13 +226,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             </button>
           </div>
 
-          <div className="flex items-center justify-between my-1">
-            <div className="flex items-center space-x-3">
+          <div className="flex items-center justify-between my-0.5">
+            <div className="flex items-center space-x-2.5">
               <div className="w-10 h-10 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center">
-                <CloudSnow className="w-6 h-6" />
+                <CloudSnow className="w-5 h-5" />
               </div>
               <div>
-                <div className="text-2xl font-black text-slate-900 leading-none">
+                <div className="text-xl font-black text-slate-900 leading-none">
                   {currentTemp}°C
                 </div>
                 <div className="text-[10px] text-slate-500 font-medium mt-0.5">
@@ -254,12 +255,12 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
       {/* ========================================================================= */}
       {/* 2. MIDDLE ROW: 3D DIGITAL TWIN + REGIONAL MAP + EMERGENCY & QUICK ACTIONS */}
       {/* ========================================================================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
         
         {/* Column 1: 3D DIGITAL TWIN CANVAS (5/12) */}
         <div className="lg:col-span-5 bg-white rounded-xl border border-slate-200 p-3 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center space-x-2">
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center space-x-1.5">
               <Box className="w-4 h-4 text-blue-700" />
               <span className="text-xs font-black uppercase text-slate-900 tracking-tight">
                 3D DIGITAL TWIN — {activeStationId.toUpperCase()} STATION
@@ -297,30 +298,30 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           </div>
 
           {/* 3D Visualizer Canvas */}
-          <div className="h-60 rounded-xl overflow-hidden relative border border-slate-200 bg-slate-900">
-            <Station3DCanvas stationId={activeStationId} />
+          <div className="h-56 rounded-xl overflow-hidden relative border border-slate-200 bg-[#070f1e]">
+            <Dashboard3DViewer stationId={activeStationId} mode={view3DMode} />
 
             {/* On-Canvas Tag Overlays */}
             <div className="absolute top-2 left-2 flex flex-col gap-1 pointer-events-none">
               <span className="px-2 py-0.5 rounded bg-blue-900/80 backdrop-blur-xs text-sky-200 text-[9px] font-mono font-bold border border-blue-500/40">
-                • Power House (2x Kirloskar)
+                • Power House ({activeStationId === 'maitri' ? '2x Kirloskar' : '3x MAN CHP'})
               </span>
               <span className="px-2 py-0.5 rounded bg-slate-900/80 backdrop-blur-xs text-slate-200 text-[9px] font-mono font-bold border border-slate-700">
-                • Living & Accommodation
+                • Living & Research Modules
               </span>
             </div>
 
             <div className="absolute top-2 right-2 flex flex-col gap-1 pointer-events-none text-right">
               <span className="px-2 py-0.5 rounded bg-emerald-950/80 backdrop-blur-xs text-emerald-300 text-[9px] font-mono font-bold border border-emerald-600/40">
-                • Priyadarshini Trace Loop: +3.2°C
+                • {activeStationId === 'maitri' ? 'Priyadarshini Loop: +3.2°C' : 'Prydz Bay RO: Active'}
               </span>
               <span className="px-2 py-0.5 rounded bg-amber-950/80 backdrop-blur-xs text-amber-300 text-[9px] font-mono font-bold border border-amber-600/40">
-                • AN-8 Tank Farm (80kL)
+                • AN-8 Tank Farm
               </span>
             </div>
 
             {/* Bottom 3D Canvas Controls */}
-            <div className="absolute bottom-2 inset-x-2 flex items-center justify-between bg-slate-950/80 backdrop-blur-xs px-2.5 py-1 rounded-lg text-[10px] text-slate-300 font-mono">
+            <div className="absolute bottom-2 inset-x-2 flex items-center justify-between bg-slate-950/80 backdrop-blur-xs px-2.5 py-1 rounded-lg text-[9px] text-slate-300 font-mono">
               <span>30 Sep 2026 12:27 IST | Live Simulation</span>
               <div className="flex items-center space-x-2 text-slate-300">
                 <span className="hover:text-white cursor-pointer">🔄 Rotate</span>
@@ -333,8 +334,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
         {/* Column 2: ANTARCTIC MAP & SATELLITE TRACKING (4/12) */}
         <div className="lg:col-span-4 bg-white rounded-xl border border-slate-200 p-3 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center space-x-2">
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center space-x-1.5">
               <Map className="w-4 h-4 text-emerald-700" />
               <span className="text-xs font-black uppercase text-slate-900 tracking-tight">
                 ANTARCTIC MAP & SATELLITE TRACKING
@@ -358,16 +359,16 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           </div>
 
           {/* Map Viewer Canvas */}
-          <div className="h-60 rounded-xl overflow-hidden relative border border-slate-200 bg-[#091528]">
+          <div className="h-56 rounded-xl overflow-hidden relative border border-slate-200 bg-[#091528]">
             <Antarctic2DMap />
 
             {/* Satellite Pass Tag */}
-            <div className="absolute top-2 left-2 px-2 py-1 rounded bg-slate-950/80 backdrop-blur-xs text-[10px] font-mono text-cyan-300 border border-cyan-500/30">
+            <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-slate-950/80 backdrop-blur-xs text-[9px] font-mono text-cyan-300 border border-cyan-500/30">
               🛰️ Satellite Pass in 12 min
             </div>
 
             {/* Map Legend */}
-            <div className="absolute bottom-2 inset-x-2 flex items-center justify-between bg-slate-950/80 backdrop-blur-xs px-2 py-1 rounded-lg text-[9px] text-slate-300">
+            <div className="absolute bottom-2 inset-x-2 flex items-center justify-between bg-slate-950/80 backdrop-blur-xs px-2 py-0.5 rounded-lg text-[9px] text-slate-300">
               <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-500"></span> Maitri</span>
               <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500"></span> Bharati</span>
               <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-cyan-400"></span> Satellite</span>
@@ -377,18 +378,18 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         </div>
 
         {/* Column 3: EMERGENCY PROTOCOL & QUICK ACTIONS (3/12) */}
-        <div className="lg:col-span-3 space-y-3 flex flex-col justify-between">
+        <div className="lg:col-span-3 space-y-2.5 flex flex-col justify-between">
           
           {/* Emergency SOS Box */}
-          <div className="bg-rose-50 rounded-xl border border-rose-200 p-3 text-left shadow-2xs">
-            <div className="flex items-center space-x-1.5 text-rose-800 font-extrabold text-[11px] uppercase tracking-wider mb-1">
-              <AlertTriangle className="w-4 h-4 text-rose-600" />
+          <div className="bg-rose-50 rounded-xl border border-rose-200 p-2.5 text-left shadow-2xs">
+            <div className="flex items-center space-x-1.5 text-rose-800 font-extrabold text-[11px] uppercase tracking-wider mb-0.5">
+              <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
               <span>EMERGENCY PROTOCOL</span>
             </div>
             <div className="text-[11px] font-black text-slate-900 leading-snug">
               SOS / Station Mayday Broadcaster
             </div>
-            <p className="text-[10px] text-slate-600 mt-1 leading-normal">
+            <p className="text-[9px] text-slate-600 mt-0.5 leading-tight">
               Triggers highest priority satcom beacon to NCPOR Goa HQ, McMurdo Rescue Center, and Novolazarevskaya.
             </p>
             
@@ -397,48 +398,48 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                 setSosTriggered(true);
                 audioService.startCriticalAlarmLoop("EMERGENCY DISTRESS BEACON ACTIVATED. TRANSMITTING POLAR SITREP TO NCPOR GOA HEADQUARTERS", "sos-beacon");
               }}
-              className="w-full mt-2.5 py-2 px-3 rounded-lg bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white font-black text-xs shadow-xs transition flex items-center justify-center space-x-1.5"
+              className="w-full mt-2 py-1.5 px-3 rounded-lg bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white font-black text-xs shadow-xs transition flex items-center justify-center space-x-1.5"
             >
-              <Radio className="w-3.5 h-3.5 animate-pulse" />
+              <Radio className="w-3 h-3 animate-pulse" />
               <span>((•)) TRIGGER SOS BEACON</span>
             </button>
           </div>
 
           {/* Quick Actions 4-Button Grid */}
-          <div className="bg-white rounded-xl border border-slate-200 p-3 shadow-xs">
-            <div className="text-[11px] font-black uppercase text-slate-900 tracking-tight mb-2">
+          <div className="bg-white rounded-xl border border-slate-200 p-2.5 shadow-xs">
+            <div className="text-[10px] font-black uppercase text-slate-900 tracking-tight mb-1.5">
               QUICK ACTIONS
             </div>
             <div className="grid grid-cols-2 gap-1.5">
               <button
                 onClick={() => audioService.startCriticalAlarmLoop("Test alarm active. All life support nominal.", "test-alarm")}
-                className="p-2 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-left transition flex items-center space-x-1.5 text-xs font-bold text-slate-800"
+                className="p-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-left transition flex items-center space-x-1.5 text-[11px] font-bold text-slate-800"
               >
-                <Bell className="w-3.5 h-3.5 text-amber-600" />
+                <Bell className="w-3 h-3 text-amber-600 shrink-0" />
                 <span>Test Alarm</span>
               </button>
               
               <button
                 onClick={() => audioService.speakSITREP(`All station systems nominal at ${activeStationId.toUpperCase()}. Power grid stable at ${maitriPower} kW.`)}
-                className="p-2 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-left transition flex items-center space-x-1.5 text-xs font-bold text-slate-800"
+                className="p-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-left transition flex items-center space-x-1.5 text-[11px] font-bold text-slate-800"
               >
-                <Mic className="w-3.5 h-3.5 text-blue-600" />
+                <Mic className="w-3 h-3 text-blue-600 shrink-0" />
                 <span>Voice SITREP</span>
               </button>
 
               <button
                 onClick={() => onNavigate('scenarios')}
-                className="p-2 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-left transition flex items-center space-x-1.5 text-xs font-bold text-slate-800"
+                className="p-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-left transition flex items-center space-x-1.5 text-[11px] font-bold text-slate-800"
               >
-                <PlayCircle className="w-3.5 h-3.5 text-emerald-600" />
+                <PlayCircle className="w-3 h-3 text-emerald-600 shrink-0" />
                 <span>Run Simulation</span>
               </button>
 
               <button
                 onClick={() => onNavigate('compare')}
-                className="p-2 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-left transition flex items-center space-x-1.5 text-xs font-bold text-slate-800"
+                className="p-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-left transition flex items-center space-x-1.5 text-[11px] font-bold text-slate-800"
               >
-                <FileText className="w-3.5 h-3.5 text-indigo-600" />
+                <FileText className="w-3 h-3 text-indigo-600 shrink-0" />
                 <span>Generate Report</span>
               </button>
             </div>
@@ -450,11 +451,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
       {/* ========================================================================= */}
       {/* 3. BOTTOM ROW: LIVE TELEMETRY TABLE + RUNWAY + ASSET HEALTH + SATELLITE   */}
       {/* ========================================================================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
         
         {/* Table 1: LIVE TELEMETRY (MAITRI) (4/12) */}
-        <div className="lg:col-span-4 bg-white rounded-xl border border-slate-200 p-3.5 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
+        <div className="lg:col-span-4 bg-white rounded-xl border border-slate-200 p-3 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-1.5">
             <span className="text-[11px] font-black uppercase text-slate-900 tracking-tight">
               LIVE TELEMETRY ({activeStationId.toUpperCase()})
             </span>
@@ -479,58 +480,58 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700">
                 <tr>
-                  <td className="py-1 font-medium">Air Temperature</td>
-                  <td className="py-1 font-bold">{currentTemp}°C</td>
-                  <td className="py-1"><span className="px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 font-bold">Normal</span></td>
-                  <td className="py-1 text-right text-emerald-600 font-mono">───</td>
+                  <td className="py-0.5 font-medium">Air Temperature</td>
+                  <td className="py-0.5 font-bold">{currentTemp}°C</td>
+                  <td className="py-0.5"><span className="px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 font-bold">Normal</span></td>
+                  <td className="py-0.5 text-right text-emerald-600 font-mono">───</td>
                 </tr>
                 <tr>
-                  <td className="py-1 font-medium">Wind Speed</td>
-                  <td className="py-1 font-bold">{windSpeed} km/h</td>
-                  <td className="py-1"><span className="px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 font-bold">Normal</span></td>
-                  <td className="py-1 text-right text-emerald-600 font-mono">───</td>
+                  <td className="py-0.5 font-medium">Wind Speed</td>
+                  <td className="py-0.5 font-bold">{windSpeed} km/h</td>
+                  <td className="py-0.5"><span className="px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 font-bold">Normal</span></td>
+                  <td className="py-0.5 text-right text-emerald-600 font-mono">───</td>
                 </tr>
                 <tr>
-                  <td className="py-1 font-medium">Wind Direction</td>
-                  <td className="py-1 font-bold">WSW (247°)</td>
-                  <td className="py-1"><span className="px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 font-bold">Normal</span></td>
-                  <td className="py-1 text-right text-emerald-600 font-mono">───</td>
+                  <td className="py-0.5 font-medium">Wind Direction</td>
+                  <td className="py-0.5 font-bold">WSW (247°)</td>
+                  <td className="py-0.5"><span className="px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 font-bold">Normal</span></td>
+                  <td className="py-0.5 text-right text-emerald-600 font-mono">───</td>
                 </tr>
                 <tr>
-                  <td className="py-1 font-medium">Pressure</td>
-                  <td className="py-1 font-bold">{pressure} hPa</td>
-                  <td className="py-1"><span className="px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 font-bold">Normal</span></td>
-                  <td className="py-1 text-right text-emerald-600 font-mono">───</td>
+                  <td className="py-0.5 font-medium">Pressure</td>
+                  <td className="py-0.5 font-bold">{pressure} hPa</td>
+                  <td className="py-0.5"><span className="px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 font-bold">Normal</span></td>
+                  <td className="py-0.5 text-right text-emerald-600 font-mono">───</td>
                 </tr>
                 <tr>
-                  <td className="py-1 font-medium">Power Load</td>
-                  <td className="py-1 font-bold">{maitriPower} kW</td>
-                  <td className="py-1"><span className="px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 font-bold">Normal</span></td>
-                  <td className="py-1 text-right text-emerald-600 font-mono">───</td>
+                  <td className="py-0.5 font-medium">Power Load</td>
+                  <td className="py-0.5 font-bold">{maitriPower} kW</td>
+                  <td className="py-0.5"><span className="px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 font-bold">Normal</span></td>
+                  <td className="py-0.5 text-right text-emerald-600 font-mono">───</td>
                 </tr>
                 <tr>
-                  <td className="py-1 font-medium">Battery SOC</td>
-                  <td className="py-1 font-bold">88%</td>
-                  <td className="py-1"><span className="px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 font-bold">Normal</span></td>
-                  <td className="py-1 text-right text-emerald-600 font-mono">───</td>
+                  <td className="py-0.5 font-medium">Battery SOC</td>
+                  <td className="py-0.5 font-bold">88%</td>
+                  <td className="py-0.5"><span className="px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 font-bold">Normal</span></td>
+                  <td className="py-0.5 text-right text-emerald-600 font-mono">───</td>
                 </tr>
                 <tr>
-                  <td className="py-1 font-medium">Fuel Reserve</td>
-                  <td className="py-1 font-bold">48.6 days</td>
-                  <td className="py-1"><span className="px-1.5 py-0.2 rounded bg-amber-50 text-amber-700 font-bold">Monitor</span></td>
-                  <td className="py-1 text-right text-amber-600 font-mono">───</td>
+                  <td className="py-0.5 font-medium">Fuel Reserve</td>
+                  <td className="py-0.5 font-bold">48.6 days</td>
+                  <td className="py-0.5"><span className="px-1.5 py-0.2 rounded bg-amber-50 text-amber-700 font-bold">Monitor</span></td>
+                  <td className="py-0.5 text-right text-amber-600 font-mono">───</td>
                 </tr>
                 <tr>
-                  <td className="py-1 font-medium">Indoor Temp (Lab)</td>
-                  <td className="py-1 font-bold">18.2 °C</td>
-                  <td className="py-1"><span className="px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 font-bold">Normal</span></td>
-                  <td className="py-1 text-right text-emerald-600 font-mono">───</td>
+                  <td className="py-0.5 font-medium">Indoor Temp (Lab)</td>
+                  <td className="py-0.5 font-bold">18.2 °C</td>
+                  <td className="py-0.5"><span className="px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 font-bold">Normal</span></td>
+                  <td className="py-0.5 text-right text-emerald-600 font-mono">───</td>
                 </tr>
                 <tr>
-                  <td className="py-1 font-medium">CO₂ Level</td>
-                  <td className="py-1 font-bold">612 ppm</td>
-                  <td className="py-1"><span className="px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 font-bold">Normal</span></td>
-                  <td className="py-1 text-right text-emerald-600 font-mono">───</td>
+                  <td className="py-0.5 font-medium">CO₂ Level</td>
+                  <td className="py-0.5 font-bold">612 ppm</td>
+                  <td className="py-0.5"><span className="px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 font-bold">Normal</span></td>
+                  <td className="py-0.5 text-right text-emerald-600 font-mono">───</td>
                 </tr>
               </tbody>
             </table>
@@ -538,8 +539,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         </div>
 
         {/* Card 2: STATION SURVIVAL RUNWAY (3/12) */}
-        <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200 p-3.5 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
+        <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200 p-3 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-1.5">
             <span className="text-[11px] font-black uppercase text-slate-900 tracking-tight">
               STATION SURVIVAL RUNWAY
             </span>
@@ -548,51 +549,51 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             </span>
           </div>
 
-          <div className="space-y-3 my-1">
+          <div className="space-y-2.5 my-0.5">
             <div>
-              <div className="flex items-center justify-between text-[10px] font-bold text-slate-700 mb-1">
+              <div className="flex items-center justify-between text-[10px] font-bold text-slate-700 mb-0.5">
                 <span className="flex items-center gap-1">⛽ Arctic Diesel Fuel</span>
                 <span className="text-orange-600">48.6 Days Left</span>
               </div>
-              <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                <div className="bg-orange-500 h-2 rounded-full" style={{ width: '65%' }}></div>
+              <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                <div className="bg-orange-500 h-1.5 rounded-full" style={{ width: '65%' }}></div>
               </div>
             </div>
 
             <div>
-              <div className="flex items-center justify-between text-[10px] font-bold text-slate-700 mb-1">
+              <div className="flex items-center justify-between text-[10px] font-bold text-slate-700 mb-0.5">
                 <span className="flex items-center gap-1">🍞 Food & Rations</span>
                 <span className="text-amber-600">8 Days Left</span>
               </div>
-              <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                <div className="bg-amber-500 h-2 rounded-full" style={{ width: '25%' }}></div>
+              <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                <div className="bg-amber-500 h-1.5 rounded-full" style={{ width: '25%' }}></div>
               </div>
             </div>
 
             <div>
-              <div className="flex items-center justify-between text-[10px] font-bold text-slate-700 mb-1">
+              <div className="flex items-center justify-between text-[10px] font-bold text-slate-700 mb-0.5">
                 <span className="flex items-center gap-1">💧 Potable Meltwater</span>
                 <span className="text-blue-600">60 Days Left</span>
               </div>
-              <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                <div className="bg-sky-500 h-2 rounded-full" style={{ width: '80%' }}></div>
+              <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                <div className="bg-sky-500 h-1.5 rounded-full" style={{ width: '80%' }}></div>
               </div>
             </div>
 
             <div>
-              <div className="flex items-center justify-between text-[10px] font-bold text-slate-700 mb-1">
+              <div className="flex items-center justify-between text-[10px] font-bold text-slate-700 mb-0.5">
                 <span className="flex items-center gap-1">🩹 Medical Supplies</span>
                 <span className="text-rose-600">115 Days Left</span>
               </div>
-              <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                <div className="bg-rose-500 h-2 rounded-full" style={{ width: '90%' }}></div>
+              <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                <div className="bg-rose-500 h-1.5 rounded-full" style={{ width: '90%' }}></div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Card 3: ASSET HEALTH MATRIX (2/12) */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-3.5 shadow-xs flex flex-col justify-between">
+        <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-3 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between mb-1">
             <span className="text-[11px] font-black uppercase text-slate-900 tracking-tight">
               ASSET HEALTH
@@ -606,32 +607,32 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           </div>
 
           {/* Donut / Circular Gauge */}
-          <div className="flex flex-col items-center justify-center my-2">
-            <div className="w-20 h-20 rounded-full border-4 border-emerald-500 border-t-emerald-200 flex flex-col items-center justify-center shadow-xs">
-              <span className="text-sm font-black text-slate-900">100%</span>
-              <span className="text-[8px] font-bold text-emerald-600 uppercase">Optimal</span>
+          <div className="flex flex-col items-center justify-center my-1.5">
+            <div className="w-16 h-16 rounded-full border-4 border-emerald-500 border-t-emerald-200 flex flex-col items-center justify-center shadow-xs">
+              <span className="text-xs font-black text-slate-900">100%</span>
+              <span className="text-[7px] font-bold text-emerald-600 uppercase">Optimal</span>
             </div>
           </div>
 
-          <div className="text-[10px] space-y-1 text-slate-600 font-medium">
+          <div className="text-[10px] space-y-0.5 text-slate-600 font-medium">
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500"></span> Healthy</span>
+              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Healthy</span>
               <strong>4</strong>
             </div>
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500"></span> Warning</span>
+              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Warning</span>
               <strong>0</strong>
             </div>
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-rose-500"></span> Critical</span>
+              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Critical</span>
               <strong>0</strong>
             </div>
           </div>
         </div>
 
         {/* Card 4: SATELLITE CONNECTIVITY (3/12) */}
-        <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200 p-3.5 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
+        <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200 p-3 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-1.5">
             <span className="text-[11px] font-black uppercase text-slate-900 tracking-tight">
               SATELLITE CONNECTIVITY
             </span>
@@ -641,28 +642,28 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             </span>
           </div>
 
-          <div className="text-[10px] space-y-1.5 divide-y divide-slate-100">
-            <div className="flex items-center justify-between pt-1">
+          <div className="text-[10px] space-y-1 divide-y divide-slate-100">
+            <div className="flex items-center justify-between pt-0.5">
               <span className="text-slate-500 font-medium">Mode:</span>
               <strong className="text-slate-800">Local / High Bandwidth</strong>
             </div>
-            <div className="flex items-center justify-between pt-1">
+            <div className="flex items-center justify-between pt-0.5">
               <span className="text-slate-500 font-medium">Uplink:</span>
               <strong className="text-slate-800 font-mono">207 B/s</strong>
             </div>
-            <div className="flex items-center justify-between pt-1">
+            <div className="flex items-center justify-between pt-0.5">
               <span className="text-slate-500 font-medium">Downlink:</span>
               <strong className="text-slate-800 font-mono">0.26 KB/s</strong>
             </div>
-            <div className="flex items-center justify-between pt-1">
+            <div className="flex items-center justify-between pt-0.5">
               <span className="text-slate-500 font-medium">Latency:</span>
               <strong className="text-slate-800 font-mono">45 ms</strong>
             </div>
-            <div className="flex items-center justify-between pt-1">
+            <div className="flex items-center justify-between pt-0.5">
               <span className="text-slate-500 font-medium">Queue:</span>
               <strong className="text-slate-800 font-mono">0 Pkts</strong>
             </div>
-            <div className="flex items-center justify-between pt-1">
+            <div className="flex items-center justify-between pt-0.5">
               <span className="text-slate-500 font-medium">Payload Reduction:</span>
               <strong className="text-emerald-600 font-mono">92.4%</strong>
             </div>
