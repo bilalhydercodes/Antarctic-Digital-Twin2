@@ -41,9 +41,11 @@ export const MainContent: React.FC = () => {
   const [showLanding, setShowLanding] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
-      if (params.get('app') === 'true') return false;
       if (params.get('portal') === 'true') return true;
-      return true; // Default to official Government of India Landing Portal
+      if (params.get('app') === 'true') return false;
+      const entered = sessionStorage.getItem('entered_twin') === 'true';
+      if (entered) return false; // Once in dashboard, page refresh preserves dashboard!
+      return true; // First visit defaults to official Landing Portal
     }
     return true;
   });
@@ -84,6 +86,7 @@ export const MainContent: React.FC = () => {
   };
 
   const handleOpenLanding = () => {
+    sessionStorage.removeItem('entered_twin');
     setShowLanding(true);
   };
 
