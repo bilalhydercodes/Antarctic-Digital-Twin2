@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { RBACRole, NavTab } from '../../types';
 import { useSimulation } from '../../context/SimulationContext';
 import { 
@@ -15,6 +15,7 @@ import {
   Cpu, 
   Activity, 
   ChevronRight, 
+  ChevronDown,
   Building2, 
   FileText, 
   Bell, 
@@ -24,7 +25,18 @@ import {
   X,
   Youtube,
   Twitter,
-  Linkedin
+  Linkedin,
+  Info,
+  Camera,
+  Mail,
+  Phone,
+  Send,
+  CheckCircle2,
+  Mountain,
+  Compass,
+  Database,
+  History,
+  ShieldAlert
 } from 'lucide-react';
 
 interface AntarcticLandingPageProps {
@@ -37,17 +49,39 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
   initialRole = 'ADMIN' 
 }) => {
   const { environment, setActiveStationId } = useSimulation();
+  
+  // Navigation & Dropdown states
+  const [openDropdown, setOpenDropdown] = useState<'stations' | 'research' | 'resources' | null>(null);
   const [activeNoticeTab, setActiveNoticeTab] = useState<'updates' | 'notifications' | 'tenders' | 'events'>('updates');
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Modals
+  const [showAboutModal, setShowAboutModal] = useState(false);
+  const [showMediaModal, setShowMediaModal] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [showDakshinGangotriModal, setShowDakshinGangotriModal] = useState(false);
   const [showVideoModal, setShowVideoModal] = useState(false);
-  const [showRoleModal, setShowRoleModal] = useState(false);
-  const [selectedStation, setSelectedStation] = useState<'maitri' | 'bharati'>('maitri');
+  const [contactSubmitted, setContactSubmitted] = useState(false);
+
+  const navRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdowns on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (navRef.current && !navRef.current.contains(event.target as Node)) {
+        setOpenDropdown(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const currentTemp = environment?.temperature?.toFixed(1) || '-32.4';
   const currentWind = environment?.windSpeed?.toFixed(0) || '27';
   const currentPressure = environment?.pressure?.toFixed(1) || '981.7';
 
   const handleLaunchTwin = (tab: NavTab = 'dashboard', stationId?: 'maitri' | 'bharati') => {
+    setOpenDropdown(null);
     if (stationId) {
       setActiveStationId(stationId);
     }
@@ -64,12 +98,21 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
     { title: 'Climate Studies', img: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=400&q=80', tab: 'analytics' as NavTab }
   ];
 
+  const galleryItems = [
+    { title: 'Maitri Station in Polar Winter', img: '/maitri-3d-station-view.jpg', location: 'Schirmacher Oasis' },
+    { title: 'Bharati Modular Container Complex', img: '/bharati-station-view.jpg', location: 'Larsemann Hills' },
+    { title: 'Antarctic Continental Panorama & Weather Mast', img: '/antarctic-landing-bg.jpg', location: 'East Antarctica' },
+    { title: 'Aurora Australis over Larsemann Hills', img: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=600&q=80', location: 'Bharati Station' },
+    { title: 'Priyadarshini Freshwater Glacial Lake', img: 'https://images.unsplash.com/photo-1517411032315-54ef2cb783bb?auto=format&fit=crop&w=600&q=80', location: 'Schirmacher Oasis' },
+    { title: 'Indian Polar Research Vessel Expedition', img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80', location: 'Southern Ocean' }
+  ];
+
   const notices = [
-    { id: 1, date: '22', month: 'Sep 2026', title: 'New atmospheric dataset from Bharati station published', category: 'updates' },
-    { id: 2, date: '15', month: 'Sep 2026', title: 'Satellite link maintenance schedule - September 2026', category: 'updates' },
-    { id: 3, date: '05', month: 'Sep 2026', title: '42nd Indian Scientific Expedition to Antarctica roster finalized', category: 'updates' },
-    { id: 4, date: '20', month: 'Aug 2026', title: 'Glaciology field observations report released for Schirmacher Oasis', category: 'updates' },
-    { id: 5, date: '12', month: 'Aug 2026', title: 'NCPOR invites proposals for Antarctic wintering research projects', category: 'updates' }
+    { id: 1, date: '28', month: 'Sep 2026', title: '44th Indian Scientific Expedition to Antarctica (44-ISEA) wintering team deployed', category: 'updates' },
+    { id: 2, date: '22', month: 'Sep 2026', title: 'Larsemann Hills atmospheric ozone and lidar datasets uploaded to Polar Data Centre', category: 'updates' },
+    { id: 3, date: '15', month: 'Sep 2026', title: 'MoES technical committee approves Maitri II station modernization master plan', category: 'updates' },
+    { id: 4, date: '05', month: 'Sep 2026', title: 'Priyadarshini Lake sub-glacial hydrology and water trace heating survey released', category: 'updates' },
+    { id: 5, date: '18', month: 'Aug 2026', title: 'NCPOR issues call for research proposals for 45th Indian Antarctic Expedition', category: 'updates' }
   ];
 
   return (
@@ -93,7 +136,7 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
           <div className="flex items-center space-x-3 text-[11px]">
             <a href="#main-content" className="hover:text-white transition">Skip to main content</a>
             <span className="text-slate-600">|</span>
-            <span className="hover:text-white cursor-pointer transition">Screen Reader Access</span>
+            <span onClick={() => setShowAboutModal(true)} className="hover:text-white cursor-pointer transition">Screen Reader Access</span>
             <span className="text-slate-600">|</span>
             <div className="flex items-center space-x-1">
               <button className="px-1 hover:text-white">A-</button>
@@ -101,16 +144,21 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
               <button className="px-1 hover:text-white font-extrabold">A+</button>
             </div>
             <span className="text-slate-600">|</span>
-            <button className="font-semibold hover:text-white transition">हिन्दी</button>
+            <button onClick={() => alert('हिन्दी संस्करण सक्रिय है (Hindi Language Support Active)')} className="font-semibold hover:text-white transition">हिन्दी</button>
             <span className="text-slate-600">|</span>
             
             {/* Search Input */}
             <div className="relative flex items-center">
               <input 
                 type="text"
-                placeholder="Search..."
+                placeholder="Search telemetry, notices..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleLaunchTwin('analytics');
+                  }
+                }}
                 className="w-32 sm:w-44 py-0.5 pl-2 pr-6 rounded-xs bg-[#162d4a] border border-[#23456e] text-slate-200 placeholder-slate-400 text-[10px] focus:outline-none focus:border-cyan-400"
               />
               <Search className="w-3 h-3 text-slate-400 absolute right-1.5 pointer-events-none" />
@@ -121,11 +169,11 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
       </header>
 
       {/* ─── 2. MAIN HEADER & INSTITUTIONAL BRANDING ─── */}
-      <div className="bg-white border-b border-slate-200 shadow-xs">
+      <div className="bg-white border-b border-slate-200 shadow-xs sticky top-0 z-40" ref={navRef}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
           
           {/* Dual Institutional Logos */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             
             {/* MoES Emblem */}
             <div className="flex items-center space-x-2.5">
@@ -158,19 +206,211 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
 
           </div>
 
-          {/* Navigation Menu */}
-          <nav className="flex items-center space-x-1 sm:space-x-5 text-xs font-bold text-slate-700">
-            <button className="text-blue-800 border-b-2 border-blue-800 pb-1 font-extrabold">Home</button>
-            <button onClick={() => handleLaunchTwin('assistant')} className="hover:text-blue-800 transition pb-1">About</button>
-            <button onClick={() => handleLaunchTwin('compare')} className="hover:text-blue-800 transition pb-1">Stations ▾</button>
-            <button onClick={() => handleLaunchTwin('dashboard')} className="hover:text-blue-800 transition pb-1 text-blue-900 font-extrabold flex items-center gap-1">
-              <span>Digital Twin</span>
-              <span className="px-1 py-0.2 bg-blue-100 text-blue-800 text-[9px] rounded-xs font-mono">LIVE</span>
+          {/* Navigation Menu with Interactive Dropdowns */}
+          <nav className="flex items-center space-x-1 sm:space-x-5 text-xs font-bold text-slate-700 relative">
+            
+            {/* 1. Home */}
+            <button 
+              onClick={() => {
+                setOpenDropdown(null);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }} 
+              className="text-blue-800 border-b-2 border-blue-800 pb-1 font-extrabold cursor-pointer"
+            >
+              Home
             </button>
-            <button onClick={() => handleLaunchTwin('research')} className="hover:text-blue-800 transition pb-1">Research ▾</button>
-            <button onClick={() => handleLaunchTwin('analytics')} className="hover:text-blue-800 transition pb-1">Resources ▾</button>
-            <button onClick={() => handleLaunchTwin('glaciology')} className="hover:text-blue-800 transition pb-1">Media</button>
-            <button onClick={() => handleLaunchTwin('commander')} className="hover:text-blue-800 transition pb-1">Contact</button>
+
+            {/* 2. About */}
+            <button 
+              onClick={() => {
+                setOpenDropdown(null);
+                setShowAboutModal(true);
+              }} 
+              className="hover:text-blue-800 transition pb-1 cursor-pointer flex items-center gap-0.5"
+            >
+              About
+            </button>
+
+            {/* 3. Stations Dropdown */}
+            <div className="relative">
+              <button 
+                onClick={() => setOpenDropdown(openDropdown === 'stations' ? null : 'stations')}
+                className={`hover:text-blue-800 transition pb-1 cursor-pointer flex items-center gap-0.5 ${openDropdown === 'stations' ? 'text-blue-800' : ''}`}
+              >
+                <span>Stations</span>
+                <ChevronDown className="w-3 h-3" />
+              </button>
+
+              {openDropdown === 'stations' && (
+                <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-slate-300 rounded-xs shadow-xl p-2 z-50 animate-fade-in text-xs font-normal">
+                  <div className="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                    Indian Antarctic Bases
+                  </div>
+                  <button 
+                    onClick={() => handleLaunchTwin('dashboard', 'maitri')}
+                    className="w-full text-left p-2 hover:bg-slate-50 rounded-xs flex items-center justify-between group transition"
+                  >
+                    <div>
+                      <div className="font-bold text-slate-900 group-hover:text-blue-800">Maitri Station</div>
+                      <div className="text-[10px] text-slate-500">Schirmacher Oasis (70.76°S, 11.73°E)</div>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-700" />
+                  </button>
+
+                  <button 
+                    onClick={() => handleLaunchTwin('dashboard', 'bharati')}
+                    className="w-full text-left p-2 hover:bg-slate-50 rounded-xs flex items-center justify-between group transition"
+                  >
+                    <div>
+                      <div className="font-bold text-slate-900 group-hover:text-blue-800">Bharati Station</div>
+                      <div className="text-[10px] text-slate-500">Larsemann Hills (69.40°S, 76.32°E)</div>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-700" />
+                  </button>
+
+                  <button 
+                    onClick={() => {
+                      setOpenDropdown(null);
+                      setShowDakshinGangotriModal(true);
+                    }}
+                    className="w-full text-left p-2 hover:bg-slate-50 rounded-xs flex items-center justify-between group transition border-t border-slate-100 mt-1"
+                  >
+                    <div>
+                      <div className="font-bold text-slate-900 group-hover:text-blue-800">Dakshin Gangotri</div>
+                      <div className="text-[10px] text-slate-500">First Base (1983) • Historical Site</div>
+                    </div>
+                    <History className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+
+                  <button 
+                    onClick={() => handleLaunchTwin('compare')}
+                    className="w-full text-left p-2 bg-blue-50/50 hover:bg-blue-50 rounded-xs flex items-center justify-between text-blue-900 font-bold mt-1"
+                  >
+                    <span>Station Comparison Matrix</span>
+                    <ArrowRight className="w-3.5 h-3.5 text-blue-700" />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* 4. Digital Twin (LIVE) */}
+            <button 
+              onClick={() => handleLaunchTwin('dashboard')} 
+              className="hover:text-blue-800 transition pb-1 text-blue-900 font-extrabold flex items-center gap-1 cursor-pointer"
+            >
+              <span>Digital Twin</span>
+              <span className="px-1 py-0.2 bg-blue-100 text-blue-800 text-[9px] rounded-xs font-mono animate-pulse">LIVE</span>
+            </button>
+
+            {/* 5. Research Dropdown */}
+            <div className="relative">
+              <button 
+                onClick={() => setOpenDropdown(openDropdown === 'research' ? null : 'research')}
+                className={`hover:text-blue-800 transition pb-1 cursor-pointer flex items-center gap-0.5 ${openDropdown === 'research' ? 'text-blue-800' : ''}`}
+              >
+                <span>Research</span>
+                <ChevronDown className="w-3 h-3" />
+              </button>
+
+              {openDropdown === 'research' && (
+                <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-slate-300 rounded-xs shadow-xl p-2 z-50 animate-fade-in text-xs font-normal">
+                  <div className="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                    Scientific Domains
+                  </div>
+                  <button onClick={() => handleLaunchTwin('glaciology')} className="w-full text-left p-2 hover:bg-slate-50 rounded-xs flex items-center justify-between group">
+                    <div>
+                      <div className="font-bold text-slate-900 group-hover:text-blue-800">Atmospheric & Cryosphere</div>
+                      <div className="text-[10px] text-slate-500">Radar, Ice Cores, Met telemetry</div>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+                  <button onClick={() => handleLaunchTwin('sensors')} className="w-full text-left p-2 hover:bg-slate-50 rounded-xs flex items-center justify-between group">
+                    <div>
+                      <div className="font-bold text-slate-900 group-hover:text-blue-800">Geomagnetism & Seismology</div>
+                      <div className="text-[10px] text-slate-500">Induction coil magnetometers</div>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+                  <button onClick={() => handleLaunchTwin('research')} className="w-full text-left p-2 hover:bg-slate-50 rounded-xs flex items-center justify-between group">
+                    <div>
+                      <div className="font-bold text-slate-900 group-hover:text-blue-800">Marine & Southern Ocean</div>
+                      <div className="text-[10px] text-slate-500">CTD Profilers, Phytoplankton</div>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* 6. Resources Dropdown */}
+            <div className="relative">
+              <button 
+                onClick={() => setOpenDropdown(openDropdown === 'resources' ? null : 'resources')}
+                className={`hover:text-blue-800 transition pb-1 cursor-pointer flex items-center gap-0.5 ${openDropdown === 'resources' ? 'text-blue-800' : ''}`}
+              >
+                <span>Resources</span>
+                <ChevronDown className="w-3 h-3" />
+              </button>
+
+              {openDropdown === 'resources' && (
+                <div className="absolute top-full right-0 mt-2 w-64 bg-white border border-slate-300 rounded-xs shadow-xl p-2 z-50 animate-fade-in text-xs font-normal">
+                  <div className="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                    Platform Tools & Data
+                  </div>
+                  <button onClick={() => handleLaunchTwin('analytics')} className="w-full text-left p-2 hover:bg-slate-50 rounded-xs flex items-center justify-between group">
+                    <div>
+                      <div className="font-bold text-slate-900 group-hover:text-blue-800">Polar Data Centre (PDC)</div>
+                      <div className="text-[10px] text-slate-500">Long-term telemetry archives</div>
+                    </div>
+                    <Database className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+                  <button onClick={() => handleLaunchTwin('replay')} className="w-full text-left p-2 hover:bg-slate-50 rounded-xs flex items-center justify-between group">
+                    <div>
+                      <div className="font-bold text-slate-900 group-hover:text-blue-800">Telemetry Time Machine</div>
+                      <div className="text-[10px] text-slate-500">Replay historic storm telemetry</div>
+                    </div>
+                    <History className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+                  <button onClick={() => handleLaunchTwin('incidents')} className="w-full text-left p-2 hover:bg-slate-50 rounded-xs flex items-center justify-between group">
+                    <div>
+                      <div className="font-bold text-slate-900 group-hover:text-blue-800">Incident Command & Log</div>
+                      <div className="text-[10px] text-slate-500">Emergency failover protocols</div>
+                    </div>
+                    <ShieldAlert className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+                  <button onClick={() => handleLaunchTwin('settings')} className="w-full text-left p-2 hover:bg-slate-50 rounded-xs flex items-center justify-between group border-t border-slate-100">
+                    <div>
+                      <div className="font-bold text-slate-900 group-hover:text-blue-800">System Settings & Logout</div>
+                      <div className="text-[10px] text-slate-500">Security credentials & RBAC</div>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* 7. Media */}
+            <button 
+              onClick={() => {
+                setOpenDropdown(null);
+                setShowMediaModal(true);
+              }} 
+              className="hover:text-blue-800 transition pb-1 cursor-pointer flex items-center gap-0.5"
+            >
+              Media
+            </button>
+
+            {/* 8. Contact */}
+            <button 
+              onClick={() => {
+                setOpenDropdown(null);
+                setShowContactModal(true);
+              }} 
+              className="hover:text-blue-800 transition pb-1 cursor-pointer flex items-center gap-0.5"
+            >
+              Contact
+            </button>
+
           </nav>
 
         </div>
@@ -280,7 +520,7 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
               <div className="mt-3 pt-2 text-right">
                 <button 
                   onClick={() => handleLaunchTwin('dashboard')}
-                  className="text-[11px] font-bold text-blue-700 hover:text-blue-900 flex items-center justify-end gap-1 ml-auto"
+                  className="text-[11px] font-bold text-blue-700 hover:text-blue-900 flex items-center justify-end gap-1 ml-auto cursor-pointer"
                 >
                   <span>View All Telemetry</span>
                   <ArrowRight className="w-3 h-3" />
@@ -397,7 +637,7 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
 
             <button 
               onClick={() => handleLaunchTwin('research')}
-              className="px-3 py-1.5 bg-[#102a43] hover:bg-[#1b3d5f] text-white text-[11px] font-bold rounded-xs flex items-center space-x-1.5 transition"
+              className="px-3 py-1.5 bg-[#102a43] hover:bg-[#1b3d5f] text-white text-[11px] font-bold rounded-xs flex items-center space-x-1.5 transition cursor-pointer"
             >
               <span>Explore Research Dossier</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -432,7 +672,7 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
               </h3>
               <button 
                 onClick={() => handleLaunchTwin('compare')}
-                className="text-xs font-bold text-blue-700 hover:underline flex items-center gap-0.5"
+                className="text-xs font-bold text-blue-700 hover:underline flex items-center gap-0.5 cursor-pointer"
               >
                 <span>View Station Comparison</span>
                 <ArrowRight className="w-3 h-3" />
@@ -459,7 +699,7 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
                     <h4 className="text-xs font-bold text-slate-900">Maitri Station</h4>
                     <p className="text-[10px] text-slate-500 font-mono">Schirmacher Oasis (70.76°S, 11.73°E)</p>
                     <p className="text-[10px] text-slate-600 mt-1.5 leading-snug">
-                      Inland rocky oasis base. Operational since 1988–89. Hosts automated weather stations (AWS), seismological observatory, and Priyadarshini Lake water intake pump system.
+                      Inland rocky oasis base. Operational since 1988–89. Hosts automated weather stations (AWS), seismological observatory, and Priyadarshini Lake water intake pump trace loop.
                     </p>
                   </div>
                 </div>
@@ -467,7 +707,7 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
                 <div className="p-2.5 pt-0">
                   <button 
                     onClick={() => handleLaunchTwin('dashboard', 'maitri')}
-                    className="text-[11px] font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1"
+                    className="text-[11px] font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1 cursor-pointer"
                   >
                     <span>Explore Maitri SCADA</span>
                     <ArrowRight className="w-3 h-3" />
@@ -500,7 +740,7 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
                 <div className="p-2.5 pt-0">
                   <button 
                     onClick={() => handleLaunchTwin('dashboard', 'bharati')}
-                    className="text-[11px] font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1"
+                    className="text-[11px] font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1 cursor-pointer"
                   >
                     <span>Explore Bharati SCADA</span>
                     <ArrowRight className="w-3 h-3" />
@@ -519,13 +759,13 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
               <div className="flex items-center space-x-2 font-bold">
                 <button 
                   onClick={() => setActiveNoticeTab('updates')}
-                  className={`${activeNoticeTab === 'updates' ? 'text-blue-800 border-b-2 border-blue-800' : 'text-slate-500 hover:text-slate-800'} pb-1`}
+                  className={`${activeNoticeTab === 'updates' ? 'text-blue-800 border-b-2 border-blue-800' : 'text-slate-500 hover:text-slate-800'} pb-1 cursor-pointer`}
                 >
                   Latest Updates
                 </button>
                 <button 
                   onClick={() => setActiveNoticeTab('notifications')}
-                  className={`${activeNoticeTab === 'notifications' ? 'text-blue-800 border-b-2 border-blue-800' : 'text-slate-500 hover:text-slate-800'} pb-1`}
+                  className={`${activeNoticeTab === 'notifications' ? 'text-blue-800 border-b-2 border-blue-800' : 'text-slate-500 hover:text-slate-800'} pb-1 cursor-pointer`}
                 >
                   Notifications
                 </button>
@@ -533,7 +773,7 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
 
               <button 
                 onClick={() => handleLaunchTwin('alerts')}
-                className="text-[10px] font-bold text-blue-700 hover:underline flex items-center"
+                className="text-[10px] font-bold text-blue-700 hover:underline flex items-center cursor-pointer"
               >
                 <span>View All</span>
                 <ArrowRight className="w-2.5 h-2.5 ml-0.5" />
@@ -542,13 +782,7 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
 
             {/* List of Notices */}
             <div className="divide-y divide-slate-100 space-y-2">
-              {[
-                { id: 1, date: '28', month: 'Sep 2026', title: '44th Indian Scientific Expedition to Antarctica (44-ISEA) wintering team deployed', category: 'updates' },
-                { id: 2, date: '22', month: 'Sep 2026', title: 'Larsemann Hills atmospheric ozone and lidar datasets uploaded to Polar Data Centre', category: 'updates' },
-                { id: 3, date: '15', month: 'Sep 2026', title: 'MoES technical committee approves Maitri II station modernization master plan', category: 'updates' },
-                { id: 4, date: '05', month: 'Sep 2026', title: 'Priyadarshini Lake sub-glacial hydrology and water trace heating survey released', category: 'updates' },
-                { id: 5, date: '18', month: 'Aug 2026', title: 'NCPOR issues call for research proposals for 45th Indian Antarctic Expedition', category: 'updates' }
-              ].map((notice) => (
+              {notices.map((notice) => (
                 <div 
                   key={notice.id} 
                   onClick={() => handleLaunchTwin('alerts')}
@@ -583,7 +817,7 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
             </h3>
             <button 
               onClick={() => handleLaunchTwin('research')}
-              className="text-xs font-bold text-blue-700 hover:underline flex items-center gap-0.5"
+              className="text-xs font-bold text-blue-700 hover:underline flex items-center gap-0.5 cursor-pointer"
             >
               <span>View All</span>
               <ArrowRight className="w-3 h-3" />
@@ -653,10 +887,10 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
               Quick Links
             </div>
             <ul className="space-y-1.5 text-slate-400 text-[11px]">
-              <li><button onClick={() => handleLaunchTwin('dashboard')} className="hover:text-white transition">Home</button></li>
-              <li><button onClick={() => handleLaunchTwin('assistant')} className="hover:text-white transition">About</button></li>
-              <li><button onClick={() => handleLaunchTwin('compare')} className="hover:text-white transition">Research Stations</button></li>
-              <li><button onClick={() => handleLaunchTwin('dashboard')} className="hover:text-white transition">Digital Twin</button></li>
+              <li><button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-white transition cursor-pointer">Home</button></li>
+              <li><button onClick={() => setShowAboutModal(true)} className="hover:text-white transition cursor-pointer">About MoES / NCPOR</button></li>
+              <li><button onClick={() => handleLaunchTwin('compare')} className="hover:text-white transition cursor-pointer">Research Stations</button></li>
+              <li><button onClick={() => handleLaunchTwin('dashboard')} className="hover:text-white transition cursor-pointer">Digital Twin Live</button></li>
             </ul>
           </div>
 
@@ -666,10 +900,10 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
               Important Links
             </div>
             <ul className="space-y-1.5 text-slate-400 text-[11px]">
-              <li><a href="https://moes.gov.in" target="_blank" rel="noreferrer" className="hover:text-white transition">MoES</a></li>
-              <li><a href="https://ncpor.res.in" target="_blank" rel="noreferrer" className="hover:text-white transition">NCPOR</a></li>
-              <li><button onClick={() => handleLaunchTwin('analytics')} className="hover:text-white transition">Polar Data Centre</button></li>
-              <li><button onClick={() => handleLaunchTwin('research')} className="hover:text-white transition">Vigyan Prasar</button></li>
+              <li><a href="https://moes.gov.in" target="_blank" rel="noreferrer" className="hover:text-white transition">MoES Portal</a></li>
+              <li><a href="https://ncpor.res.in" target="_blank" rel="noreferrer" className="hover:text-white transition">NCPOR Official Site</a></li>
+              <li><button onClick={() => handleLaunchTwin('analytics')} className="hover:text-white transition cursor-pointer">Polar Data Centre</button></li>
+              <li><button onClick={() => handleLaunchTwin('research')} className="hover:text-white transition cursor-pointer">Scientific Dossier</button></li>
             </ul>
           </div>
 
@@ -704,22 +938,230 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
               © 2026 Ministry of Earth Sciences, Government of India. All rights reserved.
             </div>
             <div className="flex items-center space-x-4">
-              <a href="#" className="hover:text-white transition">Privacy Policy</a>
-              <a href="#" className="hover:text-white transition">Terms of Use</a>
-              <a href="#" className="hover:text-white transition">Accessibility</a>
-              <a href="#" className="hover:text-white transition">Sitemap</a>
+              <button onClick={() => setShowAboutModal(true)} className="hover:text-white transition cursor-pointer">Privacy Policy</button>
+              <button onClick={() => setShowAboutModal(true)} className="hover:text-white transition cursor-pointer">Terms of Use</button>
+              <button onClick={() => setShowAboutModal(true)} className="hover:text-white transition cursor-pointer">Accessibility</button>
+              <button onClick={() => setShowAboutModal(true)} className="hover:text-white transition cursor-pointer">Sitemap</button>
             </div>
           </div>
         </div>
       </footer>
 
-      {/* ─── VIDEO / TOUR MODAL ─── */}
+      {/* ─── MODAL 1: ABOUT MOES & NCPOR ─── */}
+      {showAboutModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-2xs">
+          <div className="bg-white rounded-xs border border-slate-300 w-full max-w-2xl overflow-hidden shadow-2xl animate-scale-in font-sans">
+            <div className="bg-[#102a43] text-white p-3 flex items-center justify-between border-b border-slate-300">
+              <div className="flex items-center space-x-2">
+                <Info className="w-4 h-4 text-cyan-400" />
+                <h3 className="text-xs font-bold uppercase tracking-tight">About Indian Antarctic Programme • MoES & NCPOR</h3>
+              </div>
+              <button onClick={() => setShowAboutModal(false)} className="text-slate-300 hover:text-white cursor-pointer">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4 max-h-[80vh] overflow-y-auto text-xs text-slate-700 leading-relaxed">
+              <div className="bg-slate-50 p-3 rounded-xs border border-slate-200">
+                <h4 className="font-bold text-slate-900 text-sm mb-1">National Centre for Polar and Ocean Research (NCPOR)</h4>
+                <p className="text-[11px] text-slate-600">
+                  NCPOR is an autonomous R&D institution under the Ministry of Earth Sciences (MoES), Government of India. It serves as the nodal agency for planning, coordinating and executing the Indian Antarctic, Arctic, Southern Ocean and Himalayan cryosphere research expeditions.
+                </p>
+              </div>
+
+              <div>
+                <h5 className="font-bold text-slate-900 mb-1">Key Scientific Mandates:</h5>
+                <ul className="list-disc pl-5 space-y-1 text-slate-600 text-[11px]">
+                  <li>Continuous atmospheric, ozone, and geomagnetic observations at Maitri and Bharati stations.</li>
+                  <li>Deep ice-core paleoclimate reconstructions and glacier velocity monitoring.</li>
+                  <li>Operational monitoring and maintenance of India's research bases under Antarctic Treaty System (ATS) environmental compliance.</li>
+                  <li>Real-time telemetry digitization and life-support simulation through the Antarctic Digital Twin platform.</li>
+                </ul>
+              </div>
+
+              <div className="flex items-center justify-end space-x-2 pt-2 border-t border-slate-200">
+                <button
+                  onClick={() => {
+                    setShowAboutModal(false);
+                    handleLaunchTwin('research');
+                  }}
+                  className="px-4 py-2 bg-[#102a43] text-white text-xs font-bold rounded-xs cursor-pointer"
+                >
+                  Explore Scientific Dossier
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── MODAL 2: MEDIA GALLERY ─── */}
+      {showMediaModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-2xs">
+          <div className="bg-white rounded-xs border border-slate-300 w-full max-w-3xl overflow-hidden shadow-2xl animate-scale-in font-sans">
+            <div className="bg-[#102a43] text-white p-3 flex items-center justify-between border-b border-slate-300">
+              <div className="flex items-center space-x-2">
+                <Camera className="w-4 h-4 text-cyan-400" />
+                <h3 className="text-xs font-bold uppercase tracking-tight">Indian Antarctic Programme • Photo & Field Gallery</h3>
+              </div>
+              <button onClick={() => setShowMediaModal(false)} className="text-slate-300 hover:text-white cursor-pointer">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-4 space-y-3 max-h-[80vh] overflow-y-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                {galleryItems.map((item, idx) => (
+                  <div key={idx} className="border border-slate-200 rounded-xs overflow-hidden bg-slate-50">
+                    <div className="h-32 overflow-hidden">
+                      <img src={item.img} alt={item.title} className="w-full h-full object-cover hover:scale-105 transition duration-300" />
+                    </div>
+                    <div className="p-2">
+                      <div className="text-[11px] font-bold text-slate-900 leading-tight">{item.title}</div>
+                      <div className="text-[9px] text-slate-500 font-mono mt-0.5">{item.location}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-end pt-2 border-t border-slate-200">
+                <button
+                  onClick={() => setShowMediaModal(false)}
+                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xs cursor-pointer"
+                >
+                  Close Gallery
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── MODAL 3: CONTACT NCPOR GOA ─── */}
+      {showContactModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-2xs">
+          <div className="bg-white rounded-xs border border-slate-300 w-full max-w-xl overflow-hidden shadow-2xl animate-scale-in font-sans">
+            <div className="bg-[#102a43] text-white p-3 flex items-center justify-between border-b border-slate-300">
+              <div className="flex items-center space-x-2">
+                <Mail className="w-4 h-4 text-cyan-400" />
+                <h3 className="text-xs font-bold uppercase tracking-tight">Contact NCPOR • Ministry of Earth Sciences</h3>
+              </div>
+              <button onClick={() => setShowContactModal(false)} className="text-slate-300 hover:text-white cursor-pointer">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4 text-xs">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-3 border-b border-slate-200">
+                <div>
+                  <h4 className="font-bold text-slate-900 mb-1">Headquarters & Polar Ops:</h4>
+                  <p className="text-[11px] text-slate-600 leading-snug">
+                    National Centre for Polar and Ocean Research (NCPOR)<br />
+                    Ministry of Earth Sciences, Govt. of India<br />
+                    Headland Sada, Vasco-da-Gama, Goa - 403804, India
+                  </p>
+                </div>
+                <div className="space-y-1 text-[11px] text-slate-600 font-mono">
+                  <div><strong>Phone:</strong> +91-832-2525600</div>
+                  <div><strong>Email:</strong> director@ncpor.res.in</div>
+                  <div><strong>Satcom Ops:</strong> ops@ncpor.res.in</div>
+                </div>
+              </div>
+
+              {contactSubmitted ? (
+                <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-xs text-center space-y-1">
+                  <CheckCircle2 className="w-6 h-6 text-emerald-600 mx-auto" />
+                  <div className="font-bold text-emerald-900 text-xs">Inquiry Dispatched to NCPOR Goa Secretariat</div>
+                  <div className="text-[10px] text-emerald-700">Thank you. An authorized officer will respond to your official request.</div>
+                </div>
+              ) : (
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    setContactSubmitted(true);
+                  }}
+                  className="space-y-2.5"
+                >
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-700 block mb-0.5">Your Name</label>
+                      <input required type="text" placeholder="Dr. / Officer Name" className="w-full p-1.5 border border-slate-300 rounded-xs text-xs" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-700 block mb-0.5">Official Email</label>
+                      <input required type="email" placeholder="name@domain.gov.in" className="w-full p-1.5 border border-slate-300 rounded-xs text-xs" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-700 block mb-0.5">Expedition / Research Inquiry Subject</label>
+                    <input required type="text" placeholder="Antarctic Expedition Proposal / Telemetry Query" className="w-full p-1.5 border border-slate-300 rounded-xs text-xs" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-700 block mb-0.5">Message / Specification</label>
+                    <textarea required rows={3} placeholder="Provide details of your research inquiry or feedback..." className="w-full p-1.5 border border-slate-300 rounded-xs text-xs" />
+                  </div>
+                  <div className="flex justify-end space-x-2 pt-1">
+                    <button type="button" onClick={() => setShowContactModal(false)} className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-xs text-xs font-semibold">
+                      Cancel
+                    </button>
+                    <button type="submit" className="px-4 py-1.5 bg-[#102a43] hover:bg-[#1a385f] text-white font-bold rounded-xs text-xs flex items-center space-x-1">
+                      <Send className="w-3 h-3" />
+                      <span>Submit Inquiry</span>
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── MODAL 4: DAKSHIN GANGOTRI HISTORICAL BASE ─── */}
+      {showDakshinGangotriModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-2xs">
+          <div className="bg-white rounded-xs border border-slate-300 w-full max-w-xl overflow-hidden shadow-2xl animate-scale-in font-sans">
+            <div className="bg-[#102a43] text-white p-3 flex items-center justify-between border-b border-slate-300">
+              <div className="flex items-center space-x-2">
+                <History className="w-4 h-4 text-cyan-400" />
+                <h3 className="text-xs font-bold uppercase tracking-tight">Dakshin Gangotri • First Indian Antarctic Base (1983)</h3>
+              </div>
+              <button onClick={() => setShowDakshinGangotriModal(false)} className="text-slate-300 hover:text-white cursor-pointer">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-3 text-xs text-slate-700 leading-relaxed">
+              <div className="bg-slate-50 p-3 rounded-xs border border-slate-200">
+                <div className="font-bold text-slate-900 text-sm">Coordinates: 70°05′S, 12°00′E • Ice Shelf Base</div>
+                <p className="text-[11px] text-slate-600 mt-1">
+                  Dakshin Gangotri was established during the 3rd Indian Scientific Expedition (1983–84). It was an unmanned containerized base in ice that supported wintering teams until 1989.
+                </p>
+              </div>
+
+              <p className="text-[11px] text-slate-600">
+                In 1989, due to natural ice-shelf accumulation and submergence under snow, it was decommissioned and designated as a protected Historic Site and Monument (HSM-44) under the Antarctic Treaty System. It now functions as a supply transit and fuel cache depot.
+              </p>
+
+              <div className="flex justify-end pt-2 border-t border-slate-200">
+                <button
+                  onClick={() => setShowDakshinGangotriModal(false)}
+                  className="px-3 py-1.5 bg-[#102a43] text-white text-xs font-bold rounded-xs cursor-pointer"
+                >
+                  Close Dossier
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── MODAL 5: VIDEO / EXPEDITION BRIEFING ─── */}
       {showVideoModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-2xs">
           <div className="bg-white rounded-xs border border-slate-300 w-full max-w-2xl overflow-hidden shadow-2xl">
             <div className="flex items-center justify-between p-3 border-b border-slate-200 bg-[#102a43] text-white">
               <h4 className="text-xs font-bold">Indian Antarctic Research Programme Overview</h4>
-              <button onClick={() => setShowVideoModal(false)} className="text-slate-300 hover:text-white">
+              <button onClick={() => setShowVideoModal(false)} className="text-slate-300 hover:text-white cursor-pointer">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -731,7 +1173,7 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
                   className="w-full h-full object-cover opacity-80"
                 />
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-white space-y-2">
-                  <div className="w-12 h-12 rounded-full bg-blue-600/90 border border-white flex items-center justify-center shadow-lg">
+                  <div className="w-12 h-12 rounded-full bg-blue-600/90 border border-white flex items-center justify-center shadow-lg cursor-pointer">
                     <Play className="w-5 h-5 fill-current ml-0.5" />
                   </div>
                   <span className="text-xs font-bold font-sans">MoES / NCPOR Antarctic Scientific Expedition Reel</span>
@@ -743,7 +1185,7 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
                     setShowVideoModal(false);
                     handleLaunchTwin('dashboard');
                   }}
-                  className="px-4 py-2 bg-[#102a43] text-white text-xs font-bold rounded-xs"
+                  className="px-4 py-2 bg-[#102a43] hover:bg-[#1a385f] text-white text-xs font-bold rounded-xs cursor-pointer"
                 >
                   Enter Mission Control Dashboard
                 </button>
