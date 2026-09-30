@@ -38,7 +38,6 @@ import { RBACRole } from './types';
 export const MainContent: React.FC = () => {
   const { userRole, setUserRole, setActiveStationId } = useSimulation();
   
-  // Dashboard opens directly by default (unless user specifically navigates to ?portal=true)
   const [showLanding, setShowLanding] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
@@ -75,8 +74,6 @@ export const MainContent: React.FC = () => {
     setShowLanding(true);
   };
 
-  // When user switches role in header, automatically switch to role's primary view
-  // if the currently active tab is not accessible in that role
   useEffect(() => {
     const allowed = ROLE_ALLOWED_TABS[userRole] || ROLE_ALLOWED_TABS.ADMIN;
     if (!allowed.includes(activeTab)) {
@@ -98,7 +95,7 @@ export const MainContent: React.FC = () => {
   const isTabPermitted = allowedTabs.includes(activeTab);
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-[#ebf0f7] font-sans">
+    <div className="flex flex-col h-screen overflow-hidden bg-[#f0f4f8] font-sans">
       {/* Header & Satellite Bandwidth & Demo Stepper Banners */}
       <Header 
         onOpenLanding={handleOpenLanding} 
@@ -118,9 +115,9 @@ export const MainContent: React.FC = () => {
           onOpenHelp={() => setShowHelp(true)}
         />
 
-        <main className="flex-1 p-3.5 overflow-y-auto bg-[#ebf0f7]">
+        <main className="flex-1 p-2.5 overflow-y-auto bg-[#f0f4f8]">
           {!isTabPermitted ? (
-            <div className="max-w-xl mx-auto my-12 bg-white p-8 rounded-2xl border border-[#dce3ec] shadow-sm text-center font-sans space-y-4">
+            <div className="max-w-xl mx-auto my-12 bg-white p-8 rounded-2xl border border-[#cbd5e1] shadow-sm text-center font-sans space-y-4">
               <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center mx-auto">
                 <ShieldAlert className="w-6 h-6" />
               </div>
