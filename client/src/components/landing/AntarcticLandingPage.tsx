@@ -60,7 +60,6 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
   const [showMediaModal, setShowMediaModal] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
   const [showDakshinGangotriModal, setShowDakshinGangotriModal] = useState(false);
-  const [showVideoModal, setShowVideoModal] = useState(false);
   const [contactSubmitted, setContactSubmitted] = useState(false);
 
   const navRef = useRef<HTMLDivElement>(null);
@@ -447,18 +446,10 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
             <div className="pt-3 flex flex-wrap items-center gap-3">
               <button
                 onClick={() => handleLaunchTwin('dashboard')}
-                className="px-5 py-2.5 bg-[#102a43] hover:bg-[#1b3d5f] text-white text-xs font-bold rounded-xs shadow-md border border-cyan-500/40 flex items-center space-x-2 transition cursor-pointer"
+                className="px-6 py-2.5 bg-[#102a43] hover:bg-[#1b3d5f] text-white text-xs font-bold rounded-xs shadow-md border border-cyan-500/40 flex items-center space-x-2 transition cursor-pointer"
               >
                 <span>Explore Digital Twin</span>
                 <ArrowRight className="w-4 h-4 text-cyan-400" />
-              </button>
-
-              <button
-                onClick={() => setShowVideoModal(true)}
-                className="px-5 py-2.5 bg-white/95 hover:bg-white text-slate-900 text-xs font-bold rounded-xs shadow-md border border-slate-300 flex items-center space-x-2 transition cursor-pointer"
-              >
-                <Play className="w-3.5 h-3.5 fill-current text-blue-700" />
-                <span>Watch Video</span>
               </button>
             </div>
           </div>
@@ -1155,46 +1146,7 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
         </div>
       )}
 
-      {/* ─── MODAL 5: VIDEO / EXPEDITION BRIEFING ─── */}
-      {showVideoModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-2xs">
-          <div className="bg-white rounded-xs border border-slate-300 w-full max-w-2xl overflow-hidden shadow-2xl">
-            <div className="flex items-center justify-between p-3 border-b border-slate-200 bg-[#102a43] text-white">
-              <h4 className="text-xs font-bold">Indian Antarctic Research Programme Overview</h4>
-              <button onClick={() => setShowVideoModal(false)} className="text-slate-300 hover:text-white cursor-pointer">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="p-4 space-y-3">
-              <div className="aspect-video bg-slate-900 rounded-xs overflow-hidden relative flex items-center justify-center">
-                <img 
-                  src="/antarctic-landing-bg.jpg" 
-                  alt="Antarctica Video Preview" 
-                  className="w-full h-full object-cover opacity-80"
-                />
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-white space-y-2">
-                  <div className="w-12 h-12 rounded-full bg-blue-600/90 border border-white flex items-center justify-center shadow-lg cursor-pointer">
-                    <Play className="w-5 h-5 fill-current ml-0.5" />
-                  </div>
-                  <span className="text-xs font-bold font-sans">MoES / NCPOR Antarctic Scientific Expedition Reel</span>
-                </div>
-              </div>
-              <div className="flex justify-end">
-                <button
-                  onClick={() => {
-                    setShowVideoModal(false);
-                    handleLaunchTwin('dashboard');
-                  }}
-                  className="px-4 py-2 bg-[#102a43] hover:bg-[#1a385f] text-white text-xs font-bold rounded-xs cursor-pointer"
-                >
-                  Enter Mission Control Dashboard
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
+      {/* ─── END OF MODALS ─── */}
     </div>
   );
 };
