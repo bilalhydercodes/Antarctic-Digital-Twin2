@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useSimulation } from '../context/SimulationContext';
 import { NavTab } from '../components/layout/Sidebar';
 import { DashboardDigitalTwinEmbed } from '../components/digitaltwin/DashboardDigitalTwinEmbed';
-import { Antarctic2DMap } from '../components/map/Antarctic2DMap';
+import { AntarcticRealMap } from '../components/map/AntarcticRealMap';
 import { audioService } from '../services/AudioService';
 import { 
   Zap, 
@@ -307,47 +307,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         </div>
 
         {/* 2B. ANTARCTIC MAP & SATELLITE TRACKING (4/12) */}
-        <div className="lg:col-span-4 bg-white border border-[#cbd5e1] rounded-sm p-2.5 flex flex-col justify-between">
-          <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-200">
-            <div className="text-xs font-bold text-[#102a43] uppercase tracking-tight flex items-center gap-1.5">
-              <MapIcon className="w-3.5 h-3.5 text-slate-700" />
-              <span>ANTARCTIC MAP & SATELLITE TRACKING</span>
-            </div>
-
-            <div className="flex items-center space-x-1 text-[10px] font-bold">
-              <button
-                onClick={() => setMapMode('map')}
-                className={`px-1.5 py-0.5 rounded-xs border ${mapMode === 'map' ? 'bg-[#102a43] text-white border-[#102a43]' : 'bg-slate-50 text-slate-700 border-slate-200'}`}
-              >
-                Map View
-              </button>
-              <button
-                onClick={() => setMapMode('satellite')}
-                className={`px-1.5 py-0.5 rounded-xs border ${mapMode === 'satellite' ? 'bg-[#102a43] text-white border-[#102a43]' : 'bg-slate-50 text-slate-700 border-slate-200'}`}
-              >
-                Satellite View
-              </button>
-            </div>
-          </div>
-
-          <div className="h-64 rounded-xs overflow-hidden relative border border-slate-300 bg-[#0b1d33]">
-            <Antarctic2DMap />
-
-            <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-slate-900/90 border border-slate-700 rounded-xs font-mono text-[9px] text-cyan-300">
-              NEXT SATELLITE PASS: 12m 40s (RISAT-2B)
-            </div>
-
-            {/* GIS Legend & Scale */}
-            <div className="absolute bottom-1 inset-x-1 flex items-center justify-between bg-slate-950/90 px-2 py-0.5 text-[9px] text-slate-300 font-mono border border-slate-800">
-              <span>SCALE: 1:500,000</span>
-              <div className="flex items-center space-x-2">
-                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-blue-500"></span> Maitri</span>
-                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-red-500"></span> Bharati</span>
-                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-cyan-400"></span> Sat-Pass</span>
-                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-emerald-400"></span> UAV</span>
-              </div>
-            </div>
-          </div>
+        <div className="lg:col-span-4 flex flex-col">
+          <AntarcticRealMap 
+            onSelectStation={(stationId) => setActiveStationId(stationId)}
+            heightClass="h-64"
+          />
         </div>
 
         {/* 2C. EMERGENCY PROTOCOL & QUICK ACTIONS (3/12) */}
