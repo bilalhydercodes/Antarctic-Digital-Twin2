@@ -389,36 +389,37 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
             </h3>
             
             <p className="text-xs text-slate-600 leading-relaxed">
-              India has been conducting scientific research in Antarctica since 1981 through
-              its stations Maitri (Schirmacher Oasis) and Bharati (Larsemann Hills),
-              contributing to global understanding of climate, environment and earth systems.
+              Initiated in 1981 under the Ministry of Earth Sciences (MoES), the Indian Antarctic
+              Programme conducts continuous scientific research across East Antarctica through
+              Maitri (Schirmacher Oasis) and Bharati (Larsemann Hills), supporting cryosphere,
+              atmospheric, geomagnetic and oceanographic science under the Antarctic Treaty System.
             </p>
 
             <button 
               onClick={() => handleLaunchTwin('research')}
               className="px-3 py-1.5 bg-[#102a43] hover:bg-[#1b3d5f] text-white text-[11px] font-bold rounded-xs flex items-center space-x-1.5 transition"
             >
-              <span>Know More</span>
+              <span>Explore Research Dossier</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
 
             {/* 4 Stat Cards Grid (2x2) */}
             <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200 font-sans">
               <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-xs text-center">
-                <div className="text-xl font-extrabold text-[#102a43]">43+</div>
-                <div className="text-[10px] text-slate-500 font-medium">Years of Presence</div>
+                <div className="text-xl font-extrabold text-[#102a43]">44th</div>
+                <div className="text-[10px] text-slate-500 font-medium">Expedition in Ops</div>
               </div>
               <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-xs text-center">
-                <div className="text-xl font-extrabold text-[#102a43]">50+</div>
-                <div className="text-[10px] text-slate-500 font-medium">Scientific Programs</div>
+                <div className="text-xl font-extrabold text-[#102a43]">1981</div>
+                <div className="text-[10px] text-slate-500 font-medium">Programme Inception</div>
               </div>
               <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-xs text-center">
-                <div className="text-xl font-extrabold text-[#102a43]">500+</div>
-                <div className="text-[10px] text-slate-500 font-medium">Researchers</div>
+                <div className="text-xl font-extrabold text-[#102a43]">2,800+</div>
+                <div className="text-[10px] text-slate-500 font-medium">Polar Personnel</div>
               </div>
               <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-xs text-center">
-                <div className="text-xl font-extrabold text-[#102a43]">2</div>
-                <div className="text-[10px] text-slate-500 font-medium">Research Stations</div>
+                <div className="text-xl font-extrabold text-[#102a43]">2 Active</div>
+                <div className="text-[10px] text-slate-500 font-medium">Permanent Bases</div>
               </div>
             </div>
           </div>
@@ -433,7 +434,7 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
                 onClick={() => handleLaunchTwin('compare')}
                 className="text-xs font-bold text-blue-700 hover:underline flex items-center gap-0.5"
               >
-                <span>View All Stations</span>
+                <span>View Station Comparison</span>
                 <ArrowRight className="w-3 h-3" />
               </button>
             </div>
@@ -458,7 +459,7 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
                     <h4 className="text-xs font-bold text-slate-900">Maitri Station</h4>
                     <p className="text-[10px] text-slate-500 font-mono">Schirmacher Oasis (70.76°S, 11.73°E)</p>
                     <p className="text-[10px] text-slate-600 mt-1.5 leading-snug">
-                      India's first permanent research station in Antarctica, operational since 1988. Focus areas include atmospheric science, geosciences and environmental monitoring.
+                      Inland rocky oasis base. Operational since 1988–89. Hosts automated weather stations (AWS), seismological observatory, and Priyadarshini Lake water intake pump system.
                     </p>
                   </div>
                 </div>
@@ -468,7 +469,7 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
                     onClick={() => handleLaunchTwin('dashboard', 'maitri')}
                     className="text-[11px] font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1"
                   >
-                    <span>Explore Maitri</span>
+                    <span>Explore Maitri SCADA</span>
                     <ArrowRight className="w-3 h-3" />
                   </button>
                 </div>
@@ -491,7 +492,7 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
                     <h4 className="text-xs font-bold text-slate-900">Bharati Station</h4>
                     <p className="text-[10px] text-slate-500 font-mono">Larsemann Hills (69.40°S, 76.32°E)</p>
                     <p className="text-[10px] text-slate-600 mt-1.5 leading-snug">
-                      India's second research station, operational since 2012. Supports geosciences, marine sciences, biology and climate studies.
+                      Coastal modern station commissioned on 18 March 2012. Built from 134 modular prefabricated containers. Features direct satellite transceivers and oceanography suites.
                     </p>
                   </div>
                 </div>
@@ -501,7 +502,7 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
                     onClick={() => handleLaunchTwin('dashboard', 'bharati')}
                     className="text-[11px] font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1"
                   >
-                    <span>Explore Bharati</span>
+                    <span>Explore Bharati SCADA</span>
                     <ArrowRight className="w-3 h-3" />
                   </button>
                 </div>
@@ -541,7 +542,13 @@ export const AntarcticLandingPage: React.FC<AntarcticLandingPageProps> = ({
 
             {/* List of Notices */}
             <div className="divide-y divide-slate-100 space-y-2">
-              {notices.map((notice) => (
+              {[
+                { id: 1, date: '28', month: 'Sep 2026', title: '44th Indian Scientific Expedition to Antarctica (44-ISEA) wintering team deployed', category: 'updates' },
+                { id: 2, date: '22', month: 'Sep 2026', title: 'Larsemann Hills atmospheric ozone and lidar datasets uploaded to Polar Data Centre', category: 'updates' },
+                { id: 3, date: '15', month: 'Sep 2026', title: 'MoES technical committee approves Maitri II station modernization master plan', category: 'updates' },
+                { id: 4, date: '05', month: 'Sep 2026', title: 'Priyadarshini Lake sub-glacial hydrology and water trace heating survey released', category: 'updates' },
+                { id: 5, date: '18', month: 'Aug 2026', title: 'NCPOR issues call for research proposals for 45th Indian Antarctic Expedition', category: 'updates' }
+              ].map((notice) => (
                 <div 
                   key={notice.id} 
                   onClick={() => handleLaunchTwin('alerts')}
