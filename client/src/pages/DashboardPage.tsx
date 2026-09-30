@@ -245,77 +245,19 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
       </div>
 
-      {/* ─── SECTION 2: 3D DIGITAL TWIN + ANTARCTIC MAP & EMERGENCY PROTOCOL ─── */}
+      {/* ─── SECTION 2: EXPANDED ANTARCTIC GIS MAP & MISSION CONTROL ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-2.5">
         
-        {/* 2A. 3D DIGITAL TWIN PANEL (5/12) */}
-        <div className="lg:col-span-5 bg-white border border-[#cbd5e1] rounded-sm p-2.5 flex flex-col justify-between">
-          <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-200">
-            <div className="text-xs font-bold text-[#102a43] uppercase tracking-tight flex items-center gap-1.5">
-              <Box className="w-3.5 h-3.5 text-slate-700" />
-              <span>3D DIGITAL TWIN — {activeStationId.toUpperCase()} STATION</span>
-            </div>
-
-            {/* View & Tool Controls */}
-            <div className="flex items-center space-x-1 text-[10px] font-bold">
-              <button
-                onClick={() => setView3DMode('exterior')}
-                className={`px-1.5 py-0.5 rounded-xs border ${view3DMode === 'exterior' ? 'bg-[#102a43] text-white border-[#102a43]' : 'bg-slate-50 text-slate-700 border-slate-200'}`}
-              >
-                Exterior
-              </button>
-              <button
-                onClick={() => setView3DMode('interior')}
-                className={`px-1.5 py-0.5 rounded-xs border ${view3DMode === 'interior' ? 'bg-[#102a43] text-white border-[#102a43]' : 'bg-slate-50 text-slate-700 border-slate-200'}`}
-              >
-                Interior
-              </button>
-              <button
-                onClick={() => setView3DMode('thermal')}
-                className={`px-1.5 py-0.5 rounded-xs border ${view3DMode === 'thermal' ? 'bg-[#102a43] text-white border-[#102a43]' : 'bg-slate-50 text-slate-700 border-slate-200'}`}
-              >
-                Thermal
-              </button>
-              <button 
-                onClick={() => onNavigate('twin')} 
-                title="Full Screen 3D Inspection"
-                className="p-1 border border-slate-200 bg-slate-50 text-slate-600 hover:text-slate-900 rounded-xs"
-              >
-                <Maximize2 className="w-3 h-3" />
-              </button>
-            </div>
-          </div>
-
-          {/* Full Interactive 3D Digital Twin Canvas */}
-          <div className="h-64 rounded-xs overflow-hidden relative border border-slate-300 bg-[#070f1e]">
-            <DashboardDigitalTwinEmbed 
-              stationId={activeStationId} 
-              mode={view3DMode} 
-              onNavigate={onNavigate}
-            />
-
-            {/* Bottom CAD Tool Bar */}
-            <div className="absolute bottom-1 inset-x-1 flex items-center justify-between bg-slate-950/90 px-2 py-0.5 text-[9px] font-mono text-slate-300 border border-slate-800">
-              <span>FOV: 42° | ORBIT: ACTIVE</span>
-              <div className="flex items-center space-x-3">
-                <span className="cursor-pointer hover:text-white">Rotate (Drag)</span>
-                <span className="cursor-pointer hover:text-white">Zoom (Scroll)</span>
-                <span className="cursor-pointer hover:text-white">Click Hotspots</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 2B. ANTARCTIC MAP & SATELLITE TRACKING (4/12) */}
-        <div className="lg:col-span-4 flex flex-col">
+        {/* 2A. EXPANDED ANTARCTIC STATION LOCATION & SATELLITE MAP (8/12) */}
+        <div className="lg:col-span-8 flex flex-col">
           <AntarcticRealMap 
             onSelectStation={(stationId) => setActiveStationId(stationId)}
-            heightClass="h-64"
+            heightClass="h-[430px]"
           />
         </div>
 
-        {/* 2C. EMERGENCY PROTOCOL & QUICK ACTIONS (3/12) */}
-        <div className="lg:col-span-3 space-y-2 flex flex-col justify-between">
+        {/* 2B. EMERGENCY PROTOCOL & QUICK ACTIONS (4/12) */}
+        <div className="lg:col-span-4 space-y-2 flex flex-col justify-between">
           
           {/* Emergency Protocol Box */}
           <div className="bg-white border border-[#cbd5e1] rounded-sm p-2.5">
