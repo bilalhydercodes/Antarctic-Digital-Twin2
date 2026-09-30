@@ -171,7 +171,7 @@ export const MainContent: React.FC = () => {
               {activeTab === 'scenarios' && <ScenarioLabPage />}
               {activeTab === 'assistant' && <AssistantPage />}
               {activeTab === 'research' && <ResearchPage />}
-              {activeTab === 'settings' && <SettingsPage />}
+              {activeTab === 'settings' && <SettingsPage onLogout={handleOpenLanding} />}
             </>
           )}
         </main>
