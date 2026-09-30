@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSimulation } from '../context/SimulationContext';
 import { NavTab } from '../components/layout/Sidebar';
-import { Dashboard3DViewer } from '../components/digitaltwin/Dashboard3DViewer';
+import { DashboardDigitalTwinEmbed } from '../components/digitaltwin/DashboardDigitalTwinEmbed';
 import { Antarctic2DMap } from '../components/map/Antarctic2DMap';
 import { audioService } from '../services/AudioService';
 import { 
@@ -286,38 +286,21 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             </div>
           </div>
 
-          {/* 3D Scene View Container */}
-          <div className="h-56 rounded-xs overflow-hidden relative border border-slate-300 bg-[#070f1e]">
-            <Dashboard3DViewer stationId={activeStationId} mode={view3DMode} />
-
-            {/* Restrained Technical Overlays */}
-            <div className="absolute top-2 left-2 flex flex-col gap-1 pointer-events-none font-mono text-[9px]">
-              <span className="px-1.5 py-0.2 bg-[#102a43]/90 text-sky-200 border border-slate-600 rounded-xs">
-                [01] Research Laboratory
-              </span>
-              <span className="px-1.5 py-0.2 bg-[#102a43]/90 text-slate-200 border border-slate-600 rounded-xs">
-                [02] Power House (Kirloskar GenSets)
-              </span>
-            </div>
-
-            <div className="absolute top-2 right-2 flex flex-col gap-1 pointer-events-none font-mono text-[9px] text-right">
-              <span className="px-1.5 py-0.2 bg-[#102a43]/90 text-slate-200 border border-slate-600 rounded-xs">
-                [03] Living Module
-              </span>
-              <span className="px-1.5 py-0.2 bg-[#102a43]/90 text-amber-200 border border-slate-600 rounded-xs">
-                [04] Fuel Storage (AN-8)
-              </span>
-            </div>
+          {/* Full Interactive 3D Digital Twin Canvas */}
+          <div className="h-64 rounded-xs overflow-hidden relative border border-slate-300 bg-[#070f1e]">
+            <DashboardDigitalTwinEmbed 
+              stationId={activeStationId} 
+              mode={view3DMode} 
+              onNavigate={onNavigate}
+            />
 
             {/* Bottom CAD Tool Bar */}
             <div className="absolute bottom-1 inset-x-1 flex items-center justify-between bg-slate-950/90 px-2 py-0.5 text-[9px] font-mono text-slate-300 border border-slate-800">
-              <span>FOV: 45° | GRID: CALIBRATED</span>
+              <span>FOV: 42° | ORBIT: ACTIVE</span>
               <div className="flex items-center space-x-3">
-                <span className="cursor-pointer hover:text-white">Rotate</span>
-                <span className="cursor-pointer hover:text-white">Zoom</span>
-                <span className="cursor-pointer hover:text-white">Pan</span>
-                <span className="cursor-pointer hover:text-white">Layers</span>
-                <span className="cursor-pointer hover:text-white">Measure</span>
+                <span className="cursor-pointer hover:text-white">Rotate (Drag)</span>
+                <span className="cursor-pointer hover:text-white">Zoom (Scroll)</span>
+                <span className="cursor-pointer hover:text-white">Click Hotspots</span>
               </div>
             </div>
           </div>
@@ -347,7 +330,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             </div>
           </div>
 
-          <div className="h-56 rounded-xs overflow-hidden relative border border-slate-300 bg-[#0b1d33]">
+          <div className="h-64 rounded-xs overflow-hidden relative border border-slate-300 bg-[#0b1d33]">
             <Antarctic2DMap />
 
             <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-slate-900/90 border border-slate-700 rounded-xs font-mono text-[9px] text-cyan-300">
