@@ -17,7 +17,8 @@ import {
   VolumeX,
   Mic,
   FileText,
-  Activity
+  Activity,
+  Home
 } from 'lucide-react';
 import { RBACRole } from '../../types';
 
@@ -75,7 +76,11 @@ export const Header: React.FC<HeaderProps> = ({ onOpenLanding, onOpenTour, onOpe
     <header className="bg-[#ffffff] border-b border-[#cbd5e1] text-[#0f172a] px-3 py-1.5 flex items-center justify-between gap-3 sticky top-0 z-50 font-sans text-xs select-none">
       
       {/* ─── 1. OFFICIAL GOVT OF INDIA & NCPOR IDENTITY ─── */}
-      <div className="flex items-center space-x-3 shrink-0">
+      <div 
+        onClick={onOpenLanding}
+        title="Open Government of India NCPOR Portal Home"
+        className="flex items-center space-x-3 shrink-0 cursor-pointer hover:opacity-95 transition"
+      >
         {/* Lion Capital of India Official Emblem */}
         <div className="flex items-center space-x-2 border-r border-[#cbd5e1] pr-3">
           <svg className="w-6 h-8 text-[#0f172a] shrink-0" viewBox="0 0 40 50" fill="currentColor">
@@ -128,6 +133,16 @@ export const Header: React.FC<HeaderProps> = ({ onOpenLanding, onOpenTour, onOpe
           <Clock className="w-3 h-3 text-slate-500" />
           <span>{currentTime || '30-SEP-2026 12:27:00 IST'}</span>
         </div>
+
+        {/* Portal Home Button */}
+        <button
+          onClick={onOpenLanding}
+          title="Return to Official Government Portal"
+          className="px-2 py-1 rounded-sm border border-slate-300 bg-slate-50 hover:bg-slate-100 text-[#102a43] text-[10px] font-bold flex items-center space-x-1 transition cursor-pointer"
+        >
+          <Home className="w-3 h-3 text-blue-800" />
+          <span>PORTAL</span>
+        </button>
 
         {/* Active Station Selector */}
         <div className="flex items-center border border-slate-300 rounded-sm overflow-hidden bg-slate-50 text-[11px] font-bold">

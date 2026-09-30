@@ -41,9 +41,11 @@ export const MainContent: React.FC = () => {
   const [showLanding, setShowLanding] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
-      return params.get('portal') === 'true';
+      if (params.get('app') === 'true') return false;
+      if (params.get('portal') === 'true') return true;
+      return true; // Default to official Government of India Landing Portal
     }
-    return false;
+    return true;
   });
 
   const [showTour, setShowTour] = useState<boolean>(() => {
