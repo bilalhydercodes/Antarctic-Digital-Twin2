@@ -92,7 +92,7 @@ export const MainContent: React.FC = () => {
   const isTabPermitted = allowedTabs.includes(activeTab);
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-[#f4f3f0] font-sans">
+    <div className="flex flex-col h-screen overflow-hidden bg-[#ebf0f7] font-sans">
       {/* Header & Satellite Bandwidth & Demo Stepper Banners */}
       <Header 
         onOpenLanding={handleOpenLanding} 
@@ -112,17 +112,17 @@ export const MainContent: React.FC = () => {
           onOpenHelp={() => setShowHelp(true)}
         />
 
-        <main className="flex-1 p-6 overflow-y-auto bg-[#f4f3f0]">
+        <main className="flex-1 p-3.5 overflow-y-auto bg-[#ebf0f7]">
           {!isTabPermitted ? (
-            <div className="max-w-xl mx-auto my-12 bg-white p-8 rounded-2xl border border-[#e5e3dc] shadow-sm text-center font-sans space-y-4">
+            <div className="max-w-xl mx-auto my-12 bg-white p-8 rounded-2xl border border-[#dce3ec] shadow-sm text-center font-sans space-y-4">
               <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center mx-auto">
                 <ShieldAlert className="w-6 h-6" />
               </div>
-              <h2 className="text-lg font-black text-stone-900">
+              <h2 className="text-lg font-black text-slate-900">
                 Module Restricted for Role: {userRole}
               </h2>
-              <p className="text-xs text-stone-600 max-w-md mx-auto leading-relaxed">
-                The requested module is not part of the <span className="font-bold text-stone-800">{ROLE_METADATA[userRole]?.badge}</span> operational profile.
+              <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
+                The requested module is not part of the <span className="font-bold text-slate-800">{ROLE_METADATA[userRole]?.badge}</span> operational profile.
               </p>
               <button
                 onClick={() => setActiveTab(allowedTabs[0] || 'dashboard')}
@@ -178,24 +178,17 @@ export const MainContent: React.FC = () => {
       <HelpCenterModal 
         isOpen={showHelp} 
         onClose={() => setShowHelp(false)} 
-        onNavigateTab={(tab) => {
-          setActiveTab(tab);
-          setShowHelp(false);
-        }}
-        onOpenTour={() => {
-          setShowHelp(false);
-          setShowTour(true);
-        }}
       />
     </div>
   );
 };
 
-
-export default function App() {
+export const App: React.FC = () => {
   return (
     <SimulationProvider>
       <MainContent />
     </SimulationProvider>
   );
-}
+};
+
+export default App;

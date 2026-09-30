@@ -2,14 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSimulation } from '../../context/SimulationContext';
 import { audioService, AudioAlarmState } from '../../services/AudioService';
 import { 
-  Search, 
-  Bell, 
-  ChevronDown, 
-  Radio,
   Snowflake,
-  Mountain,
-  PlayCircle,
-  StopCircle,
   Play,
   Pause,
   RotateCcw,
@@ -18,9 +11,12 @@ import {
   Mic,
   ShieldCheck,
   Square,
-  AlertOctagon,
   Sparkles,
-  HelpCircle
+  HelpCircle,
+  Radio,
+  Clock,
+  ExternalLink,
+  ChevronDown
 } from 'lucide-react';
 import { RBACRole } from '../../types';
 
@@ -37,11 +33,10 @@ export const Header: React.FC<HeaderProps> = ({ onOpenLanding, onOpenTour, onOpe
   useEffect(() => {
     return audioService.subscribe(setAlarmState);
   }, []);
+
   const { 
     activeStationId, 
     setActiveStationId, 
-    environment,
-    alerts,
     useRealWeatherMode,
     setUseRealWeatherMode,
     simulationState,
@@ -55,285 +50,148 @@ export const Header: React.FC<HeaderProps> = ({ onOpenLanding, onOpenTour, onOpe
     setUserRole
   } = useSimulation();
 
-  const unhandledAlertsCount = alerts.filter(a => !a.acknowledged).length;
-
   return (
-    <header className="bg-white border-b border-[#e5e3dc] px-6 py-3 flex flex-wrap items-center justify-between gap-4 sticky top-0 z-50 shadow-sm font-sans">
-      {/* 1. BRANDING & TITLE & WELCOME PORTAL BUTTON */}
+    <header className="bg-white border-b border-[#dce3ec] px-4 py-2 flex flex-wrap items-center justify-between gap-3 sticky top-0 z-50 shadow-xs font-sans select-none">
+      
+      {/* 1. BRANDING: GOVT OF INDIA & NCPOR OFFICIAL EMBLEMS */}
       <div className="flex items-center space-x-3 shrink-0">
-        <div className="w-10 h-10 rounded-xl bg-blue-900 text-white flex items-center justify-center shadow-md">
-          <Mountain className="w-6 h-6 text-sky-300" />
+        {/* Lion Capital of India Official Emblem */}
+        <div className="flex items-center space-x-2 border-r border-[#e2e8f0] pr-3">
+          <svg className="w-7 h-9 text-stone-900 shrink-0" viewBox="0 0 40 50" fill="currentColor">
+            <path d="M20 2C16 2 13 4 11 7C10 8.5 10 10 10.5 11.5C9 12 8 13.5 8 15C8 17 9.5 18.5 11.5 19C10.5 20.5 10.5 22.5 11.5 24C10 25 9 26.5 9 28.5C9 31 11 33 13.5 33.5C13 34.5 13 35.5 13.5 36.5C12 37.5 11 39 11 41C11 43.5 13 45.5 15.5 46L20 47L24.5 46C27 45.5 29 43.5 29 41C29 39 28 37.5 26.5 36.5C27 35.5 27 34.5 26.5 33.5C29 33 31 31 31 28.5C31 26.5 30 25 28.5 24C29.5 22.5 29.5 20.5 28.5 19C30.5 18.5 32 17 32 15C32 13.5 31 12 29.5 11.5C30 10 30 8.5 29 7C27 4 24 2 20 2ZM18 43H22V45H18V43ZM15 39H25V41H15V39ZM14 31C14 29.5 15.5 28 17.5 28H22.5C24.5 28 26 29.5 26 31C26 32.5 24.5 34 22.5 34H17.5C15.5 34 14 32.5 14 31Z" />
+          </svg>
+          <div className="leading-tight text-left">
+            <div className="text-[10px] font-bold tracking-wider text-stone-700">भारत सरकार</div>
+            <div className="text-[11px] font-black text-stone-950 tracking-tight">GOVERNMENT OF INDIA</div>
+            <div className="text-[9px] font-semibold text-stone-600">पृथ्वी विज्ञान मंत्रालय</div>
+            <div className="text-[9px] font-bold text-stone-800 tracking-tight">MINISTRY OF EARTH SCIENCES</div>
+          </div>
         </div>
-        <div>
-          <h1 className="text-base font-extrabold text-stone-900 leading-tight">
-            Antarctic Digital Twin
-          </h1>
-          <p className="text-xs text-stone-500 font-semibold">
-            Ministry of Earth Sciences • NCPOR #26060
-          </p>
+
+        {/* NCPOR Official Insignia */}
+        <div className="flex items-center space-x-2 border-r border-[#e2e8f0] pr-3">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-900 to-sky-700 p-0.5 shadow-2xs shrink-0 flex items-center justify-center text-white border border-sky-300">
+            <Snowflake className="w-4 h-4 text-sky-200 animate-spin-slow" />
+          </div>
+          <div className="leading-tight text-left">
+            <div className="text-[11px] font-black tracking-tight text-blue-950">NCPOR</div>
+            <div className="text-[9px] font-bold text-stone-700">राष्ट्रीय ध्रुवीय एवं समुद्री अनुसंधान केंद्र</div>
+            <div className="text-[8px] font-semibold text-stone-500">NATIONAL CENTRE FOR POLAR AND OCEAN RESEARCH</div>
+            <div className="text-[8px] text-stone-400">Ministry of Earth Sciences, Govt. of India</div>
+          </div>
         </div>
 
-        {onOpenLanding && (
-          <button
-            onClick={onOpenLanding}
-            title="Return to Welcome Portal & Role Demo Access"
-            className="hidden sm:flex items-center space-x-1.5 ml-2 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-slate-700 font-bold text-xs shadow-sm transition"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-            <span>PORTAL</span>
-          </button>
-        )}
+        {/* Quick Utilities */}
+        <div className="hidden xl:flex items-center space-x-1 pl-1">
+          {onOpenLanding && (
+            <button
+              onClick={onOpenLanding}
+              title="Return to Welcome Portal & Role Demo Access"
+              className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-slate-700 font-bold text-[11px] shadow-2xs transition"
+            >
+              <Sparkles className="w-3 h-3 text-cyan-400" />
+              <span>PORTAL</span>
+            </button>
+          )}
 
-        {onOpenTour && (
-          <button
-            onClick={onOpenTour}
-            title="Start interactive 2-minute tour for anyone"
-            className="hidden sm:flex items-center space-x-1.5 ml-1 px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 text-white font-bold text-xs shadow-sm transition"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-cyan-300" />
-            <span>2-MIN TOUR</span>
-          </button>
-        )}
+          {onOpenTour && (
+            <button
+              onClick={onOpenTour}
+              title="Start interactive 2-minute tour"
+              className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-blue-700 hover:bg-blue-600 text-white font-bold text-[11px] shadow-2xs transition"
+            >
+              <Sparkles className="w-3 h-3 text-cyan-300" />
+              <span>TOUR</span>
+            </button>
+          )}
 
-        {onOpenHelp && (
-          <button
-            onClick={onOpenHelp}
-            title="Open Plain-English Help Center & Glossary"
-            className="hidden sm:flex items-center space-x-1.5 ml-1 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 font-bold text-xs shadow-sm transition"
+          <a
+            href="/presentation.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Open Official Feature Showcase Presentation Deck"
+            className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 font-bold text-[11px] shadow-2xs transition"
           >
-            <HelpCircle className="w-3.5 h-3.5 text-amber-600" />
-            <span>HELP & GLOSSARY</span>
-          </button>
-        )}
-
-        <a
-          href="/presentation.html"
-          target="_blank"
-          rel="noopener noreferrer"
-          title="Open Official Feature Showcase Presentation Deck"
-          className="hidden sm:flex items-center space-x-1.5 ml-1 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 font-bold text-xs shadow-sm transition"
-        >
-          <span>📽️</span>
-          <span>DECK PPT</span>
-        </a>
+            <span>📽️</span>
+            <span>DECK</span>
+          </a>
+        </div>
       </div>
 
-      {/* 2. PROMINENT MAITRI & BHARATI STATION SWITCHER */}
-      <div className="flex items-center bg-[#f4f3f0] p-1 rounded-2xl border border-[#e5e3dc]">
-        <button
-          onClick={() => setActiveStationId('maitri')}
-          title="Switch to Maitri Station: India's 2nd base, est. 1988 in rocky Schirmacher Oasis"
-          className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition shadow-sm ${
-            activeStationId === 'maitri'
-              ? 'bg-blue-700 text-white shadow-md'
-              : 'text-stone-600 hover:text-stone-900 hover:bg-[#edebe4]'
-          }`}
-        >
-          <span className="text-sm">🏔️</span>
-          <div className="text-left leading-tight">
-            <div className="flex items-center space-x-1">
-              <span>MAITRI</span>
-              <span className={`px-1 py-0.2 rounded text-[9px] ${activeStationId === 'maitri' ? 'bg-blue-800 text-blue-100' : 'bg-stone-200 text-stone-700'}`}>
-                1988
-              </span>
-            </div>
-            <div className={`text-[9px] font-normal ${activeStationId === 'maitri' ? 'text-blue-100' : 'text-stone-400'}`}>
-              Inland Oasis • 70.76°S
-            </div>
-          </div>
-        </button>
-
-        <button
-          onClick={() => setActiveStationId('bharati')}
-          title="Switch to Bharati Station: India's 3rd base, est. 2012 on Larsemann Hills Coast"
-          className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition shadow-sm ${
-            activeStationId === 'bharati'
-              ? 'bg-sky-600 text-white shadow-md'
-              : 'text-stone-600 hover:text-stone-900 hover:bg-[#edebe4]'
-          }`}
-        >
-          <span className="text-sm">🏔️</span>
-          <div className="text-left leading-tight">
-            <div className="flex items-center space-x-1">
-              <span>BHARATI</span>
-              <span className={`px-1 py-0.2 rounded text-[9px] ${activeStationId === 'bharati' ? 'bg-sky-700 text-sky-100' : 'bg-stone-200 text-stone-700'}`}>
-                2012
-              </span>
-            </div>
-            <div className={`text-[9px] font-normal ${activeStationId === 'bharati' ? 'text-sky-100' : 'text-stone-400'}`}>
-              Coastal Modern • 69.40°S
-            </div>
-          </div>
-        </button>
+      {/* 2. CENTER: PLATFORM TITLE */}
+      <div className="hidden lg:flex flex-col items-center justify-center text-center px-4 py-1 rounded-xl bg-gradient-to-r from-sky-50 via-white to-sky-50 border border-sky-100 shadow-2xs">
+        <h1 className="text-base font-black tracking-tight text-blue-950 uppercase flex items-center gap-1.5">
+          <span>ANTARCTIC DIGITAL TWIN</span>
+          <span className="text-[10px] font-bold px-1.5 py-0.5 bg-blue-100 text-blue-800 rounded">PS #26060</span>
+        </h1>
+        <p className="text-[10px] text-stone-500 font-semibold tracking-wide">
+          Integrated Station Monitoring & Simulation Platform
+        </p>
       </div>
 
-      {/* 3. SIMULATION SPEED CLOCK & CONTROLS */}
-      <div className="flex items-center space-x-3">
-        {/* Real Antarctic Satellite Weather Toggle */}
-        <button
-          onClick={() => setUseRealWeatherMode(!useRealWeatherMode)}
-          title={useRealWeatherMode ? 'Using live Antarctic satellite weather feeds. Click to switch to simulation.' : 'Using simulated weather model. Click to switch to real satellite feeds.'}
-          className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition ${
-            useRealWeatherMode
-              ? 'bg-sky-50 text-sky-700 border-sky-300 shadow-sm'
-              : 'bg-stone-100 text-stone-600 border-stone-300'
-          }`}
-        >
-          <Radio className={`w-3.5 h-3.5 ${useRealWeatherMode ? 'text-sky-600 animate-pulse' : 'text-stone-400'}`} />
-          <span>{useRealWeatherMode ? 'REAL SATELLITE MET' : 'SIMULATED MET'}</span>
-        </button>
-
-        {/* Live Link Badge */}
-        <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-[#f8f7f4] border border-[#e5e3dc] rounded-xl text-xs font-semibold text-stone-700">
-          <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`}></span>
-          <span>{isConnected ? 'LIVE TELEMETRY' : 'CONNECTING...'}</span>
+      {/* 3. RIGHT CONTROLS: INDIAN FLAG, TIME, STATION SWITCHER & RBAC */}
+      <div className="flex items-center space-x-2.5">
+        {/* Real Weather & Live Stream Indicators */}
+        <div className="hidden sm:flex items-center space-x-2 bg-stone-100 px-2.5 py-1 rounded-xl border border-stone-200">
+          <button
+            onClick={() => setUseRealWeatherMode(!useRealWeatherMode)}
+            title={useRealWeatherMode ? 'Using live satellite feeds' : 'Using physics simulation model'}
+            className={`flex items-center space-x-1 text-[11px] font-bold transition ${
+              useRealWeatherMode ? 'text-sky-700' : 'text-stone-600'
+            }`}
+          >
+            <Radio className={`w-3 h-3 ${useRealWeatherMode ? 'text-sky-600 animate-pulse' : 'text-stone-400'}`} />
+            <span>{useRealWeatherMode ? 'REAL MET' : 'SIM MET'}</span>
+          </button>
+          <span className="text-stone-300">|</span>
+          <div className="flex items-center space-x-1 text-[11px] font-semibold text-stone-700">
+            <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`}></span>
+            <span>{isConnected ? 'LIVE' : 'SYNCING'}</span>
+          </div>
         </div>
 
-        {/* RBAC Role Selector */}
-        <div className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs border font-bold shadow-sm transition ${
-          userRole === 'ADMIN' ? 'bg-rose-50 border-rose-300 text-rose-900' :
-          userRole === 'COMMANDER' ? 'bg-amber-50 border-amber-300 text-amber-900' :
-          userRole === 'OPERATOR' ? 'bg-blue-50 border-blue-300 text-blue-900' :
-          userRole === 'SCIENTIST' ? 'bg-emerald-50 border-emerald-300 text-emerald-900' :
-          'bg-stone-100 border-stone-300 text-stone-800'
-        }`}>
-          <ShieldCheck className={`w-3.5 h-3.5 shrink-0 ${
-            userRole === 'ADMIN' ? 'text-rose-600' :
-            userRole === 'COMMANDER' ? 'text-amber-600' :
-            userRole === 'OPERATOR' ? 'text-blue-600' :
-            userRole === 'SCIENTIST' ? 'text-emerald-600' :
-            'text-stone-600'
-          }`} />
+        {/* Live Date/Time Clock (IST) */}
+        <div className="hidden 2xl:flex items-center space-x-1.5 px-2.5 py-1 bg-stone-50 border border-stone-200 rounded-xl text-[11px] font-mono font-semibold text-stone-700">
+          <Clock className="w-3 h-3 text-stone-500" />
+          <span>Wed, 30 Sep 2026 12:27 IST</span>
+        </div>
+
+        {/* Mission Control Indicator */}
+        <div className="hidden md:flex items-center space-x-1.5 px-2.5 py-1 rounded-xl bg-slate-100 border border-slate-300 text-slate-700 text-[11px] font-bold">
+          <span className="w-2 h-2 rounded-full bg-blue-600 animate-ping"></span>
+          <span>⚙️ Mission Control</span>
+        </div>
+
+        {/* Indian Flag Badge */}
+        <div className="hidden sm:flex items-center space-x-1.5 px-2.5 py-1 rounded-xl bg-gradient-to-r from-orange-50 via-white to-green-50 border border-stone-200 shadow-2xs">
+          <div className="w-5 h-3.5 rounded-xs overflow-hidden border border-stone-300 flex flex-col">
+            <div className="h-1/3 bg-[#FF9933]"></div>
+            <div className="h-1/3 bg-white flex items-center justify-center">
+              <div className="w-1 h-1 rounded-full bg-[#000080]"></div>
+            </div>
+            <div className="h-1/3 bg-[#128807]"></div>
+          </div>
+          <div className="text-[10px] font-extrabold text-stone-800 leading-none">
+            <div>भारत</div>
+            <div className="text-[8px] text-stone-500">INDIA</div>
+          </div>
+        </div>
+
+        {/* RBAC Role Selector Dropdown */}
+        <div className="flex items-center space-x-1.5 px-2.5 py-1 bg-slate-900 text-white border border-slate-700 rounded-xl text-xs font-bold shadow-xs">
+          <ShieldCheck className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
           <select
             value={userRole}
             onChange={(e) => setUserRole(e.target.value as RBACRole)}
-            className="bg-transparent font-black text-xs focus:outline-none cursor-pointer uppercase"
+            className="bg-transparent font-extrabold text-xs focus:outline-none cursor-pointer uppercase text-cyan-200"
           >
-            <option value="ADMIN">ADMIN</option>
-            <option value="COMMANDER">COMMANDER</option>
-            <option value="OPERATOR">OPERATOR</option>
-            <option value="SCIENTIST">SCIENTIST</option>
-            <option value="VIEWER">VIEWER</option>
+            <option value="OPERATOR" className="bg-slate-900 text-white">Station Operator</option>
+            <option value="COMMANDER" className="bg-slate-900 text-white">Station Commander</option>
+            <option value="SCIENTIST" className="bg-slate-900 text-white">Research Scientist</option>
+            <option value="ADMIN" className="bg-slate-900 text-white">System Admin</option>
+            <option value="VIEWER" className="bg-slate-900 text-white">Remote Viewer</option>
           </select>
         </div>
-
-        {/* Speed Controls (Locked to Read-Only stream for VIEWER role) */}
-        {userRole !== 'VIEWER' ? (
-          <div className="flex items-center space-x-1 bg-[#f8f7f4] p-1 rounded-xl border border-[#e5e3dc]">
-            <button
-              onClick={toggleSimulation}
-              title={simulationState.isRunning ? 'Pause' : 'Start'}
-              className="p-1.5 rounded-lg bg-white border border-[#e5e3dc] text-stone-700 hover:bg-stone-50 transition"
-            >
-              {simulationState.isRunning ? <Pause className="w-3.5 h-3.5 text-amber-600" /> : <Play className="w-3.5 h-3.5 text-emerald-600" />}
-            </button>
-            <button
-              onClick={resetSimulation}
-              title="Reset"
-              className="p-1.5 rounded-lg bg-white border border-[#e5e3dc] text-stone-700 hover:bg-stone-50 transition"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-            </button>
-
-            <div className="flex items-center space-x-0.5 px-1 font-mono text-xs font-bold">
-              {[1, 5, 20].map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setSpeed(s)}
-                  className={`px-2 py-0.5 rounded-md transition ${
-                    simulationState.speedMultiplier === s
-                      ? 'bg-blue-700 text-white'
-                      : 'text-stone-600 hover:bg-stone-200'
-                  }`}
-                >
-                  {s}x
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-stone-100 border border-stone-200 text-stone-500 font-mono text-xs font-bold">
-            <span className="w-2 h-2 rounded-full bg-stone-400"></span>
-            <span>READ-ONLY VIEW</span>
-          </div>
-        )}
-
-        {/* AUDIO MUTE TOGGLE & VOICE ALARM CONTROLS */}
-        {alarmState.isAlarmLoopActive ? (
-          <button
-            onClick={() => audioService.stopCriticalAlarmLoop()}
-            title="Stop Repeating AI Voice Alarm Immediately"
-            className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-black text-xs shadow-lg transition animate-pulse border-2 border-white ring-4 ring-rose-600/40"
-          >
-            <Square className="w-3.5 h-3.5 fill-white" />
-            <span>STOP VOICE ALARM</span>
-          </button>
-        ) : (
-          <div className="flex items-center space-x-1.5">
-            <button
-              onClick={() => {
-                const muted = audioService.toggleMute();
-                setIsMutedState(muted);
-                if (!muted) audioService.playClick();
-              }}
-              title={isMutedState ? 'Unmute Audio & Alerts' : 'Mute Audio & Alerts'}
-              className={`p-2 rounded-xl border transition ${
-                isMutedState
-                  ? 'bg-rose-50 text-rose-600 border-rose-200'
-                  : 'bg-stone-100 text-stone-700 border-stone-300 hover:bg-stone-200'
-              }`}
-            >
-              {isMutedState ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-            </button>
-
-            <button
-              onClick={() => {
-                audioService.playClick();
-                audioService.speakSITREP(
-                  `Attention Operator. This is the Antarctic Digital Twin Commander SITREP briefing for ${activeStationId.toUpperCase()} Research Station. All grid switchgears operating within nominal polar parameters. Telemetry packet streaming active.`
-                );
-              }}
-              title="Listen to AI Voice SITREP Briefing"
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 font-bold text-xs shadow-sm transition"
-            >
-              <Mic className="w-3.5 h-3.5 text-indigo-600 animate-pulse" />
-              <span>VOICE SITREP</span>
-            </button>
-
-            <button
-              onClick={() => {
-                audioService.resetSilencedAlerts();
-                audioService.startCriticalAlarmLoop(
-                  `Primary generator cooling loop failure at ${activeStationId.toUpperCase()} Station. Thermal overload trip. Engage secondary co-generation loop immediately`,
-                  `demo-alarm-${Date.now()}`
-                );
-              }}
-              title="Test Repeating AI Voice Alarm Loop (Repeats until Stop is clicked)"
-              className="flex items-center space-x-1 px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold text-[11px] shadow-sm transition"
-            >
-              <span>🚨 TEST ALARM</span>
-            </button>
-          </div>
-        )}
-
-        {/* RUN DEMO BUTTON */}
-        {!simulationState.demoModeActive ? (
-          <button
-            onClick={startDemo}
-            className="flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition"
-          >
-            <PlayCircle className="w-4 h-4" />
-            <span>RUN DEMO</span>
-          </button>
-        ) : (
-          <button
-            onClick={stopDemo}
-            className="flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-md transition"
-          >
-            <StopCircle className="w-4 h-4" />
-            <span>STOP DEMO</span>
-          </button>
-        )}
       </div>
     </header>
   );
